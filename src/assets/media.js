@@ -47,6 +47,11 @@ import image186Improved from '../../optimized/186_Mejorada.webp';
 import image189 from '../../optimized/189.webp';
 import processImage from '../../optimized/proceso.webp';
 import processImage2 from '../../optimized/proceso2.webp';
+import processExplore from '../../optimized/exploracion.webp';
+import processModel from '../../optimized/modelar.webp';
+import processGlaze from '../../optimized/esmaltado.webp';
+import processFire from '../../optimized/cocer.webp';
+import processCraft from '../../optimized/procesoartesanal.webp';
 
 export {
   footerMark,
@@ -98,4 +103,9 @@ export {
   image189,
   processImage,
   processImage2,
+  processExplore,
+  processModel,
+  processGlaze,
+  processFire,
+  processCraft,
 };

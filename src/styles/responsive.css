@@ -244,7 +244,7 @@
     padding: 0;
     border-bottom: 0;
   }
-  .process-step__heading { padding: 1rem 0; }
+  .process-step__heading { padding: 0; }
 
   .catalog-hero {
     min-height: 0;

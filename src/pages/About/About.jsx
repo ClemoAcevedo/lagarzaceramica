@@ -7,48 +7,53 @@ import {
   image165,
   image166,
   image167,
-  image175,
-  image178,
-  image179,
-  image186,
   image186Improved,
   image189,
   processImage,
   processImage2,
+  processExplore,
+  processFire,
+  processGlaze,
+  processModel,
+  processCraft,
 } from '../../assets/media.js';
 import usePageMeta from '../../hooks/usePageMeta.js';
 
 const processSteps = [
   {
+    order: 'Primero',
     title: 'Explorar',
-    description: 'Una forma comienza en la observación, el dibujo y las pruebas de volumen.',
-    image: image178,
-    alt: 'Herramientas de cerámica reunidas sobre la mesa del taller',
+    description: 'El proceso comienza eligiendo la arcilla según su color, textura y las posibilidades que ofrece para cada pieza.',
+    image: processExplore,
+    alt: 'Muestras de distintas arcillas reunidas durante la exploración de materiales',
   },
   {
+    order: 'Luego',
     title: 'Modelar',
     description: 'Las manos construyen cada pieza y dejan en ella variaciones irrepetibles.',
-    image: processImage,
-    alt: 'Manos trabajando un bloque de arcilla húmeda',
+    image: processModel,
+    alt: 'Manos modelando vasos de arcilla en el taller',
   },
   {
+    order: 'Después',
     title: 'Esmaltar',
     description: 'Capas de color, textura y minerales transforman la superficie.',
-    image: image175,
-    alt: 'Pinceles del taller preparados para aplicar color y esmalte',
+    image: processGlaze,
+    alt: 'Pieza de cerámica sumergida en esmalte líquido',
   },
   {
+    order: 'Finalmente',
     title: 'Cocer',
     description: 'El horno completa el proceso y revela el carácter final del gres.',
-    image: image179,
-    alt: 'Piezas de arcilla cruda preparadas para la cocción',
+    image: processFire,
+    alt: 'Piezas de cerámica acomodadas dentro del horno para su cocción',
   },
 ];
 
 const initialProcessVisual = {
   title: 'Proceso artesanal',
-  image: image186,
-  alt: 'Lola trabajando con cerámica junto a la ventana del taller',
+  image: processCraft,
+  alt: 'Distintas etapas de transformación de la arcilla dispuestas en secuencia',
 };
 
 export default function About() {
@@ -157,8 +162,19 @@ export default function About() {
             <span className="process__hint--mobile">Toca una etapa para descubrirla</span>
           </p>
           <ol className="process-list">
-            {processSteps.map(({ title, description }, index) => (
+            {processSteps.map(({ order, title, description }, index) => (
               <li className={activeProcess === index ? 'is-active' : ''} key={title}>
+                {index === 0 && (
+                  <img
+                    className="process-timeline__bird"
+                    src={footerMark}
+                    alt=""
+                    aria-hidden="true"
+                    style={{
+                      '--bird-offset': `${2.9 + (activeProcess ?? 0) * 5.8}rem`,
+                    }}
+                  />
+                )}
                 <div
                   className="process-step"
                   tabIndex="0"
@@ -167,8 +183,11 @@ export default function About() {
                   onTouchStart={() => setActiveProcess(index)}
                 >
                   <div className="process-step__heading">
-                    <img className="process-step__icon" src={footerMark} alt="" aria-hidden="true" />
-                    <h3>{title}</h3>
+                    <span className="process-step__node" aria-hidden="true" />
+                    <div>
+                      <span className="process-step__order">{order}</span>
+                      <h3>{title}</h3>
+                    </div>
                   </div>
                   <p>{description}</p>
                 </div>
@@ -187,7 +206,7 @@ export default function About() {
               key={step.title}
             />
           ))}
-          <figcaption>{activeProcessStep.title}</figcaption>
+          {activeProcess !== null && <figcaption>{activeProcessStep.title}</figcaption>}
         </figure>
       </section>
 
