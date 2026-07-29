@@ -16,6 +16,18 @@ npm run build
 npm run preview
 ```
 
+## GitHub Pages
+
+El repositorio está configurado para publicarse en
+`https://clemoacevedo.github.io/lagarzaceramica/`.
+
+Cada push a `main` ejecuta `.github/workflows/deploy.yml`, compila el proyecto
+y publica `dist/`. En GitHub se debe seleccionar una sola vez:
+**Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
+Vite usa `/lagarzaceramica/` como base durante el build. El archivo
+`dist/404.html` permite abrir y recargar directamente las rutas internas.
+
 ## Rutas
 
 - `/`: inicio.
