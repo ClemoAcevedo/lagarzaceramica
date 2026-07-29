@@ -1,0 +1,126 @@
+.workshops-hero {
+  display: grid;
+  height: calc(100svh - 6rem);
+  min-height: calc(100svh - 6rem);
+  grid-template-columns: .84fr 1.16fr;
+  background: var(--green-deep);
+  color: var(--white);
+}
+.workshops-hero__copy {
+  display: flex;
+  padding: clamp(5rem, 9vw, 9rem) clamp(2rem, 5vw, 6rem) clamp(5rem, 8vw, 8rem) var(--gutter);
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+.workshops-hero h1 { max-width: 7.5ch; margin-bottom: 2rem; font-size: clamp(4.8rem, 7.1vw, 8.7rem); }
+.workshops-hero__copy > p:not(.eyebrow) { max-width: 31rem; margin-bottom: 2.2rem; }
+.workshops-hero__media {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.workshops-hero__media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% center;
+}
+.workshops-hero__media figcaption {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  padding: .5rem .65rem;
+  background: rgba(16, 43, 24, .78);
+}
+.workshop-intro {
+  display: grid;
+  grid-template-columns: .2fr 1fr .82fr;
+  gap: clamp(2rem, 6vw, 7rem);
+  align-items: start;
+  border-top: 1px solid var(--line);
+}
+.workshop-intro h2 { max-width: 9ch; }
+.workshop-intro > div:last-child { padding-top: 2.1rem; }
+
+.method .section-heading h2 { max-width: 12ch; }
+.method-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
+.method-grid article { min-height: 22rem; padding: 1.5rem 2rem 2rem 0; border-right: 1px solid var(--line); }
+.method-grid article + article { padding-left: 2rem; }
+.method-images {
+  display: grid;
+  margin-top: clamp(5rem, 8vw, 8rem);
+  grid-template-columns: 1.2fr .68fr;
+  gap: clamp(1.2rem, 3vw, 3rem);
+  align-items: end;
+}
+.method-images .gallery-frame { aspect-ratio: 5/4; }
+.method-images .gallery-frame:last-child { aspect-ratio: 3/4; }
+.method-images .gallery-frame:first-child img { object-position: center 58%; }
+.method-images .gallery-frame:last-child img { object-position: center 55%; }
+
+.workshop-info {
+  display: grid;
+  grid-template-columns: .8fr 1fr;
+  gap: clamp(4rem, 10vw, 12rem);
+  align-items: center;
+}
+.workshop-info figure {
+  position: relative;
+  aspect-ratio: 3/4;
+  margin-left: 4vw;
+  overflow: hidden;
+}
+.workshop-info figure img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+}
+.workshop-info h2 { margin-bottom: 2.4rem; }
+.workshop-info dl { margin: 2rem 0 2.8rem; }
+.workshop-info dl div {
+  display: grid;
+  padding: 1.05rem 0;
+  grid-template-columns: 1fr 1.8fr;
+  border-top: 1px solid var(--line);
+}
+.workshop-info dt { font-size: .6rem; font-weight: 600; letter-spacing: .11em; text-transform: uppercase; }
+.workshop-info dd { margin: 0; }
+
+.faq { display: grid; grid-template-columns: .72fr 1.28fr; gap: clamp(4rem, 8vw, 9rem); align-items: start; }
+.faq .section-heading { margin: 0; align-items: start; }
+.faq .section-heading h2 { max-width: 7ch; }
+.accordion { border-top: 1px solid var(--line); }
+.accordion details { border-bottom: 1px solid var(--line); }
+.accordion summary {
+  display: flex;
+  min-height: 5.4rem;
+  padding: 1.2rem 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  cursor: pointer;
+  font-family: var(--serif);
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+  list-style: none;
+}
+.accordion summary::-webkit-details-marker { display: none; }
+.accordion summary span { font-family: var(--sans); transition: transform .25s; }
+.accordion details[open] summary span { transform: rotate(45deg); }
+.accordion details p { padding: 0 4rem 1.8rem 0; }
+
+@keyframes hero-in {
+  from { opacity: 0; transform: scale(1.025); }
+  to { opacity: 1; transform: scale(1); }
+}
+.js .reveal { opacity: 0; transform: translateY(20px); transition: opacity .85s, transform .85s cubic-bezier(.2,.7,.2,1); }
+.js .reveal.is-visible { opacity: 1; transform: none; }
+.image-reveal { overflow: hidden; }
+.js .image-reveal img { opacity: 0; transform: scale(1.025); transition: opacity 1s, transform 1.25s cubic-bezier(.2,.7,.2,1); }
+.js .image-reveal.is-visible img { opacity: 1; transform: none; }

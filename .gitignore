@@ -1,0 +1,21 @@
+# Dependencies and generated builds
+node_modules/
+dist/
+
+# Vite and test artefacts
+.vite/
+coverage/
+*.log
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Full-resolution photographic archive.
+# The website builds from the versioned WebP files in /optimized.
+fullphotos/
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
