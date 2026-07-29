@@ -1,11 +1,11 @@
 import { TextLink } from '../Links/Links.jsx';
 
-export default function Hero({ image, imageAlt, eyebrow, title, action, caption }) {
+export default function Hero({ image, imageAlt, subtitle, title, action, caption }) {
   return (
     <section className="hero">
       <div className="hero__content">
-        <p className="eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
+        <p className="hero__subtitle">{subtitle}</p>
         <TextLink to={action.to} light>{action.label}</TextLink>
       </div>
       <figure className="hero__figure">

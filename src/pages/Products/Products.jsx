@@ -1,13 +1,37 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ButtonLink } from '../../components/Links/Links.jsx';
 import { CatalogCard } from '../../components/ProductCard/ProductCard.jsx';
 import { productFilters, products } from '../../data/products.js';
 import usePageMeta from '../../hooks/usePageMeta.js';
+import { whatsappUrl } from '../../utils/links.js';
 
-const availabilityUrl = 'https://wa.me/?text=Hola%20La%20Garza%2C%20quisiera%20conocer%20las%20piezas%20disponibles.';
+const availabilityUrl = whatsappUrl('Hola La Garza, quisiera conocer las piezas disponibles.');
 
 export default function Products() {
   const [activeFilter, setActiveFilter] = useState('all');
+  const [isFiltering, setIsFiltering] = useState(false);
+  const filterTimeout = useRef();
+  const entranceTimeout = useRef();
+
+  useEffect(() => () => {
+    window.clearTimeout(filterTimeout.current);
+    window.clearTimeout(entranceTimeout.current);
+  }, []);
+
+  const changeFilter = (nextFilter) => {
+    if (nextFilter === activeFilter || isFiltering) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setActiveFilter(nextFilter);
+      return;
+    }
+
+    setIsFiltering(true);
+    filterTimeout.current = window.setTimeout(() => {
+      setActiveFilter(nextFilter);
+      entranceTimeout.current = window.setTimeout(() => setIsFiltering(false), 40);
+    }, 180);
+  };
 
   usePageMeta(
     'Piezas — La Garza',
@@ -34,14 +58,18 @@ export default function Products() {
             type="button"
             key={value}
             aria-pressed={activeFilter === value}
-            onClick={() => setActiveFilter(value)}
+            onClick={() => changeFilter(value)}
           >
             {label}
           </button>
         ))}
       </div>
 
-      <section className="catalog section" data-catalog>
+      <section
+        className={`catalog section${isFiltering ? ' is-filtering' : ''}`}
+        data-catalog
+        aria-busy={isFiltering}
+      >
         {products.map((product) => (
           <CatalogCard
             key={product.title}

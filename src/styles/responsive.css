@@ -14,8 +14,10 @@
   h2 { font-size: clamp(2.8rem, 12vw, 4.2rem); }
   .site-header,
   .site-header--overlay.is-scrolled { height: 4.8rem; padding-top: .45rem; padding-bottom: .45rem; }
-  .brand { position: relative; z-index: 2; width: 9.2rem; }
-  .brand img { height: 3.2rem; }
+  .site-header.is-scrolled { height: 4.2rem; }
+  .brand { position: relative; z-index: 2; width: 10.2rem; }
+  .brand img { height: 4.1rem; }
+  .site-header.is-scrolled .brand img { height: 3.2rem; }
   .menu-toggle {
     position: relative;
     z-index: 2;
@@ -93,7 +95,8 @@
     grid-row: 2;
     justify-content: flex-start;
   }
-  .hero h1 { max-width: 9ch; margin-bottom: 2.25rem; font-size: clamp(3.2rem, 13.3vw, 4.6rem); }
+  .hero h1 { max-width: 9ch; margin-bottom: 1rem; font-size: clamp(3.2rem, 13.3vw, 4.6rem); }
+  .hero__subtitle { margin-bottom: 2.25rem; }
   .hero__caption { display: none; }
 
   .intro,
@@ -245,6 +248,7 @@
     gap: 1rem;
   }
   .catalog-controls { top: 4.8rem; }
+  .site-header.is-scrolled + #contenido .catalog-controls { top: 4.2rem; }
   .catalog {
     grid-template-columns: 1fr;
     gap: 5rem;

@@ -51,7 +51,7 @@ export default function Home() {
       <Hero
         image={image25}
         imageAlt="Cuencos de gres natural agrupados sobre fondo claro"
-        eyebrow="Cerámica en gres · Valdivia, Chile"
+        subtitle="Cerámica en gres"
         title={<>Piezas con memoria,<br />hechas para acompañar.</>}
         action={{ to: '/piezas', label: 'Descubrir las piezas' }}
         caption="Cuencos de ribera · Gres natural"

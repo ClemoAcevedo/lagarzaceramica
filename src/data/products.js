@@ -23,6 +23,7 @@ import {
   image124,
   image125,
 } from '../assets/media.js';
+import { whatsappUrl } from '../utils/links.js';
 
 const productEntries = [
   {
@@ -38,7 +39,7 @@ const productEntries = [
       { src: image9, alt: 'Conjunto de gallinas contenedoras en distintos tamaños' },
     ],
     format: 'landscape',
-    contactUrl: 'https://wa.me/?text=Hola%20La%20Garza%2C%20quisiera%20consultar%20por%20la%20Gallina%20contenedora.',
+    contactUrl: whatsappUrl('Hola La Garza, quisiera consultar por la Gallina contenedora.'),
   },
   {
     slug: 'cuencos-de-ribera',
@@ -52,7 +53,7 @@ const productEntries = [
       { src: image26, alt: 'Familia de cuencos de ribera agrupados' },
     ],
     format: 'landscape',
-    contactUrl: 'https://wa.me/?text=Hola%20La%20Garza%2C%20quisiera%20consultar%20por%20los%20Cuencos%20de%20ribera.',
+    contactUrl: whatsappUrl('Hola La Garza, quisiera consultar por los Cuencos de ribera.'),
   },
   {
     id: 'coleccion-azul',
@@ -66,7 +67,7 @@ const productEntries = [
       { src: image41, alt: 'Plato y cuenco Azul Río vistos desde arriba' },
       { src: image46, alt: 'Familia Azul Río sostenida entre las manos' },
     ],
-    contactUrl: 'https://wa.me/?text=Hola%20La%20Garza%2C%20quisiera%20consultar%20por%20la%20Familia%20Azul%20R%C3%ADo.',
+    contactUrl: whatsappUrl('Hola La Garza, quisiera consultar por la Familia Azul Río.'),
   },
   {
     slug: 'nidos',
@@ -79,7 +80,7 @@ const productEntries = [
       { src: image70, alt: 'Nido de cerámica texturada en primer plano' },
       { src: image76, alt: 'Familia de Nidos vista desde arriba' },
     ],
-    contactUrl: 'https://wa.me/?text=Hola%20La%20Garza%2C%20quisiera%20consultar%20por%20los%20Nidos.',
+    contactUrl: whatsappUrl('Hola La Garza, quisiera consultar por los Nidos.'),
   },
   {
     id: 'coleccion-tierra',
@@ -93,7 +94,7 @@ const productEntries = [
       { src: image102, alt: 'Tazas de campo agrupadas junto a platos de gres' },
       { src: image104, alt: 'Conjunto de tazas de campo y platos color tierra' },
     ],
-    contactUrl: 'https://wa.me/?text=Hola%20La%20Garza%2C%20quisiera%20consultar%20por%20la%20Taza%20de%20campo.',
+    contactUrl: whatsappUrl('Hola La Garza, quisiera consultar por la Taza de campo.'),
   },
   {
     slug: 'florero-jardin',
@@ -106,7 +107,7 @@ const productEntries = [
       { src: image90, alt: 'Cuenco de la línea Jardín con flores modeladas' },
       { src: image91, alt: 'Detalle lateral de flores modeladas de la línea Jardín' },
     ],
-    contactUrl: 'https://wa.me/?text=Hola%20La%20Garza%2C%20quisiera%20consultar%20por%20el%20Florero%20jard%C3%ADn.',
+    contactUrl: whatsappUrl('Hola La Garza, quisiera consultar por el Florero jardín.'),
   },
   {
     slug: 'fuente-orilla',
@@ -118,7 +119,7 @@ const productEntries = [
       { src: image116, alt: 'Fuente ovalada de borde ondulado' },
       { src: image117, alt: 'Fuente orilla vista en perspectiva' },
     ],
-    contactUrl: 'https://wa.me/?text=Hola%20La%20Garza%2C%20quisiera%20consultar%20por%20la%20Fuente%20orilla.',
+    contactUrl: whatsappUrl('Hola La Garza, quisiera consultar por la Fuente orilla.'),
   },
   {
     slug: 'vasos-bosque',
@@ -131,7 +132,7 @@ const productEntries = [
       { src: image124, alt: 'Vasos bosque agrupados sobre una bandeja de gres' },
       { src: image125, alt: 'Detalle de los vasos bosque y su esmalte interior' },
     ],
-    contactUrl: 'https://wa.me/?text=Hola%20La%20Garza%2C%20quisiera%20consultar%20por%20los%20Vasos%20bosque.',
+    contactUrl: whatsappUrl('Hola La Garza, quisiera consultar por los Vasos bosque.'),
   },
 ];
 

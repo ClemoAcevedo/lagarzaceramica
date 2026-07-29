@@ -5,9 +5,10 @@ import SectionHeading from '../../components/SectionHeading/SectionHeading.jsx';
 import WorkshopCard from '../../components/WorkshopCard/WorkshopCard.jsx';
 import { image168, image174, image180, image186 } from '../../assets/media.js';
 import usePageMeta from '../../hooks/usePageMeta.js';
+import { whatsappUrl } from '../../utils/links.js';
 
-const workshopInfoUrl = 'https://wa.me/?text=Hola%20La%20Garza%2C%20quisiera%20recibir%20informaci%C3%B3n%20sobre%20los%20talleres.';
-const workshopSignupUrl = 'https://wa.me/?text=Hola%20La%20Garza%2C%20quisiera%20inscribirme%20en%20un%20taller.';
+const workshopInfoUrl = whatsappUrl('Hola La Garza, quisiera recibir información sobre los talleres.');
+const workshopSignupUrl = whatsappUrl('Hola La Garza, quisiera inscribirme en un taller.');
 
 const methodSteps = [
   ['01', 'Conocer la materia', 'Comenzamos con sus propiedades, herramientas y posibilidades.'],

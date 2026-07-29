@@ -58,9 +58,8 @@ Antes de publicar se debe confirmar con la clienta:
 
 1. Historia y filosofía definitivas.
 2. Metodología, calendario, duración y valores de talleres.
-3. Número de WhatsApp para sustituir los enlaces `wa.me` sin número.
-4. Usuario oficial de Instagram.
-5. Nombres y descripciones definitivas de las piezas.
+3. Usuario oficial de Instagram.
+4. Nombres y descripciones definitivas de las piezas.
 
 Los textos pendientes conservan el atributo
 `data-content-status="provisional"` en sus componentes de página.
