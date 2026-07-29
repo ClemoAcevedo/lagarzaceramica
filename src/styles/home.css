@@ -129,6 +129,8 @@
   color: var(--green-deep);
 }
 .atmosphere {
+  --atmosphere-inset: clamp(2.5rem, 5vw, 4.5rem);
+  --atmosphere-overlap: clamp(2rem, 4vw, 4rem);
   position: relative;
   display: grid;
   width: min(100%, 88rem);
@@ -148,7 +150,7 @@
 .atmosphere__image {
   position: relative;
   z-index: 0;
-  width: 86%;
+  width: calc(100% - var(--atmosphere-inset));
   aspect-ratio: 4/5;
   margin: 0;
   justify-self: end;
@@ -165,7 +167,8 @@
 .atmosphere__copy {
   position: relative;
   z-index: 1;
-  margin-left: clamp(-4rem, -4vw, -2rem);
+  width: calc(100% - var(--atmosphere-inset) + var(--atmosphere-overlap));
+  margin-left: calc(-1 * var(--atmosphere-overlap));
   padding: clamp(2.75rem, 4.5vw, 5rem);
   background: var(--green-deep);
   color: var(--white);

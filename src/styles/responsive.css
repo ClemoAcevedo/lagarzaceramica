@@ -230,7 +230,9 @@
     transform: none;
   }
   .philosophy { min-height: 0; gap: 3rem; }
-  .philosophy__image { width: 76%; aspect-ratio: 4/4.5; }
+  .philosophy__images { width: 100%; min-height: 33rem; }
+  .philosophy__image--primary { width: 72%; }
+  .philosophy__image--secondary { width: 52%; outline-width: .55rem; }
   .process-list { grid-template-columns: 1fr; }
   .process-list li { min-height: 0; padding: 1.2rem 0 2.5rem; border-right: 0; border-bottom: 1px solid var(--line); }
   .process-list li + li { padding-left: 0; }

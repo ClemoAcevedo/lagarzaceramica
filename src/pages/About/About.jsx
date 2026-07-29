@@ -1,7 +1,6 @@
 import CTA from '../../components/CTA/CTA.jsx';
 import Gallery from '../../components/Gallery/Gallery.jsx';
 import {
-  image150,
   image158,
   image165,
   image166,
@@ -11,6 +10,8 @@ import {
   image186,
   image186Improved,
   image189,
+  processImage,
+  processImage2,
 } from '../../assets/media.js';
 import usePageMeta from '../../hooks/usePageMeta.js';
 
@@ -93,15 +94,20 @@ export default function About() {
         <p className="editorial-gallery__caption">Un lugar de trabajo para observar, probar y volver a empezar.</p>
       </Gallery>
 
-      <section className="philosophy section section--green">
+      <section className="philosophy section">
         <div className="philosophy__copy reveal">
           <p className="eyebrow">Filosofía</p>
-          <h2>Lo imperfecto también puede ser preciso.</h2>
-          <p>Trabajamos respetando la personalidad del material. El gesto, la huella y el fuego participan de cada resultado. Buscamos formas serenas y útiles que hagan especial lo cotidiano.</p>
+          <h2>La belleza del proceso.</h2>
+          <p>Cada pieza nace del encuentro entre la arcilla, las manos y el tiempo. Valoramos el proceso y el trabajo artesanal para crear objetos con identidad propia, capaces de aportar belleza, presencia y uso al entorno.</p>
         </div>
-        <figure className="philosophy__image image-reveal">
-          <img src={image150} alt="Cuencos de gres anidados sobre una pieza de madera" loading="lazy" />
-        </figure>
+        <div className="philosophy__images">
+          <figure className="philosophy__image philosophy__image--primary image-reveal">
+            <img src={processImage2} alt="Manos afinando una pieza de arcilla con una herramienta" loading="lazy" />
+          </figure>
+          <figure className="philosophy__image philosophy__image--secondary image-reveal">
+            <img src={processImage} alt="Manos trabajando un bloque de arcilla húmeda" loading="lazy" />
+          </figure>
+        </div>
       </section>
 
       <section className="process section">

@@ -45,6 +45,8 @@ import image186 from '../../optimized/186.webp';
 import image158 from '../../optimized/158.webp';
 import image186Improved from '../../optimized/186_Mejorada.webp';
 import image189 from '../../optimized/189.webp';
+import processImage from '../../optimized/proceso.webp';
+import processImage2 from '../../optimized/proceso2.webp';
 
 export {
   footerMark,
@@ -94,4 +96,6 @@ export {
   image158,
   image186Improved,
   image189,
+  processImage,
+  processImage2,
 };
