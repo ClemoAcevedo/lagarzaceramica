@@ -22,7 +22,6 @@ export default function Products() {
           <h1>Piezas</h1>
         </div>
         <div className="catalog-hero__intro">
-          <span>01 — 08</span>
           <p>Series pequeñas y objetos únicos modelados en gres. No hay dos piezas exactamente iguales.</p>
         </div>
       </section>
@@ -53,8 +52,14 @@ export default function Products() {
       </section>
 
       <section className="catalog-note section">
-        <p>Las piezas son hechas a mano en series pequeñas. Escríbenos para conocer disponibilidad, medidas y variaciones.</p>
-        <ButtonLink href={availabilityUrl}>Consultar disponibilidad</ButtonLink>
+        <div className="catalog-note__heading">
+          <p className="eyebrow">Disponibilidad del taller</p>
+          <h2>Cada pieza tiene su propio gesto.</h2>
+        </div>
+        <div className="catalog-note__details">
+          <p>Las piezas son hechas a mano en series pequeñas. Escríbenos para conocer disponibilidad, medidas y variaciones.</p>
+          <ButtonLink href={availabilityUrl} light arrow>Consultar disponibilidad</ButtonLink>
+        </div>
       </section>
     </main>
   );

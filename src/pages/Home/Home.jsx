@@ -17,14 +17,14 @@ import { homeContactUrl } from '../../utils/links.js';
 
 const featuredProducts = [
   {
-    to: '/products#coleccion-gallinas',
+    to: '/piezas/gallina-contenedora',
     image: image12,
     alt: 'Conjunto de gallinas de cerámica con tapa',
     title: 'Gallina contenedora',
     material: 'Gres esmaltado',
   },
   {
-    to: '/products#coleccion-azul',
+    to: '/piezas/familia-azul-rio',
     image: image43,
     alt: 'Conjunto de platos y cuencos esmaltados en azul',
     title: 'Familia Azul Río',
@@ -32,7 +32,7 @@ const featuredProducts = [
     tall: true,
   },
   {
-    to: '/products#coleccion-tierra',
+    to: '/piezas/taza-de-campo',
     image: image103,
     alt: 'Tazas color tierra sobre platos de gres',
     title: 'Taza de campo',
@@ -53,7 +53,7 @@ export default function Home() {
         imageAlt="Cuencos de gres natural agrupados sobre fondo claro"
         eyebrow="Cerámica en gres · Valdivia, Chile"
         title={<>Piezas con memoria,<br />hechas para acompañar.</>}
-        action={{ to: '/products', label: 'Descubrir las piezas' }}
+        action={{ to: '/piezas', label: 'Descubrir las piezas' }}
         caption="Cuencos de ribera · Gres natural"
       />
 
@@ -62,7 +62,7 @@ export default function Home() {
           <p className="eyebrow">La materia y el tiempo</p>
           <h2>Cerámica que guarda el gesto de quien la hizo.</h2>
           <p>En La Garza creamos piezas de gres de manera lenta y consciente. Cada forma nace en el taller, entre pruebas, esmaltes y una forma muy personal de mirar lo cotidiano.</p>
-          <TextLink to="/about">Conocer nuestra historia</TextLink>
+          <TextLink to="/sobre-la-garza">Conocer nuestra historia</TextLink>
         </div>
         <figure className="intro__image">
           <div className="intro__image-frame image-reveal">
@@ -76,7 +76,7 @@ export default function Home() {
         <SectionHeading
           eyebrow="Selección del taller"
           title="Piezas singulares"
-          action={{ to: '/products', label: 'Ver todas' }}
+          action={{ to: '/piezas', label: 'Ver todas' }}
         />
         <div className="product-grid product-grid--featured">
           {featuredProducts.map((product) => <ProductCard key={product.title} {...product} />)}
@@ -91,7 +91,7 @@ export default function Home() {
           <p className="eyebrow">La mesa del taller</p>
           <h2>Un espacio para crear con las manos.</h2>
           <p>Encuentros de cerámica en grupos pequeños, pensados para explorar la materia, aprender el proceso y crear una pieza propia.</p>
-          <ButtonLink to="/workshops">Conocer los talleres</ButtonLink>
+          <ButtonLink to="/talleres">Conocer los talleres</ButtonLink>
         </div>
       </section>
 

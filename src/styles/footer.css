@@ -6,10 +6,12 @@
 }
 .footer-mark {
   position: absolute;
-  right: -2vw;
-  bottom: -9rem;
-  width: clamp(15rem, 29vw, 31rem);
+  right: clamp(1rem, 3vw, 3rem);
+  top: 50%;
+  width: auto;
+  height: min(94%, 34rem);
   opacity: .055;
+  transform: translateY(-50%);
 }
 .footer-main {
   position: relative;

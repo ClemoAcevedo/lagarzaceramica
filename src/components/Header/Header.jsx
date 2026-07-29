@@ -4,9 +4,9 @@ import { headerLogo } from '../../assets/media.js';
 import { contactUrl, homeContactUrl } from '../../utils/links.js';
 
 const navigation = [
-  { to: '/about', label: 'Sobre La Garza' },
-  { to: '/products', label: 'Piezas' },
-  { to: '/workshops', label: 'Talleres' },
+  { to: '/sobre-la-garza', label: 'Sobre La Garza' },
+  { to: '/piezas', label: 'Piezas' },
+  { to: '/talleres', label: 'Talleres' },
 ];
 
 export default function Header({ overlay = false }) {

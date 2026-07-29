@@ -9,9 +9,9 @@ export default function Footer() {
       <div className="footer-main">
         <p>Objetos de gres hechos<br />en Valdivia, Chile.</p>
         <nav aria-label="Navegación del pie">
-          <Link to="/about">Sobre La Garza</Link>
-          <Link to="/products">Piezas</Link>
-          <Link to="/workshops">Talleres</Link>
+          <Link to="/sobre-la-garza">Sobre La Garza</Link>
+          <Link to="/piezas">Piezas</Link>
+          <Link to="/talleres">Talleres</Link>
         </nav>
         <div>
           <a href={instagramUrl} target="_blank" rel="noopener">Instagram ↗</a>

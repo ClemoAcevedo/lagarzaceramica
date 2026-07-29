@@ -31,9 +31,9 @@ Vite usa `/lagarzaceramica/` como base durante el build. El archivo
 ## Rutas
 
 - `/`: inicio.
-- `/about`: historia, filosofía y proceso.
-- `/products`: vitrina filtrable, sin carrito ni pagos.
-- `/workshops`: metodología, información y preguntas frecuentes.
+- `/sobre-la-garza`: historia, filosofía y proceso.
+- `/piezas`: vitrina filtrable, sin carrito ni pagos.
+- `/talleres`: metodología, información y preguntas frecuentes.
 
 ## Estructura
 
@@ -67,6 +67,10 @@ Los textos pendientes conservan el atributo
 
 ## Categorías de piezas
 
-Las piezas y categorías se administran en `src/data/products.js`. Los filtros
-se mantienen sincronizados mediante `productFilters` y la propiedad `category`
-de cada pieza.
+Las piezas y categorías se administran únicamente en `src/data/products.js`.
+Al añadir o eliminar una entrada, la grilla, los filtros y su página individual
+se actualizan automáticamente. La URL se genera a partir del título mediante la
+propiedad `slug`; se puede definir un `slug` manual si una URL publicada debe
+permanecer estable aunque cambie el título. Cada línea acepta una o más fotos en
+su arreglo `images`; la primera se usa como portada del catálogo y las demás
+aparecen automáticamente como miniaturas en la ficha.

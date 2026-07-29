@@ -132,7 +132,7 @@ export default function About() {
       <CTA
         eyebrow="Piezas hechas para durar"
         title="Conoce el trabajo del taller."
-        action={{ to: '/products', label: 'Ver las piezas', light: true, arrow: true }}
+        action={{ to: '/piezas', label: 'Ver las piezas', light: true, arrow: true }}
       />
     </main>
   );

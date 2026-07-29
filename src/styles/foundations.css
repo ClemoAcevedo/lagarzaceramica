@@ -41,7 +41,7 @@
   --gutter: clamp(1.25rem, 4.1vw, 5rem);
   --section-space: clamp(7rem, 11vw, 12rem);
   --content-max: 96rem;
-  --catalog-max: 88rem;
+  --catalog-max: 84rem;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
