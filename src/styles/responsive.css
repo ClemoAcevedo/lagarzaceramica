@@ -176,32 +176,21 @@
   }
   .page-hero h1 { font-size: clamp(3.6rem, 15.5vw, 5.2rem); }
   .page-hero__note { margin: 2.5rem 0 0; }
-  .page-hero__image { width: 58%; margin: 0 auto; }
+  .page-hero__image { width: 62%; margin: 0 auto; }
   .page-hero__frame { aspect-ratio: 2/3; }
   .story {
-    padding-top: 3.5rem;
-    padding-bottom: 3.5rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.25rem;
   }
-  .story__title h2 { font-size: clamp(2.6rem, 10vw, 3.6rem); }
-  .story__title { height: auto; }
+  .story__copy,
+  .story__images { grid-column: 1; }
+  .story__images { grid-row: 1; }
+  .story__copy { grid-row: 2; }
+  .story__copy h2 { font-size: clamp(2.6rem, 10vw, 3.6rem); }
   .story__body { padding-top: 0; }
-  .story__materials {
-    width: 74%;
-    height: auto;
-    aspect-ratio: 3/4;
-    margin: 2rem auto;
-  }
-  .story__aside {
-    height: auto;
-  }
-  .story__portrait {
-    width: 62%;
-    height: auto;
-    aspect-ratio: 2/3;
-    margin: 2.5rem 0 0 auto;
-  }
+  .story__images { width: 86%; margin: 0 auto; gap: .75rem; }
   .editorial-gallery {
     padding-top: 4.5rem;
     padding-bottom: 5rem;
@@ -229,18 +218,33 @@
     grid-row: 2;
     transform: none;
   }
-  .philosophy { min-height: 0; gap: 3rem; }
+  .philosophy { min-height: 0; padding-top: 3.5rem; padding-bottom: 3.5rem; gap: 3rem; }
   .philosophy__images { width: 100%; min-height: 33rem; }
   .philosophy__image--primary { width: 72%; }
   .philosophy__image--secondary { width: 52%; outline-width: .55rem; }
-  .process-list { grid-template-columns: 1fr; }
-  .process-list li { min-height: 0; padding: 1.2rem 0 2.5rem; border-right: 0; border-bottom: 1px solid var(--line); }
-  .process-list li + li { padding-left: 0; }
-  .process-list h3 { margin-top: 2rem; }
-  .process-gallery { grid-template-columns: .7fr 1.1fr; }
-  .process-gallery .gallery-frame:first-child { display: none; }
-  .process-gallery .gallery-frame:nth-child(2) { aspect-ratio: 4/4.7; }
-  .process-gallery .gallery-frame:nth-child(3) { aspect-ratio: 4/4.9; }
+  .process {
+    min-height: 0;
+    padding-top: 4.5rem;
+    padding-bottom: 4.5rem;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 2.5rem;
+  }
+  .process .section-heading { margin: 0; grid-column: 1; grid-row: 1; }
+  .process .section-heading h2 { max-width: none; font-size: clamp(2.2rem, 9.5vw, 3.2rem); white-space: nowrap; }
+  .process__hint--desktop { display: none; }
+  .process__hint--mobile { display: inline; }
+  .process-visual {
+    width: min(72%, 17rem);
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .process__timeline { grid-column: 1; grid-row: 3; }
+  .process-list li {
+    padding: 0;
+    border-bottom: 0;
+  }
+  .process-step__heading { padding: 1rem 0; }
 
   .catalog-hero {
     min-height: 0;

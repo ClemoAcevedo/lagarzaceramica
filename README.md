@@ -58,8 +58,7 @@ Antes de publicar se debe confirmar con la clienta:
 
 1. Historia y filosofía definitivas.
 2. Metodología, calendario, duración y valores de talleres.
-3. Usuario oficial de Instagram.
-4. Nombres y descripciones definitivas de las piezas.
+3. Nombres y descripciones definitivas de las piezas.
 
 Los textos pendientes conservan el atributo
 `data-content-status="provisional"` en sus componentes de página.

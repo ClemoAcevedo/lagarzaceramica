@@ -104,6 +104,10 @@
   object-position: center;
   transition: transform .9s cubic-bezier(.2,.7,.2,1);
 }
+.catalog-card--bottom .catalog-card__media img {
+  object-position: center bottom;
+  transform-origin: center bottom;
+}
 .catalog-card--landscape .catalog-card__media { aspect-ratio: 4/4.5; }
 .catalog-card:hover .catalog-card__media,
 .catalog-card:focus-within .catalog-card__media {
@@ -114,6 +118,8 @@
 .catalog-card:focus-within .catalog-card__media::after { opacity: 1; }
 .catalog-card:hover .catalog-card__media img,
 .catalog-card:focus-within .catalog-card__media img { transform: scale(1.045); }
+.catalog-card--bottom:hover .catalog-card__media img,
+.catalog-card--bottom:focus-within .catalog-card__media img { transform: scale(1.02); }
 .catalog-card__copy {
   position: relative;
   display: block;

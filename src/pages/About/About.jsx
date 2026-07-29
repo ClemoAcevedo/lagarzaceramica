@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import CTA from '../../components/CTA/CTA.jsx';
 import Gallery from '../../components/Gallery/Gallery.jsx';
 import {
+  footerMark,
   image158,
   image165,
   image166,
   image167,
   image175,
-  image180,
+  image178,
+  image179,
   image186,
   image186Improved,
   image189,
@@ -16,13 +19,44 @@ import {
 import usePageMeta from '../../hooks/usePageMeta.js';
 
 const processSteps = [
-  ['Explorar', 'Una forma comienza en la observación, el dibujo y las pruebas de volumen.'],
-  ['Modelar', 'Las manos construyen cada pieza y dejan en ella variaciones irrepetibles.'],
-  ['Esmaltar', 'Capas de color, textura y minerales transforman la superficie.'],
-  ['Cocer', 'El horno completa el proceso y revela el carácter final del gres.'],
+  {
+    title: 'Explorar',
+    description: 'Una forma comienza en la observación, el dibujo y las pruebas de volumen.',
+    image: image178,
+    alt: 'Herramientas de cerámica reunidas sobre la mesa del taller',
+  },
+  {
+    title: 'Modelar',
+    description: 'Las manos construyen cada pieza y dejan en ella variaciones irrepetibles.',
+    image: processImage,
+    alt: 'Manos trabajando un bloque de arcilla húmeda',
+  },
+  {
+    title: 'Esmaltar',
+    description: 'Capas de color, textura y minerales transforman la superficie.',
+    image: image175,
+    alt: 'Pinceles del taller preparados para aplicar color y esmalte',
+  },
+  {
+    title: 'Cocer',
+    description: 'El horno completa el proceso y revela el carácter final del gres.',
+    image: image179,
+    alt: 'Piezas de arcilla cruda preparadas para la cocción',
+  },
 ];
 
+const initialProcessVisual = {
+  title: 'Proceso artesanal',
+  image: image186,
+  alt: 'Lola trabajando con cerámica junto a la ventana del taller',
+};
+
 export default function About() {
+  const [activeProcess, setActiveProcess] = useState(null);
+  const activeProcessStep = activeProcess === null ? initialProcessVisual : processSteps[activeProcess];
+  const processVisuals = [initialProcessVisual, ...processSteps];
+  const activeVisual = activeProcess === null ? 0 : activeProcess + 1;
+
   usePageMeta(
     'Sobre La Garza — Cerámica en Valdivia',
     'La historia, filosofía y proceso artesanal del taller de cerámica La Garza en Valdivia.',
@@ -46,9 +80,16 @@ export default function About() {
       </section>
 
       <section className="story section section--sand">
-        <div className="story__title reveal">
+        <div className="story__copy reveal">
           <p className="eyebrow">Nuestra historia</p>
           <h2>Una práctica hecha de tiempo y atención.</h2>
+          <div className="story__body" data-content-status="provisional">
+            <p>La Garza nace en Valdivia como un espacio de exploración en torno a la cerámica en gres. El taller reúne el oficio cotidiano y el deseo de crear objetos que permanezcan cerca.</p>
+            <p>Cada colección se construye sin prisa. Las pequeñas variaciones de forma, tono y textura son parte esencial de las piezas: señales de un proceso humano que no busca repetirse de manera exacta.</p>
+            <small>Texto provisional · pendiente de validación</small>
+          </div>
+        </div>
+        <div className="story__images">
           <figure className="story__portrait image-reveal">
             <img
               src={image186Improved}
@@ -56,20 +97,13 @@ export default function About() {
               loading="lazy"
             />
           </figure>
-        </div>
-        <figure className="story__materials image-reveal">
-          <img
-            src={image158}
-            alt="Materiales y herramientas de cerámica dispuestos en el taller"
-            loading="lazy"
-          />
-        </figure>
-        <div className="story__aside">
-          <div className="story__body reveal" data-content-status="provisional">
-            <p>La Garza nace en Valdivia como un espacio de exploración en torno a la cerámica en gres. El taller reúne el oficio cotidiano y el deseo de crear objetos que permanezcan cerca.</p>
-            <p>Cada colección se construye sin prisa. Las pequeñas variaciones de forma, tono y textura son parte esencial de las piezas: señales de un proceso humano que no busca repetirse de manera exacta.</p>
-            <small>Texto provisional · pendiente de validación</small>
-          </div>
+          <figure className="story__materials image-reveal">
+            <img
+              src={image158}
+              alt="Materiales y herramientas de cerámica dispuestos en el taller"
+              loading="lazy"
+            />
+          </figure>
         </div>
       </section>
 
@@ -114,25 +148,47 @@ export default function About() {
         <header className="section-heading reveal">
           <div>
             <p className="eyebrow">Proceso artesanal</p>
-            <h2>De la idea al fuego</h2>
+            <h2>De la idea a la pieza.</h2>
           </div>
         </header>
-        <ol className="process-list">
-          {processSteps.map(([title, description]) => (
-            <li className="reveal" key={title}>
-              <h3>{title}</h3>
-              <p>{description}</p>
-            </li>
+        <div className="process__timeline" onMouseLeave={() => setActiveProcess(null)}>
+          <p className="process__hint">
+            <span className="process__hint--desktop">Recorre cada etapa con el cursor</span>
+            <span className="process__hint--mobile">Toca una etapa para descubrirla</span>
+          </p>
+          <ol className="process-list">
+            {processSteps.map(({ title, description }, index) => (
+              <li className={activeProcess === index ? 'is-active' : ''} key={title}>
+                <div
+                  className="process-step"
+                  tabIndex="0"
+                  onMouseEnter={() => setActiveProcess(index)}
+                  onFocus={() => setActiveProcess(index)}
+                  onTouchStart={() => setActiveProcess(index)}
+                >
+                  <div className="process-step__heading">
+                    <img className="process-step__icon" src={footerMark} alt="" aria-hidden="true" />
+                    <h3>{title}</h3>
+                  </div>
+                  <p>{description}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <figure className="process-visual">
+          {processVisuals.map((step, index) => (
+            <img
+              className={activeVisual === index ? 'is-active' : ''}
+              src={step.image}
+              alt={activeVisual === index ? step.alt : ''}
+              aria-hidden={activeVisual !== index}
+              loading="lazy"
+              key={step.title}
+            />
           ))}
-        </ol>
-        <Gallery
-          className="process-gallery"
-          images={[
-            { src: image175, alt: 'Pinceles del taller en primer plano' },
-            { src: image180, alt: 'Piezas de cerámica cruda en proceso' },
-            { src: image186, alt: 'Ceramista trabajando junto a la ventana' },
-          ]}
-        />
+          <figcaption>{activeProcessStep.title}</figcaption>
+        </figure>
       </section>
 
       <CTA

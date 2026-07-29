@@ -70,17 +70,17 @@ const productEntries = [
     contactUrl: whatsappUrl('Hola La Garza, quisiera consultar por la Familia Azul Río.'),
   },
   {
-    slug: 'nidos',
+    slug: 'testas-de-erizos',
     category: 'natural',
     collection: 'Natural',
-    title: 'Nidos',
-    description: 'Contenedores de textura envolvente, esmalte interior oliva y terminación exterior cruda.',
+    title: 'Testas de erizos',
+    description: 'Piezas escultóricas de textura envolvente, esmalte interior oliva y terminación exterior cruda.',
     images: [
-      { src: image74, alt: 'Conjunto de cuencos texturados en color marfil' },
-      { src: image70, alt: 'Nido de cerámica texturada en primer plano' },
-      { src: image76, alt: 'Familia de Nidos vista desde arriba' },
+      { src: image74, alt: 'Conjunto de testas de erizos en cerámica color marfil' },
+      { src: image70, alt: 'Testa de erizo de cerámica texturada en primer plano' },
+      { src: image76, alt: 'Familia de testas de erizos vista desde arriba' },
     ],
-    contactUrl: whatsappUrl('Hola La Garza, quisiera consultar por los Nidos.'),
+    contactUrl: whatsappUrl('Hola La Garza, quisiera consultar por las Testas de erizos.'),
   },
   {
     id: 'coleccion-tierra',
@@ -102,6 +102,7 @@ const productEntries = [
     collection: 'Especiales',
     title: 'Florero jardín',
     description: 'Objeto único construido y decorado a mano con flores en relieve.',
+    previewFit: 'bottom',
     images: [
       { src: image107, alt: 'Florero turquesa con flores modeladas en cerámica' },
       { src: image90, alt: 'Cuenco de la línea Jardín con flores modeladas' },

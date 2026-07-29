@@ -19,7 +19,7 @@ export default function ProductCard({ to, image, alt, title, material, tall = fa
 export function CatalogCard({ product, hidden }) {
   return (
     <article
-      className={`catalog-card catalog-card--${product.format || 'portrait'} reveal`}
+      className={`catalog-card catalog-card--${product.format || 'portrait'}${product.previewFit ? ` catalog-card--${product.previewFit}` : ''} reveal`}
       data-category={product.category}
       id={product.id}
       hidden={hidden}

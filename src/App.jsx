@@ -13,6 +13,7 @@ export default function App() {
         <Route index element={<Home />} />
         <Route path="sobre-la-garza" element={<About />} />
         <Route path="piezas" element={<Products />} />
+        <Route path="piezas/nidos" element={<Navigate to="/piezas/testas-de-erizos" replace />} />
         <Route path="piezas/:slug" element={<ProductDetail />} />
         <Route path="talleres" element={<Workshops />} />
         <Route path="about" element={<Navigate to="/sobre-la-garza" replace />} />

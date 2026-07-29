@@ -3,4 +3,4 @@ export const whatsappUrl = (message) => `https://wa.me/${whatsappNumber}?text=${
 
 export const contactUrl = whatsappUrl('Hola La Garza');
 export const homeContactUrl = whatsappUrl('Hola La Garza, quisiera hacer una consulta.');
-export const instagramUrl = 'https://www.instagram.com/';
+export const instagramUrl = 'https://www.instagram.com/lagarzaceramica/';
