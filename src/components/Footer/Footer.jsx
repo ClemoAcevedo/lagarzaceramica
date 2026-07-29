@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="site-footer">
       <img className="footer-mark" src={footerMark} alt="" aria-hidden="true" />
       <div className="footer-main">
-        <p>Objetos de gres hechos<br />en Valdivia, Chile.</p>
+        <p>Objetos de gres hechos en Valdivia, Chile.</p>
         <nav aria-label="Navegación del pie">
           <Link to="/sobre-la-garza">Sobre La Garza</Link>
           <Link to="/piezas">Piezas</Link>

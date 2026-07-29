@@ -118,7 +118,7 @@
   }
   .featured .section-heading > div { min-width: 0; }
   .featured .section-heading .eyebrow { margin-bottom: .75rem; }
-  .featured .section-heading h2 { font-size: clamp(2.1rem, 8.8vw, 3rem); }
+  .featured .section-heading h2 { font-size: clamp(1.95rem, 7.8vw, 2.75rem); }
   .product-grid { grid-template-columns: 1fr; gap: 4.5rem; }
   .product-card,
   .product-card:first-child,

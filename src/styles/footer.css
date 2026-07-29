@@ -21,7 +21,7 @@
   padding-bottom: clamp(6rem, 10vw, 10rem);
 }
 .footer-main > p {
-  max-width: 14ch;
+  max-width: 19ch;
   margin: 0;
   font-family: var(--serif);
   font-size: clamp(2.4rem, 4vw, 4.5rem);
