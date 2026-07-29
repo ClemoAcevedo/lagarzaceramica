@@ -2,20 +2,23 @@ import CTA from '../../components/CTA/CTA.jsx';
 import Gallery from '../../components/Gallery/Gallery.jsx';
 import {
   image150,
+  image158,
   image165,
   image166,
   image167,
   image175,
   image180,
   image186,
+  image186Improved,
+  image189,
 } from '../../assets/media.js';
 import usePageMeta from '../../hooks/usePageMeta.js';
 
 const processSteps = [
-  ['01', 'Explorar', 'Una forma comienza en la observación, el dibujo y las pruebas de volumen.'],
-  ['02', 'Modelar', 'Las manos construyen cada pieza y dejan en ella variaciones irrepetibles.'],
-  ['03', 'Esmaltar', 'Capas de color, textura y minerales transforman la superficie.'],
-  ['04', 'Cocer', 'El horno completa el proceso y revela el carácter final del gres.'],
+  ['Explorar', 'Una forma comienza en la observación, el dibujo y las pruebas de volumen.'],
+  ['Modelar', 'Las manos construyen cada pieza y dejan en ella variaciones irrepetibles.'],
+  ['Esmaltar', 'Capas de color, textura y minerales transforman la superficie.'],
+  ['Cocer', 'El horno completa el proceso y revela el carácter final del gres.'],
 ];
 
 export default function About() {
@@ -27,6 +30,7 @@ export default function About() {
   return (
     <main id="contenido">
       <section className="page-hero section">
+        <img className="page-hero__background" src={image189} alt="" aria-hidden="true" />
         <div className="page-hero__copy">
           <p className="eyebrow">Sobre La Garza</p>
           <h1>Una manera<br />de mirar<br />el tiempo.</h1>
@@ -40,16 +44,31 @@ export default function About() {
         </figure>
       </section>
 
-      <section className="story section">
-        <div className="section-number">01</div>
+      <section className="story section section--sand">
         <div className="story__title reveal">
           <p className="eyebrow">Nuestra historia</p>
           <h2>Una práctica hecha de tiempo y atención.</h2>
+          <figure className="story__portrait image-reveal">
+            <img
+              src={image186Improved}
+              alt="Lola seleccionando materiales junto a la ventana del taller"
+              loading="lazy"
+            />
+          </figure>
         </div>
-        <div className="story__body reveal" data-content-status="provisional">
-          <p>La Garza nace en Valdivia como un espacio de exploración en torno a la cerámica en gres. El taller reúne el oficio cotidiano y el deseo de crear objetos que permanezcan cerca.</p>
-          <p>Cada colección se construye sin prisa. Las pequeñas variaciones de forma, tono y textura son parte esencial de las piezas: señales de un proceso humano que no busca repetirse de manera exacta.</p>
-          <small>Texto provisional · pendiente de validación</small>
+        <figure className="story__materials image-reveal">
+          <img
+            src={image158}
+            alt="Materiales y herramientas de cerámica dispuestos en el taller"
+            loading="lazy"
+          />
+        </figure>
+        <div className="story__aside">
+          <div className="story__body reveal" data-content-status="provisional">
+            <p>La Garza nace en Valdivia como un espacio de exploración en torno a la cerámica en gres. El taller reúne el oficio cotidiano y el deseo de crear objetos que permanezcan cerca.</p>
+            <p>Cada colección se construye sin prisa. Las pequeñas variaciones de forma, tono y textura son parte esencial de las piezas: señales de un proceso humano que no busca repetirse de manera exacta.</p>
+            <small>Texto provisional · pendiente de validación</small>
+          </div>
         </div>
       </section>
 
@@ -75,7 +94,6 @@ export default function About() {
       </Gallery>
 
       <section className="philosophy section section--green">
-        <div className="section-number">02</div>
         <div className="philosophy__copy reveal">
           <p className="eyebrow">Filosofía</p>
           <h2>Lo imperfecto también puede ser preciso.</h2>
@@ -94,9 +112,8 @@ export default function About() {
           </div>
         </header>
         <ol className="process-list">
-          {processSteps.map(([number, title, description]) => (
-            <li className="reveal" key={number}>
-              <span>{number}</span>
+          {processSteps.map(([title, description]) => (
+            <li className="reveal" key={title}>
               <h3>{title}</h3>
               <p>{description}</p>
             </li>

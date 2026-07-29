@@ -27,6 +27,9 @@ import image178 from '../../optimized/178.webp';
 import image179 from '../../optimized/179.webp';
 import image180 from '../../optimized/180.webp';
 import image186 from '../../optimized/186.webp';
+import image158 from '../../optimized/158.webp';
+import image186Improved from '../../optimized/186_Mejorada.webp';
+import image189 from '../../optimized/189.webp';
 
 export {
   footerMark,
@@ -58,4 +61,7 @@ export {
   image179,
   image180,
   image186,
+  image158,
+  image186Improved,
+  image189,
 };
