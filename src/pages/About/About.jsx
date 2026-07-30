@@ -73,7 +73,7 @@ export default function About() {
         <img className="page-hero__background" src={image189} alt="" aria-hidden="true" />
         <div className="page-hero__copy">
           <p className="eyebrow">Sobre La Garza</p>
-          <h1>Una manera<br />de mirar<br />el tiempo.</h1>
+          <h1>Una&nbsp;manera<br />de mirar<br />el tiempo.</h1>
           <p className="page-hero__note">Taller de cerámica en gres<br />Valdivia, Chile</p>
         </div>
         <figure className="page-hero__image">
