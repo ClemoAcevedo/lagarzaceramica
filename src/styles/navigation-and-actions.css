@@ -16,11 +16,11 @@
   position: absolute;
   inset: 0 0 auto;
   background: transparent;
-  border-color: rgba(255, 255, 255, .22);
-  color: var(--white);
+  border-color: rgba(32, 72, 42, .22);
+  color: var(--green-deep);
   backdrop-filter: none;
 }
-.site-header--overlay .brand img { filter: brightness(0) invert(1); }
+.site-header--overlay .brand img { filter: none; }
 .site-header--overlay .main-nav { color: var(--green-deep); }
 .site-header.is-scrolled { height: 5rem; }
 .site-header.is-scrolled .brand img { height: 3.35rem; }
@@ -71,47 +71,77 @@
 
 .hero {
   position: relative;
-  display: grid;
-  min-height: 96svh;
-  grid-template-columns: minmax(24rem, 44%) 1fr;
+  min-height: 100svh;
   overflow: hidden;
-  background: var(--green-deep);
-  color: var(--white);
+  background: var(--mist);
+  color: var(--green-deep);
 }
 .hero__content {
-  position: relative;
+  position: absolute;
   z-index: 2;
   display: flex;
-  padding: clamp(9rem, 16vh, 11rem) clamp(2rem, 5vw, 6.5rem) 7rem var(--gutter);
+  top: clamp(7.75rem, 14vh, 9.5rem);
+  right: var(--gutter);
+  bottom: 2rem;
+  left: var(--gutter);
+  width: auto;
+  padding: 0;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
+  align-items: flex-end;
+  text-align: right;
 }
 .hero h1 {
-  max-width: 10ch;
-  margin-bottom: 1.15rem;
-  font-size: clamp(4rem, 6vw, 7.35rem);
+  max-width: none;
+  margin-bottom: 0;
+  font-size: clamp(4rem, 4.75vw, 6.3rem);
   letter-spacing: -.062em;
 }
 .hero__subtitle {
-  margin-bottom: 2.5rem;
+  margin: .8rem 0 0;
   font-size: .66rem;
   font-weight: 500;
   letter-spacing: .16em;
   line-height: 1.4;
   text-transform: uppercase;
 }
-.hero__figure { position: relative; height: 96svh; min-height: 96svh; overflow: hidden; }
+.hero .text-link {
+  min-height: 2.75rem;
+  margin-top: auto;
+  padding: .65rem 1rem;
+  border: 1px solid currentColor;
+  background: rgba(244, 241, 233, .72);
+  backdrop-filter: blur(8px);
+}
+.hero .text-link:hover {
+  background: var(--green-deep);
+  color: var(--white);
+}
+.hero__figure {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  overflow: hidden;
+}
 .hero__media {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 82%;
+  object-position: center center;
   animation: hero-in 1.3s ease both;
 }
-.hero__caption { position: absolute; right: 2rem; bottom: 2rem; padding: .55rem .7rem; background: rgba(16, 43, 24, .8); }
+.hero__caption {
+  position: absolute;
+  left: var(--gutter);
+  bottom: 1.75rem;
+  padding: 0;
+  background: transparent;
+  color: var(--green-deep);
+  font-size: .58rem;
+  font-weight: 500;
+  opacity: 1;
+}
 
 .text-link {
   display: inline-flex;

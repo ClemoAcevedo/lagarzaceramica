@@ -5,7 +5,7 @@ import ProductCard from '../../components/ProductCard/ProductCard.jsx';
 import SectionHeading from '../../components/SectionHeading/SectionHeading.jsx';
 import {
   image12,
-  image25,
+  image27,
   image43,
   image49,
   image103,
@@ -49,8 +49,8 @@ export default function Home() {
   return (
     <main id="contenido">
       <Hero
-        image={image25}
-        imageAlt="Cuencos de gres natural agrupados sobre fondo claro"
+        image={image27}
+        imageAlt="Cuencos de Ribera en gres natural agrupados sobre fondo claro"
         subtitle="Cerámica en gres"
         title={<>Piezas con memoria,<br />hechas para acompañar.</>}
         action={{ to: '/piezas', label: 'Descubrir las piezas' }}

@@ -6,6 +6,7 @@ import image9 from '../../optimized/9.webp';
 import image18 from '../../optimized/18.webp';
 import image23 from '../../optimized/23.webp';
 import image26 from '../../optimized/26.webp';
+import image27 from '../../optimized/27.webp';
 import image25 from '../../optimized/25.webp';
 import image43 from '../../optimized/43.webp';
 import image41 from '../../optimized/41.webp';
@@ -63,6 +64,7 @@ export {
   image23,
   image25,
   image26,
+  image27,
   image41,
   image43,
   image46,
