@@ -10,6 +10,14 @@
 @media (max-width: 760px) {
   :root { --section-space: 6.5rem; }
   body { font-size: 14px; }
+  .eyebrow,
+  figcaption { font-size: .72rem; }
+  .button,
+  .text-link,
+  .filter { font-size: .72rem; }
+  .footer-main nav,
+  .footer-main > div { font-size: .75rem; }
+  .footer-bottom { font-size: .68rem; }
   h1 { font-size: clamp(3.7rem, 16vw, 5.5rem); }
   h2 { font-size: clamp(2.8rem, 12vw, 4.2rem); }
   .site-header,
@@ -45,21 +53,31 @@
   .menu-toggle[aria-expanded="true"] i::after { transform: rotate(-90deg); }
   .main-nav {
     position: fixed;
+    z-index: 1;
     inset: 0;
     display: flex;
+    width: 100vw;
+    min-height: 100dvh;
     padding: 7rem var(--gutter) 3rem;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
     gap: .25rem;
-    background: var(--green-deep);
+    background-color: var(--green-deep);
     color: var(--white);
     opacity: 0;
     pointer-events: none;
+    visibility: hidden;
     transform: translateY(-8px);
-    transition: opacity .3s, transform .3s;
+    transition: opacity .3s, transform .3s, visibility 0s linear .3s;
   }
-  .main-nav.is-open { opacity: 1; pointer-events: auto; transform: none; }
+  .main-nav.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
   .main-nav a {
     font-family: var(--serif);
     font-size: clamp(2.6rem, 12vw, 3.7rem);
@@ -76,8 +94,23 @@
     letter-spacing: .12em;
     text-transform: uppercase;
   }
+  .main-nav .nav-social {
+    display: flex;
+    margin-top: 1.5rem;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .main-nav .nav-social a {
+    padding: .5rem 0;
+    font-family: var(--sans);
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
   .site-header:has(.main-nav.is-open) { color: var(--white); }
   .site-header:has(.main-nav.is-open) .brand img { filter: brightness(0) invert(1); }
+  .site-header--overlay .main-nav.is-open { color: var(--white); }
   .site-header--overlay:not(:has(.main-nav.is-open)) { color: var(--green-deep); }
   .site-header--overlay:not(:has(.main-nav.is-open)) .brand img { filter: none; }
 
@@ -132,6 +165,9 @@
   .featured .product-card__image,
   .featured .product-card__image--tall { aspect-ratio: 4/3.75; }
   .product-card__meta span { max-width: 7rem; text-align: right; }
+  .product-card__meta span,
+  .catalog-card__action,
+  .process-step__order { font-size: .68rem; }
   .workshop-preview { min-height: 84svh; }
   .workshop-preview::after { background: linear-gradient(0deg, rgba(11,29,16,.78), rgba(11,29,16,.05) 80%); }
   .workshop-preview__media img { object-position: 49% center; }
@@ -308,6 +344,8 @@
   }
   .product-detail__copy { padding-left: 0; }
   .product-detail__copy h1 { font-size: clamp(3.8rem, 16vw, 5.5rem); }
+  .product-detail__share { margin-left: 0; }
+  .product-detail__share button { min-height: 2.75rem; font-size: .72rem; }
   .catalog-note {
     min-height: 0;
     grid-template-columns: 1fr;

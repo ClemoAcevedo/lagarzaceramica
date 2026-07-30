@@ -5,6 +5,7 @@ import Home from './pages/Home/Home.jsx';
 import ProductDetail from './pages/ProductDetail/ProductDetail.jsx';
 import Products from './pages/Products/Products.jsx';
 import Workshops from './pages/Workshops/Workshops.jsx';
+import NotFound from './pages/NotFound/NotFound.jsx';
 
 export default function App() {
   return (
@@ -19,7 +20,7 @@ export default function App() {
         <Route path="about" element={<Navigate to="/sobre-la-garza" replace />} />
         <Route path="products" element={<Navigate to="/piezas" replace />} />
         <Route path="workshops" element={<Navigate to="/talleres" replace />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   );

@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { useLocation, useNavigationType } from 'react-router-dom';
 
-function useScrollRestoration(pathname, hash) {
+function useScrollRestoration(pathname, hash, navigationType) {
   useEffect(() => {
+    if (navigationType === 'POP') return undefined;
+
     if (!hash) {
       window.scrollTo(0, 0);
       return undefined;
@@ -13,7 +15,27 @@ function useScrollRestoration(pathname, hash) {
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [hash, pathname]);
+  }, [hash, navigationType, pathname]);
+}
+
+function useRouteFocus(pathname) {
+  const firstRender = useRef(true);
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return undefined;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const heading = document.querySelector('main h1');
+      if (!heading) return;
+      heading.setAttribute('tabindex', '-1');
+      heading.focus({ preventScroll: true });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname]);
 }
 
 function useRevealAnimations(pathname) {
@@ -42,6 +64,8 @@ function useRevealAnimations(pathname) {
 
 export default function useRouteEffects() {
   const { pathname, hash } = useLocation();
-  useScrollRestoration(pathname, hash);
+  const navigationType = useNavigationType();
+  useScrollRestoration(pathname, hash, navigationType);
+  useRouteFocus(pathname);
   useRevealAnimations(pathname);
 }

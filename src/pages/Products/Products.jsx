@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ButtonLink } from '../../components/Links/Links.jsx';
 import { CatalogCard } from '../../components/ProductCard/ProductCard.jsx';
 import { productFilters, products } from '../../data/products.js';
@@ -8,7 +9,10 @@ import { whatsappUrl } from '../../utils/links.js';
 const availabilityUrl = whatsappUrl('Hola La Garza, quisiera conocer las piezas disponibles.');
 
 export default function Products() {
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedFilter = searchParams.get('coleccion');
+  const initialFilter = productFilters.some(({ value }) => value === requestedFilter) ? requestedFilter : 'all';
+  const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [isFiltering, setIsFiltering] = useState(false);
   const filterTimeout = useRef();
   const entranceTimeout = useRef();
@@ -18,17 +22,27 @@ export default function Products() {
     window.clearTimeout(entranceTimeout.current);
   }, []);
 
+  useLayoutEffect(() => {
+    const savedScroll = sessionStorage.getItem('la-garza:catalog-scroll');
+    if (savedScroll === null) return undefined;
+    sessionStorage.removeItem('la-garza:catalog-scroll');
+    const frame = window.requestAnimationFrame(() => window.scrollTo(0, Number(savedScroll)));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
   const changeFilter = (nextFilter) => {
     if (nextFilter === activeFilter || isFiltering) return;
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setActiveFilter(nextFilter);
+      setSearchParams(nextFilter === 'all' ? {} : { coleccion: nextFilter }, { replace: true });
       return;
     }
 
     setIsFiltering(true);
     filterTimeout.current = window.setTimeout(() => {
       setActiveFilter(nextFilter);
+      setSearchParams(nextFilter === 'all' ? {} : { coleccion: nextFilter }, { replace: true });
       entranceTimeout.current = window.setTimeout(() => setIsFiltering(false), 40);
     }, 180);
   };
@@ -36,10 +50,11 @@ export default function Products() {
   usePageMeta(
     'Piezas — La Garza',
     'Vitrina de piezas únicas de cerámica en gres hechas por La Garza en Valdivia.',
+    { image: products[0].image },
   );
 
   return (
-    <main id="contenido">
+    <main id="contenido" className="page-enter">
       <section className="catalog-hero section">
         <div>
           <p className="eyebrow">Edición de taller · 2026</p>
@@ -74,6 +89,7 @@ export default function Products() {
           <CatalogCard
             key={product.title}
             product={product}
+            fromCatalog
             hidden={activeFilter !== 'all' && activeFilter !== product.category}
           />
         ))}

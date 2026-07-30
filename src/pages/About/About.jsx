@@ -65,10 +65,11 @@ export default function About() {
   usePageMeta(
     'Sobre La Garza — Cerámica en Valdivia',
     'La historia, filosofía y proceso artesanal del taller de cerámica La Garza en Valdivia.',
+    { image: image165 },
   );
 
   return (
-    <main id="contenido">
+    <main id="contenido" className="page-enter">
       <section className="page-hero section">
         <img className="page-hero__background" src={image189} alt="" aria-hidden="true" />
         <div className="page-hero__copy">
@@ -88,10 +89,9 @@ export default function About() {
         <div className="story__copy reveal">
           <p className="eyebrow">Nuestra historia</p>
           <h2>Una práctica hecha de tiempo y atención.</h2>
-          <div className="story__body" data-content-status="provisional">
+          <div className="story__body">
             <p>La Garza nace en Valdivia como un espacio de exploración en torno a la cerámica en gres. El taller reúne el oficio cotidiano y el deseo de crear objetos que permanezcan cerca.</p>
             <p>Cada colección se construye sin prisa. Las pequeñas variaciones de forma, tono y textura son parte esencial de las piezas: señales de un proceso humano que no busca repetirse de manera exacta.</p>
-            <small>Texto provisional · pendiente de validación</small>
           </div>
         </div>
         <div className="story__images">

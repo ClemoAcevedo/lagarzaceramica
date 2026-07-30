@@ -16,7 +16,7 @@ export default function ProductCard({ to, image, alt, title, material, tall = fa
   );
 }
 
-export function CatalogCard({ product, hidden }) {
+export function CatalogCard({ product, hidden, fromCatalog = false }) {
   return (
     <article
       className={`catalog-card catalog-card--${product.format || 'portrait'}${product.previewFit ? ` catalog-card--${product.previewFit}` : ''} reveal`}
@@ -24,7 +24,14 @@ export function CatalogCard({ product, hidden }) {
       id={product.id}
       hidden={hidden}
     >
-      <Link className="catalog-card__link" to={`/piezas/${product.slug}`}>
+      <Link
+        className="catalog-card__link"
+        to={`/piezas/${product.slug}`}
+        state={fromCatalog ? { fromCatalog: true } : undefined}
+        onClick={() => {
+          if (fromCatalog) sessionStorage.setItem('la-garza:catalog-scroll', String(window.scrollY));
+        }}
+      >
         <figure className="catalog-card__media image-reveal">
           <img src={product.image} alt={product.alt} loading="lazy" />
         </figure>

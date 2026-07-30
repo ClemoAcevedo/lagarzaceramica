@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Poppins";
-  src: url("../assets/fonts/poppins-regular.ttf") format("truetype");
+  src: url("../assets/fonts/poppins-regular.woff2") format("woff2");
   font-display: swap;
   font-style: normal;
   font-weight: 400;
@@ -8,7 +8,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("../assets/fonts/poppins-medium.ttf") format("truetype");
+  src: url("../assets/fonts/poppins-medium.woff2") format("woff2");
   font-display: swap;
   font-style: normal;
   font-weight: 500;
@@ -16,7 +16,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("../assets/fonts/poppins-semibold.ttf") format("truetype");
+  src: url("../assets/fonts/poppins-semibold.woff2") format("woff2");
   font-display: swap;
   font-style: normal;
   font-weight: 600;
@@ -87,6 +87,14 @@ h3 { font-size: clamp(1.65rem, 2.4vw, 2.55rem); letter-spacing: -.025em; }
 p { max-width: 42rem; }
 ::selection { background: var(--sage); color: var(--green-deep); }
 :focus-visible { outline: 2px solid var(--peach); outline-offset: 5px; }
+h1[tabindex="-1"]:focus { outline: none; }
+
+.page-enter { animation: page-in .45s ease both; }
+
+@keyframes page-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 .skip-link {
   position: fixed;
@@ -132,3 +140,15 @@ figcaption {
   letter-spacing: .13em;
   text-transform: uppercase;
 }
+
+.not-found {
+  display: flex;
+  min-height: calc(100svh - 6rem);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--sand);
+  text-align: center;
+}
+.not-found h1 { max-width: 9ch; font-size: clamp(4rem, 8vw, 8rem); }
+.not-found > p:not(.eyebrow) { max-width: 34rem; margin-bottom: 2.5rem; }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { headerLogo } from '../../assets/media.js';
-import { contactUrl, homeContactUrl } from '../../utils/links.js';
+import { contactUrl, homeContactUrl, instagramUrl } from '../../utils/links.js';
 
 const navigation = [
   { to: '/', label: 'Inicio' },
@@ -33,12 +33,19 @@ export default function Header({ overlay = false }) {
     };
     document.addEventListener('keydown', closeOnEscape);
     const main = document.querySelector('main');
-    if (menuOpen) main?.setAttribute('inert', '');
-    else main?.removeAttribute('inert');
+    const footer = document.querySelector('footer');
+    if (menuOpen) {
+      main?.setAttribute('inert', '');
+      footer?.setAttribute('inert', '');
+    } else {
+      main?.removeAttribute('inert');
+      footer?.removeAttribute('inert');
+    }
     return () => {
       document.body.classList.remove('menu-open');
       document.removeEventListener('keydown', closeOnEscape);
       main?.removeAttribute('inert');
+      footer?.removeAttribute('inert');
     };
   }, [menuOpen]);
 
@@ -79,6 +86,10 @@ export default function Header({ overlay = false }) {
         >
           Contacto
         </a>
+        <div className="nav-social" aria-label="Redes y contacto">
+          <a href={instagramUrl} target="_blank" rel="noopener">Instagram ↗</a>
+          <a href={contactUrl} target="_blank" rel="noopener">WhatsApp ↗</a>
+        </div>
       </nav>
     </header>
   );

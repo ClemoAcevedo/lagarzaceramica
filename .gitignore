@@ -5,6 +5,8 @@ dist/
 # Vite and test artefacts
 .vite/
 coverage/
+playwright-report/
+test-results/
 *.log
 
 # Local environment files

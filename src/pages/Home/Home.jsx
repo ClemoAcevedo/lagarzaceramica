@@ -44,10 +44,11 @@ export default function Home() {
   usePageMeta(
     'La Garza — Cerámica en gres, Valdivia',
     'La Garza, taller de cerámica en gres hecho a mano en Valdivia, Chile. Conoce nuestras piezas y talleres.',
+    { image: image27 },
   );
 
   return (
-    <main id="contenido">
+    <main id="contenido" className="page-enter">
       <Hero
         image={image27}
         imageAlt="Cuencos de Ribera en gres natural agrupados sobre fondo claro"

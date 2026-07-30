@@ -52,22 +52,23 @@ export default function Workshops() {
   usePageMeta(
     'Talleres de cerámica — La Garza',
     'Talleres de cerámica en gres de La Garza en Valdivia. Aprende, experimenta y crea con tus manos.',
+    { image: image189 },
   );
 
   return (
-    <main id="contenido">
+    <main id="contenido" className="page-enter">
       <section className="workshops-hero">
-        <div className="workshops-hero__copy">
+        <div className="workshops-hero__copy reveal">
           <p className="eyebrow">Talleres en Valdivia</p>
           <h1><span>Tiempo para</span><br />hacer con<br />las manos.</h1>
           <p>Una experiencia cercana para conocer la cerámica desde la materia, el gesto y la experimentación.</p>
           <ButtonLink href={workshopInfoUrl}>Consultar próximos encuentros</ButtonLink>
         </div>
         <figure className="workshops-hero__media">
-          <div className="workshops-hero__image workshops-hero__image--primary">
+          <div className="workshops-hero__image workshops-hero__image--primary image-reveal">
             <img src={image189} alt="Estanterías del taller con piezas de cerámica en proceso" fetchPriority="high" />
           </div>
-          <div className="workshops-hero__image workshops-hero__image--detail">
+          <div className="workshops-hero__image workshops-hero__image--detail image-reveal">
             <img src={image176} alt="Detalle de herramientas de modelado en el taller" fetchPriority="high" />
           </div>
           <figcaption>Taller y herramientas · Valdivia</figcaption>
@@ -90,9 +91,8 @@ export default function Workshops() {
             <span>en la arcilla.</span>
           </h2>
         </div>
-        <div className="workshop-intro__body reveal" data-content-status="provisional">
+        <div className="workshop-intro__body reveal">
           <p>Los talleres de La Garza están pensados para descubrir el gres en un ambiente acogedor y grupos pequeños. No necesitas experiencia previa: acompañamos cada etapa para que explores con libertad y construyas una pieza propia.</p>
-          <small>Información provisional · pendiente de validación</small>
         </div>
       </section>
 
