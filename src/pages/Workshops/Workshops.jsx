@@ -1,36 +1,54 @@
+import { useState } from 'react';
 import CTA from '../../components/CTA/CTA.jsx';
-import Gallery from '../../components/Gallery/Gallery.jsx';
 import { ButtonLink } from '../../components/Links/Links.jsx';
 import SectionHeading from '../../components/SectionHeading/SectionHeading.jsx';
-import WorkshopCard from '../../components/WorkshopCard/WorkshopCard.jsx';
-import { image168, image174, image180, image186 } from '../../assets/media.js';
+import {
+  footerMark,
+  image57,
+  image113,
+  image123,
+  image166,
+  image176,
+  image189,
+  workshopIntroBackground,
+} from '../../assets/media.js';
 import usePageMeta from '../../hooks/usePageMeta.js';
 import { whatsappUrl } from '../../utils/links.js';
 
 const workshopInfoUrl = whatsappUrl('Hola La Garza, quisiera recibir información sobre los talleres.');
 const workshopSignupUrl = whatsappUrl('Hola La Garza, quisiera inscribirme en un taller.');
 
-const methodSteps = [
-  ['01', 'Conocer la materia', 'Comenzamos con sus propiedades, herramientas y posibilidades.'],
-  ['02', 'Modelar a mano', 'Exploramos técnicas de construcción manual y terminaciones.'],
-  ['03', 'Dar identidad', 'Trabajamos forma, textura y color para que cada pieza sea personal.'],
+const methodPoints = [
+  {
+    title: 'Conocer la materia',
+    description: 'Comenzamos con sus propiedades, herramientas y posibilidades.',
+    image: image123,
+    alt: 'Vasos de gres modelados a mano sobre una bandeja',
+  },
+  {
+    title: 'Modelar a mano',
+    description: 'Exploramos técnicas de construcción manual y terminaciones.',
+    image: image57,
+    alt: 'Detalle de platos de gres apilados',
+  },
+  {
+    title: 'Dar identidad',
+    description: 'Trabajamos forma, textura y color para que cada pieza sea personal.',
+    image: image113,
+    alt: 'Cuencos de gres esmaltados y apilados',
+  },
 ];
 
-const workshopDetails = [
-  ['Experiencia', 'No se requiere experiencia previa.'],
-  ['Modalidad', 'Encuentros presenciales en Valdivia.'],
-  ['Materiales', 'Incluidos durante la experiencia.'],
-  ['Fechas y valores', 'Consultar calendario por WhatsApp.'],
-];
-
-const questions = [
-  ['¿Necesito experiencia previa?', 'No. Los encuentros están pensados para personas que se acercan por primera vez y también para quienes desean seguir practicando.'],
-  ['¿Qué materiales debo llevar?', 'Los materiales y herramientas de trabajo están incluidos. Recomendamos venir con ropa cómoda.'],
-  ['¿Me llevo mi pieza el mismo día?', 'La cerámica requiere secado, esmaltado y cocción. Te explicaremos el plazo de entrega al comenzar.'],
-  ['¿Cómo conozco las próximas fechas?', 'Escríbenos por WhatsApp para recibir el calendario actualizado y conocer los cupos disponibles.'],
+const participationInfo = [
+  ['El encuentro', 'Los talleres son presenciales en Valdivia, en grupos pequeños y con acompañamiento cercano durante la práctica.'],
+  ['Lo que necesitas', 'No necesitas experiencia previa. Los materiales y herramientas están incluidos; solo recomendamos venir con ropa cómoda.'],
+  ['Después de modelar', 'Tu pieza permanece en el taller para completar el secado, esmaltado y la cocción. Al comenzar te explicaremos el plazo de entrega.'],
+  ['Fechas, valores y reserva', 'El calendario y los cupos se actualizan periódicamente. Puedes consultar la próxima fecha y reservar directamente por WhatsApp.'],
 ];
 
 export default function Workshops() {
+  const [activeMethod, setActiveMethod] = useState(null);
+
   usePageMeta(
     'Talleres de cerámica — La Garza',
     'Talleres de cerámica en gres de La Garza en Valdivia. Aprende, experimenta y crea con tus manos.',
@@ -41,78 +59,119 @@ export default function Workshops() {
       <section className="workshops-hero">
         <div className="workshops-hero__copy">
           <p className="eyebrow">Talleres en Valdivia</p>
-          <h1>Tiempo para<br />hacer con<br />las manos.</h1>
+          <h1><span>Tiempo para</span><br />hacer con<br />las manos.</h1>
           <p>Una experiencia cercana para conocer la cerámica desde la materia, el gesto y la experimentación.</p>
-          <ButtonLink href={workshopInfoUrl} light>Consultar próximos encuentros</ButtonLink>
+          <ButtonLink href={workshopInfoUrl}>Consultar próximos encuentros</ButtonLink>
         </div>
         <figure className="workshops-hero__media">
-          <img src={image168} alt="Vista amplia de la mesa central del taller La Garza" fetchPriority="high" />
-          <figcaption>La mesa del taller · Valdivia</figcaption>
+          <div className="workshops-hero__image workshops-hero__image--primary">
+            <img src={image189} alt="Estanterías del taller con piezas de cerámica en proceso" fetchPriority="high" />
+          </div>
+          <div className="workshops-hero__image workshops-hero__image--detail">
+            <img src={image176} alt="Detalle de herramientas de modelado en el taller" fetchPriority="high" />
+          </div>
+          <figcaption>Taller y herramientas · Valdivia</figcaption>
         </figure>
       </section>
 
       <section className="workshop-intro section">
-        <div className="section-number">01</div>
-        <div className="reveal">
+        <img
+          className="workshop-intro__background"
+          src={workshopIntroBackground}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+        />
+        <div className="workshop-intro__heading reveal">
           <p className="eyebrow">La experiencia</p>
-          <h2>Tiempo, atención y manos en la arcilla.</h2>
+          <h2>
+            <span>Atención, materia</span>
+            <span>y manos</span>
+            <span>en la arcilla.</span>
+          </h2>
         </div>
-        <div className="reveal" data-content-status="provisional">
+        <div className="workshop-intro__body reveal" data-content-status="provisional">
           <p>Los talleres de La Garza están pensados para descubrir el gres en un ambiente acogedor y grupos pequeños. No necesitas experiencia previa: acompañamos cada etapa para que explores con libertad y construyas una pieza propia.</p>
           <small>Información provisional · pendiente de validación</small>
         </div>
       </section>
 
-      <section className="method section section--sand">
-        <SectionHeading eyebrow="Metodología" title="Una práctica guiada y personal" />
-        <div className="method-grid">
-          {methodSteps.map(([number, title, description]) => (
-            <WorkshopCard key={number} number={number} title={title}>{description}</WorkshopCard>
-          ))}
-        </div>
-        <Gallery
-          className="method-images"
-          images={[
-            { src: image174, alt: 'Mesa de herramientas junto a las ventanas del taller' },
-            { src: image180, alt: 'Piezas de gres crudo durante el proceso de modelado' },
-          ]}
+      <section className="process method section">
+        <SectionHeading
+          eyebrow="Metodología"
+          title={<><span>Una práctica</span><br /><span>guiada y personal</span></>}
         />
-      </section>
-
-      <section className="workshop-info section">
-        <figure className="image-reveal">
-          <img src={image186} alt="Lola trabajando con cerámica dentro del taller" loading="lazy" />
-        </figure>
-        <div>
-          <p className="eyebrow">Información general</p>
-          <h2>Antes de venir</h2>
-          <dl>
-            {workshopDetails.map(([term, description]) => (
-              <div key={term}>
-                <dt>{term}</dt>
-                <dd>{description}</dd>
-              </div>
+        <div className="method__points" onMouseLeave={() => setActiveMethod(null)}>
+          <p className="process__hint">
+            <span className="process__hint--desktop">Explora cada aspecto con el cursor</span>
+            <span className="process__hint--mobile">Toca un aspecto para descubrirlo</span>
+          </p>
+          <ul className="method-list">
+            {methodPoints.map(({ title, description }, index) => (
+              <li className={activeMethod === index ? 'is-active' : ''} key={title}>
+                <div
+                  className="method-point"
+                  tabIndex="0"
+                  onMouseEnter={() => setActiveMethod(index)}
+                  onFocus={() => setActiveMethod(index)}
+                  onTouchStart={() => setActiveMethod(index)}
+                >
+                  <div className="method-point__heading">
+                    <span className="method-point__marker" aria-hidden="true">
+                      <img src={footerMark} alt="" />
+                    </span>
+                    <h3>{title}</h3>
+                  </div>
+                  <p>{description}</p>
+                </div>
+              </li>
             ))}
-          </dl>
-          <ButtonLink href={workshopInfoUrl}>Consultar e inscribirme</ButtonLink>
+          </ul>
         </div>
+        <figure className={`process-visual method-visual ${activeMethod === null ? 'is-overview' : 'is-detail'}`}>
+          <img
+            className={activeMethod === null ? 'is-active' : ''}
+            src={image166}
+            alt={activeMethod === null ? 'Vista general del taller de La Garza en Valdivia' : ''}
+            aria-hidden={activeMethod !== null}
+            loading="lazy"
+          />
+          {methodPoints.map((point, index) => (
+            <img
+              className={activeMethod === index ? 'is-active' : ''}
+              src={point.image}
+              alt={activeMethod === index ? point.alt : ''}
+              aria-hidden={activeMethod !== index}
+              loading="lazy"
+              key={point.title}
+            />
+          ))}
+          {activeMethod !== null && <figcaption>{methodPoints[activeMethod].title}</figcaption>}
+        </figure>
       </section>
 
-      <section className="faq section">
-        <SectionHeading eyebrow="Preguntas frecuentes" title="Lo que necesitas saber" />
-        <div className="accordion">
-          {questions.map(([question, answer]) => (
-            <details key={question}>
-              <summary>{question}<span>+</span></summary>
-              <p>{answer}</p>
-            </details>
-          ))}
+      <section className="workshop-guide section">
+        <div className="workshop-guide__heading">
+          <p className="eyebrow">Información para participar</p>
+          <h2>Lo esencial antes de venir al taller.</h2>
+          <p>Información práctica para que solo tengas que concentrarte en crear.</p>
+        </div>
+        <div className="workshop-guide__content">
+          <div className="accordion workshop-guide__accordion">
+            {participationInfo.map(([topic, detail], index) => (
+              <details key={topic} open={index === 0 || undefined}>
+                <summary>{topic}<span>+</span></summary>
+                <p>{detail}</p>
+              </details>
+            ))}
+          </div>
+          <ButtonLink href={workshopInfoUrl}>Consultar próximos encuentros</ButtonLink>
         </div>
       </section>
 
       <CTA
         eyebrow="Próximos encuentros"
-        title="Reserva un lugar en la mesa."
+        title="Reserva un lugar en nuestro taller."
         description="Consulta fechas, valores y disponibilidad directamente con La Garza."
         action={{ href: workshopSignupUrl, label: 'Inscribirme por WhatsApp', light: true, arrow: true }}
       />

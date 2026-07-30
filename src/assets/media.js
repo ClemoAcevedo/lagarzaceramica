@@ -12,6 +12,7 @@ import image43 from '../../optimized/43.webp';
 import image41 from '../../optimized/41.webp';
 import image46 from '../../optimized/46.webp';
 import image49 from '../../optimized/49.webp';
+import image57 from '../../optimized/57.webp';
 import image74 from '../../optimized/74.webp';
 import image70 from '../../optimized/70.webp';
 import image76 from '../../optimized/76.webp';
@@ -21,6 +22,7 @@ import image102 from '../../optimized/102.webp';
 import image103 from '../../optimized/103.webp';
 import image104 from '../../optimized/104.webp';
 import image107 from '../../optimized/107.webp';
+import image113 from '../../optimized/113.webp';
 import image116 from '../../optimized/116.webp';
 import image117 from '../../optimized/117.webp';
 import image123 from '../../optimized/123.webp';
@@ -39,6 +41,7 @@ import image168 from '../../optimized/168.webp';
 import image170 from '../../optimized/170.webp';
 import image174 from '../../optimized/174.webp';
 import image175 from '../../optimized/175.webp';
+import image176 from '../../optimized/176.webp';
 import image178 from '../../optimized/178.webp';
 import image179 from '../../optimized/179.webp';
 import image180 from '../../optimized/180.webp';
@@ -53,6 +56,7 @@ import processModel from '../../optimized/modelar.webp';
 import processGlaze from '../../optimized/esmaltado.webp';
 import processFire from '../../optimized/cocer.webp';
 import processCraft from '../../optimized/procesoartesanal.webp';
+import workshopIntroBackground from '../../optimized/fondotaller.webp';
 
 export {
   footerMark,
@@ -69,6 +73,7 @@ export {
   image43,
   image46,
   image49,
+  image57,
   image70,
   image74,
   image76,
@@ -78,6 +83,7 @@ export {
   image103,
   image104,
   image107,
+  image113,
   image116,
   image117,
   image123,
@@ -96,6 +102,7 @@ export {
   image170,
   image174,
   image175,
+  image176,
   image178,
   image179,
   image180,
@@ -110,4 +117,5 @@ export {
   processGlaze,
   processFire,
   processCraft,
+  workshopIntroBackground,
 };
