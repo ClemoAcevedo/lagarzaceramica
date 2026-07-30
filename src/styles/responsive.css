@@ -144,12 +144,12 @@
     background: rgba(38, 41, 39, .25);
   }
   .workshop-preview__copy p:not(.eyebrow) { max-width: 27ch; }
-  .atmosphere { width: 100%; grid-template-columns: 1fr; gap: 0; }
-  .atmosphere__image { width: 80%; aspect-ratio: 4/5; margin: 0 auto 0 0; justify-self: start; }
+  .atmosphere { width: 100%; grid-template-columns: 1fr; gap: 2.75rem; }
+  .atmosphere__image { width: 86%; aspect-ratio: 4/5; margin: 0 auto 0 0; justify-self: start; }
   .atmosphere__copy {
-    width: 84%;
-    margin: -2rem 0 0 auto;
-    padding: 2.1rem 1.5rem 2.3rem;
+    width: 100%;
+    margin: 0;
+    padding: 1.75rem 0 0;
   }
   .atmosphere__copy > p:last-child { font-size: clamp(2.25rem, 9.8vw, 3.3rem); }
   .cta { min-height: 34rem; padding-right: var(--gutter); padding-left: var(--gutter); }

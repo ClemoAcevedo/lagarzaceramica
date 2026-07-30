@@ -16,7 +16,7 @@
   position: absolute;
   inset: 0 0 auto;
   background: transparent;
-  border-color: rgba(32, 72, 42, .22);
+  border-color: rgba(40, 85, 54, .22);
   color: var(--green-deep);
   backdrop-filter: none;
 }
@@ -136,11 +136,13 @@
   left: var(--gutter);
   bottom: 1.75rem;
   padding: 0;
+  border: 0;
   background: transparent;
   color: var(--green-deep);
   font-size: .58rem;
   font-weight: 500;
   opacity: 1;
+  text-shadow: 0 1px 8px rgba(244, 241, 233, .72);
 }
 
 .text-link {

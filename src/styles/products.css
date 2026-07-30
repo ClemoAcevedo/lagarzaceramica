@@ -89,7 +89,7 @@
 .catalog-card__media::after {
   position: absolute;
   inset: 0;
-  background: rgba(32, 72, 42, .08);
+  background: rgba(40, 85, 54, .08);
   content: "";
   opacity: 0;
   pointer-events: none;
