@@ -43,19 +43,35 @@ test('el menú móvil es legible, completo y bloquea el contenido posterior', as
 
 test('el catálogo conserva filtro y posición al volver de una ficha', async ({ page }) => {
   await page.goto('/piezas');
-  await page.getByRole('button', { name: 'Natural', exact: true }).click();
-  await expect(page).toHaveURL(/coleccion=natural/);
+  await page.getByRole('button', { name: 'Tierra', exact: true }).click();
+  await expect(page).toHaveURL(/coleccion=tierra/);
   await page.locator('.catalog-card:not([hidden])').first().scrollIntoViewIfNeeded();
   const previousScroll = await page.evaluate(() => window.scrollY);
   await page.locator('.catalog-card:not([hidden]) a').first().click();
   await page.getByRole('button', { name: /volver a piezas/i }).click();
 
-  await expect(page).toHaveURL(/coleccion=natural/);
-  await expect(page.getByRole('button', { name: 'Natural', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page).toHaveURL(/coleccion=tierra/);
+  await expect(page.getByRole('button', { name: 'Tierra', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await expect.poll(async () => {
     const currentScroll = await page.evaluate(() => window.scrollY);
     return Math.abs(currentScroll - previousScroll);
   }).toBeLessThanOrEqual(40);
+});
+
+test('la búsqueda de piezas se combina con las clasificaciones', async ({ page }) => {
+  await page.goto('/piezas');
+  const search = page.getByRole('searchbox', { name: 'Buscar piezas' });
+
+  await search.fill('florero huella');
+  await expect(page.locator('.catalog-card:not([hidden])')).toHaveCount(1);
+  await expect(page.locator('.catalog-card:not([hidden]) h2')).toHaveText('Florero huella');
+
+  await page.getByRole('button', { name: 'Tierra', exact: true }).click();
+  await expect(page.locator('.catalog-card:not([hidden])')).toHaveCount(0);
+  await expect(page.getByText('No encontramos piezas que coincidan')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Limpiar búsqueda' }).click();
+  await expect(page.locator('.catalog-card:not([hidden])')).toHaveCount(17);
 });
 
 test('la página 404 está centrada', async ({ page }) => {

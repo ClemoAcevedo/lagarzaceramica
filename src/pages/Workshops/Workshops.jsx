@@ -86,9 +86,9 @@ export default function Workshops() {
         <div className="workshop-intro__heading reveal">
           <p className="eyebrow">La experiencia</p>
           <h2>
-            <span>Atención, materia</span>
-            <span>y manos</span>
-            <span>en la arcilla.</span>
+            <span>Descubre la magia</span>
+            <span>del gres en</span>
+            <span>nuestro taller.</span>
           </h2>
         </div>
         <div className="workshop-intro__body reveal">

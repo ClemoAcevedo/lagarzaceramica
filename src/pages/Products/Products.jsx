@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ButtonLink } from '../../components/Links/Links.jsx';
 import { CatalogCard } from '../../components/ProductCard/ProductCard.jsx';
@@ -8,14 +8,36 @@ import { whatsappUrl } from '../../utils/links.js';
 
 const availabilityUrl = whatsappUrl('Hola La Garza, quisiera conocer las piezas disponibles.');
 
+function normalizeSearchText(value) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedFilter = searchParams.get('coleccion');
   const initialFilter = productFilters.some(({ value }) => value === requestedFilter) ? requestedFilter : 'all';
   const [activeFilter, setActiveFilter] = useState(initialFilter);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isFiltering, setIsFiltering] = useState(false);
   const filterTimeout = useRef();
   const entranceTimeout = useRef();
+  const normalizedQuery = normalizeSearchText(searchQuery);
+  const visibleProducts = useMemo(() => products.filter((product) => {
+    const matchesCollection = activeFilter === 'all' || activeFilter === product.category;
+    if (!matchesCollection) return false;
+    if (!normalizedQuery) return true;
+
+    return normalizeSearchText([
+      product.title,
+      product.description,
+      product.collection,
+    ].join(' ')).includes(normalizedQuery);
+  }), [activeFilter, normalizedQuery]);
+  const visibleProductSlugs = new Set(visibleProducts.map(({ slug }) => slug));
 
   useEffect(() => () => {
     window.clearTimeout(filterTimeout.current);
@@ -65,19 +87,35 @@ export default function Products() {
         </div>
       </section>
 
-      <div className="catalog-controls section" role="group" aria-label="Filtrar piezas por colección">
-        {productFilters.map(({ value, label }) => (
-          <button
-            className={`filter${activeFilter === value ? ' is-active' : ''}`}
-            data-filter={value}
-            type="button"
-            key={value}
-            aria-pressed={activeFilter === value}
-            onClick={() => changeFilter(value)}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="catalog-controls section">
+        <div className="catalog-filters" role="group" aria-label="Filtrar piezas por colección">
+          {productFilters.map(({ value, label }) => (
+            <button
+              className={`filter${activeFilter === value ? ' is-active' : ''}`}
+              data-filter={value}
+              type="button"
+              key={value}
+              aria-pressed={activeFilter === value}
+              onClick={() => changeFilter(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <form className="catalog-search" role="search" onSubmit={(event) => event.preventDefault()}>
+          <input
+            id="buscar-piezas"
+            type="search"
+            value={searchQuery}
+            aria-label="Buscar piezas"
+            placeholder="Buscar piezas"
+            autoComplete="off"
+            onChange={(event) => setSearchQuery(event.target.value)}
+          />
+          {searchQuery && (
+            <button type="button" aria-label="Limpiar búsqueda" onClick={() => setSearchQuery('')}>×</button>
+          )}
+        </form>
       </div>
 
       <section
@@ -85,12 +123,17 @@ export default function Products() {
         data-catalog
         aria-busy={isFiltering}
       >
+        {visibleProducts.length === 0 && (
+          <p className="catalog-empty" role="status">
+            No encontramos piezas que coincidan con tu búsqueda y clasificación.
+          </p>
+        )}
         {products.map((product) => (
           <CatalogCard
             key={product.title}
             product={product}
             fromCatalog
-            hidden={activeFilter !== 'all' && activeFilter !== product.category}
+            hidden={!visibleProductSlugs.has(product.slug)}
           />
         ))}
       </section>

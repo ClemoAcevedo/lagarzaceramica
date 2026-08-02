@@ -15,6 +15,9 @@ export default function App() {
         <Route path="sobre-la-garza" element={<About />} />
         <Route path="piezas" element={<Products />} />
         <Route path="piezas/nidos" element={<Navigate to="/piezas/testas-de-erizos" replace />} />
+        <Route path="piezas/familia-azul-rio" element={<Navigate to="/piezas/vajilla-rio" replace />} />
+        <Route path="piezas/fuente-orilla" element={<Navigate to="/piezas/frutero-orilla" replace />} />
+        <Route path="piezas/vasos-bosque" element={<Navigate to="/piezas/vasos-sour" replace />} />
         <Route path="piezas/:slug" element={<ProductDetail />} />
         <Route path="talleres" element={<Workshops />} />
         <Route path="about" element={<Navigate to="/sobre-la-garza" replace />} />

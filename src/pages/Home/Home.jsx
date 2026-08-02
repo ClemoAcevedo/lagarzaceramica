@@ -24,10 +24,10 @@ const featuredProducts = [
     material: 'Gres esmaltado',
   },
   {
-    to: '/piezas/familia-azul-rio',
+    to: '/piezas/vajilla-rio',
     image: image43,
     alt: 'Conjunto de platos y cuencos esmaltados en azul',
-    title: 'Familia Azul Río',
+    title: 'Vajilla Río',
     material: 'Gres esmaltado',
     tall: true,
   },
@@ -61,7 +61,7 @@ export default function Home() {
       <section className="intro section">
         <div className="intro__copy reveal">
           <p className="eyebrow">La materia y el tiempo</p>
-          <h2>Cerámica que guarda el gesto de quien la hizo.</h2>
+          <h2>Cerámica que guarda el gesto de su autor.</h2>
           <p>En La Garza creamos piezas de gres de manera lenta y consciente. Cada forma nace en el taller, entre pruebas, esmaltes y una forma muy personal de mirar lo cotidiano.</p>
           <TextLink to="/sobre-la-garza">Conocer nuestra historia</TextLink>
         </div>

@@ -303,8 +303,14 @@
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  .catalog-controls { top: 4.8rem; }
+  .catalog-controls {
+    top: 4.8rem;
+    grid-template-columns: 1fr;
+    gap: .35rem;
+  }
   .site-header.is-scrolled + #contenido .catalog-controls { top: 4.2rem; }
+  .catalog-search { grid-row: 1; }
+  .catalog-filters { grid-row: 2; }
   .catalog {
     grid-template-columns: 1fr;
     gap: 5rem;
