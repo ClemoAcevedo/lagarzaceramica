@@ -1,5 +1,6 @@
 import CTA from '../../components/CTA/CTA.jsx';
 import Hero from '../../components/Hero/Hero.jsx';
+import LoadingImage from '../../components/LoadingImage/LoadingImage.jsx';
 import { ButtonLink, TextLink } from '../../components/Links/Links.jsx';
 import ProductCard from '../../components/ProductCard/ProductCard.jsx';
 import CatalogStatus from '../../components/CatalogStatus/CatalogStatus.jsx';
@@ -42,7 +43,7 @@ export default function Home() {
         </div>
         <figure className="intro__image">
           <div className="intro__image-frame image-reveal">
-            <img src={image49} alt="Vajilla de gres vista desde arriba" loading="lazy" />
+            <LoadingImage src={image49} alt="Vajilla de gres vista desde arriba" loading="lazy" />
           </div>
           <figcaption>Formas únicas · Modeladas a mano</figcaption>
         </figure>
@@ -76,7 +77,7 @@ export default function Home() {
 
       <section className="workshop-preview">
         <div className="workshop-preview__media image-reveal">
-          <img src={image168} alt="Interior luminoso del taller La Garza con mesa central y grandes ventanas" loading="lazy" />
+          <LoadingImage src={image168} alt="Interior luminoso del taller La Garza con mesa central y grandes ventanas" loading="lazy" />
         </div>
         <div className="workshop-preview__copy reveal">
           <p className="eyebrow">La mesa del taller</p>
@@ -88,7 +89,7 @@ export default function Home() {
 
       <section className="atmosphere section">
         <figure className="atmosphere__image image-reveal">
-          <img src={image159Improved} alt="Ventanas del taller cubiertas por la lluvia de Valdivia" loading="lazy" />
+          <LoadingImage src={image159Improved} alt="Ventanas del taller cubiertas por la lluvia de Valdivia" loading="lazy" />
         </figure>
         <div className="atmosphere__copy reveal">
           <p className="eyebrow">Valdivia, sur de Chile</p>

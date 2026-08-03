@@ -1,3 +1,5 @@
+import LoadingImage from '../LoadingImage/LoadingImage.jsx';
+
 export default function Gallery({ as: Tag = 'div', className, images, children }) {
   return (
     <Tag className={className}>
@@ -10,7 +12,7 @@ export default function Gallery({ as: Tag = 'div', className, images, children }
 
         return (
           <figure key={src} className={frameClass}>
-            <img src={src} alt={alt} loading="lazy" />
+            <LoadingImage src={src} alt={alt} loading="lazy" />
           </figure>
         );
       })}

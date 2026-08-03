@@ -496,8 +496,8 @@
   background: #dcd9d1;
   pointer-events: none;
 }
-img.is-loading { opacity: 0; }
-img.is-loaded { opacity: 1; transition: opacity .45s ease; }
+img.is-loading { opacity: 0 !important; }
+img.is-loaded { transition: opacity .45s ease; }
 
 @keyframes loading-shimmer {
   to { transform: translateX(100%); }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import CTA from '../../components/CTA/CTA.jsx';
 import Gallery from '../../components/Gallery/Gallery.jsx';
+import LoadingImage from '../../components/LoadingImage/LoadingImage.jsx';
 import {
   footerMark,
   image158,
@@ -79,7 +80,7 @@ export default function About() {
         </div>
         <figure className="page-hero__image">
           <div className="page-hero__frame image-reveal">
-            <img src={image165} alt="Lola, fundadora de La Garza, en su taller" fetchPriority="high" />
+            <LoadingImage src={image165} alt="Lola, fundadora de La Garza, en su taller" fetchPriority="high" />
           </div>
           <figcaption>Lola · Fundadora y ceramista</figcaption>
         </figure>
@@ -96,14 +97,14 @@ export default function About() {
         </div>
         <div className="story__images">
           <figure className="story__portrait image-reveal">
-            <img
+            <LoadingImage
               src={image186Improved}
               alt="Lola seleccionando materiales junto a la ventana del taller"
               loading="lazy"
             />
           </figure>
           <figure className="story__materials image-reveal">
-            <img
+            <LoadingImage
               src={image158}
               alt="Materiales y herramientas de cerámica dispuestos en el taller"
               loading="lazy"
@@ -141,10 +142,10 @@ export default function About() {
         </div>
         <div className="philosophy__images">
           <figure className="philosophy__image philosophy__image--primary image-reveal">
-            <img src={processImage2} alt="Manos afinando una pieza de arcilla con una herramienta" loading="lazy" />
+            <LoadingImage src={processImage2} alt="Manos afinando una pieza de arcilla con una herramienta" loading="lazy" />
           </figure>
           <figure className="philosophy__image philosophy__image--secondary image-reveal">
-            <img src={processImage} alt="Manos trabajando un bloque de arcilla húmeda" loading="lazy" />
+            <LoadingImage src={processImage} alt="Manos trabajando un bloque de arcilla húmeda" loading="lazy" />
           </figure>
         </div>
       </section>
@@ -197,7 +198,7 @@ export default function About() {
         </div>
         <figure className="process-visual">
           {processVisuals.map((step, index) => (
-            <img
+            <LoadingImage
               className={activeVisual === index ? 'is-active' : ''}
               src={step.image}
               alt={activeVisual === index ? step.alt : ''}

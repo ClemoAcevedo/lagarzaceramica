@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import CTA from '../../components/CTA/CTA.jsx';
 import { ButtonLink } from '../../components/Links/Links.jsx';
+import LoadingImage from '../../components/LoadingImage/LoadingImage.jsx';
 import SectionHeading from '../../components/SectionHeading/SectionHeading.jsx';
 import {
   footerMark,
@@ -66,10 +67,10 @@ export default function Workshops() {
         </div>
         <figure className="workshops-hero__media">
           <div className="workshops-hero__image workshops-hero__image--primary image-reveal">
-            <img src={image189} alt="Estanterías del taller con piezas de cerámica en proceso" fetchPriority="high" />
+            <LoadingImage src={image189} alt="Estanterías del taller con piezas de cerámica en proceso" fetchPriority="high" />
           </div>
           <div className="workshops-hero__image workshops-hero__image--detail image-reveal">
-            <img src={image176} alt="Detalle de herramientas de modelado en el taller" fetchPriority="high" />
+            <LoadingImage src={image176} alt="Detalle de herramientas de modelado en el taller" fetchPriority="high" />
           </div>
           <figcaption>Taller y herramientas · Valdivia</figcaption>
         </figure>
@@ -129,7 +130,7 @@ export default function Workshops() {
           </ul>
         </div>
         <figure className={`process-visual method-visual ${activeMethod === null ? 'is-overview' : 'is-detail'}`}>
-          <img
+          <LoadingImage
             className={activeMethod === null ? 'is-active' : ''}
             src={image166}
             alt={activeMethod === null ? 'Vista general del taller de La Garza en Valdivia' : ''}
@@ -137,7 +138,7 @@ export default function Workshops() {
             loading="lazy"
           />
           {methodPoints.map((point, index) => (
-            <img
+            <LoadingImage
               className={activeMethod === index ? 'is-active' : ''}
               src={point.image}
               alt={activeMethod === index ? point.alt : ''}
