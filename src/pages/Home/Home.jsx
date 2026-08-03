@@ -2,45 +2,20 @@ import CTA from '../../components/CTA/CTA.jsx';
 import Hero from '../../components/Hero/Hero.jsx';
 import { ButtonLink, TextLink } from '../../components/Links/Links.jsx';
 import ProductCard from '../../components/ProductCard/ProductCard.jsx';
+import CatalogStatus from '../../components/CatalogStatus/CatalogStatus.jsx';
 import SectionHeading from '../../components/SectionHeading/SectionHeading.jsx';
 import {
-  image12,
   image27,
-  image43,
   image49,
-  image103,
   image159Improved,
   image168,
 } from '../../assets/media.js';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 import usePageMeta from '../../hooks/usePageMeta.js';
 import { homeContactUrl } from '../../utils/links.js';
 
-const featuredProducts = [
-  {
-    to: '/piezas/gallina-contenedora',
-    image: image12,
-    alt: 'Conjunto de gallinas de cerámica con tapa',
-    title: 'Gallina contenedora',
-    material: 'Gres esmaltado',
-  },
-  {
-    to: '/piezas/vajilla-rio',
-    image: image43,
-    alt: 'Conjunto de platos y cuencos esmaltados en azul',
-    title: 'Vajilla Río',
-    material: 'Gres esmaltado',
-    tall: true,
-  },
-  {
-    to: '/piezas/taza-de-campo',
-    image: image103,
-    alt: 'Tazas color tierra sobre platos de gres',
-    title: 'Taza de campo',
-    material: 'Gres esmaltado',
-  },
-];
-
 export default function Home() {
+  const { featuredProducts, loading, error, refresh } = useCatalog();
   usePageMeta(
     'La Garza — Cerámica en gres, Valdivia',
     'La Garza, taller de cerámica en gres hecho a mano en Valdivia, Chile. Conoce nuestras piezas y talleres.',
@@ -80,7 +55,22 @@ export default function Home() {
           action={{ to: '/piezas', label: 'Ver todas' }}
         />
         <div className="product-grid product-grid--featured">
-          {featuredProducts.map((product) => <ProductCard key={product.title} {...product} />)}
+          <CatalogStatus loading={loading} error={error} onRetry={refresh} label="Cargando selección…" />
+          {!loading && !error && featuredProducts.map((product, index) => (
+            <ProductCard
+              key={product.id}
+              to={`/piezas/${product.slug}`}
+              image={product.image}
+              alt={product.alt}
+              title={product.title}
+              material={product.material}
+              priceClp={product.priceClp}
+              cropX={product.cropX}
+              cropY={product.cropY}
+              cropZoom={product.cropZoom}
+              tall={index === 1}
+            />
+          ))}
         </div>
       </section>
 

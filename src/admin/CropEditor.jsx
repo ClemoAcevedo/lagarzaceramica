@@ -1,0 +1,84 @@
+import { useRef } from 'react';
+
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+export default function CropEditor({ image, value, aspect = 'cover', onChange, onCancel, onSave }) {
+  const viewport = useRef(null);
+  const drag = useRef(null);
+
+  const beginDrag = (event) => {
+    event.currentTarget.setPointerCapture(event.pointerId);
+    drag.current = {
+      pointerId: event.pointerId,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      cropX: value.x,
+      cropY: value.y,
+    };
+  };
+
+  const moveImage = (event) => {
+    if (!drag.current || drag.current.pointerId !== event.pointerId || !viewport.current) return;
+    const bounds = viewport.current.getBoundingClientRect();
+    const sensitivity = 100 / value.zoom;
+    onChange({
+      ...value,
+      x: clamp(drag.current.cropX - ((event.clientX - drag.current.clientX) / bounds.width) * sensitivity, 0, 100),
+      y: clamp(drag.current.cropY - ((event.clientY - drag.current.clientY) / bounds.height) * sensitivity, 0, 100),
+    });
+  };
+
+  const endDrag = (event) => {
+    if (drag.current?.pointerId === event.pointerId) drag.current = null;
+  };
+
+  const imageStyle = {
+    objectPosition: `${value.x}% ${value.y}%`,
+    transform: `scale(${value.zoom})`,
+    transformOrigin: `${value.x}% ${value.y}%`,
+  };
+
+  return (
+    <div className="admin-modal admin-crop-modal" role="dialog" aria-modal="true" aria-labelledby="crop-title">
+      <div className="admin-modal__card admin-crop-modal__card">
+        <div className="admin-crop-modal__heading">
+          <div>
+            <p className="admin-kicker">{aspect === 'cover' ? 'Portada del catálogo' : 'Fotografía de la galería'}</p>
+            <h2 id="crop-title">Reencuadrar fotografía</h2>
+          </div>
+          <button type="button" aria-label="Cerrar reencuadre" onClick={onCancel}>×</button>
+        </div>
+        <p className="admin-crop-modal__hint">Arrastra la fotografía para moverla dentro del marco.</p>
+        <div
+          className={`admin-crop-viewport admin-crop-viewport--${aspect}`}
+          ref={viewport}
+          onPointerDown={beginDrag}
+          onPointerMove={moveImage}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+        >
+          <img src={image} alt="Vista previa del encuadre" draggable="false" style={imageStyle} />
+          <span aria-hidden="true" />
+        </div>
+        <label className="admin-crop-zoom">
+          <span><strong>Acercar</strong><output>{Math.round(value.zoom * 100)}%</output></span>
+          <input
+            type="range"
+            min="1"
+            max="3"
+            step="0.01"
+            value={value.zoom}
+            onChange={(event) => onChange({ ...value, zoom: Number(event.target.value) })}
+          />
+        </label>
+        <div className="admin-crop-modal__footer">
+          <button className="admin-secondary" type="button" onClick={() => onChange({ x: 50, y: 50, zoom: 1 })}>Centrar y restablecer</button>
+          <div>
+            <button className="admin-secondary" type="button" onClick={onCancel}>Cancelar</button>
+            <button className="admin-primary" type="button" onClick={onSave}>Usar este encuadre</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

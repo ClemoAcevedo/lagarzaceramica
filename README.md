@@ -9,6 +9,10 @@ npm install
 npm run dev
 ```
 
+Sin variables de Supabase, el proyecto usa el catálogo local como respaldo. Para
+trabajar con el panel y los datos remotos, copia `.env.example` a `.env.local` y
+completa la URL y la clave publicable del proyecto.
+
 ## Producción
 
 ```bash
@@ -34,6 +38,10 @@ Vite usa `/lagarzaceramica/` como base durante el build. El archivo
 - `/sobre-la-garza`: historia, filosofía y proceso.
 - `/piezas`: vitrina filtrable, sin carrito ni pagos.
 - `/talleres`: metodología, información y preguntas frecuentes.
+- `/admin/login`: acceso al panel.
+- `/admin/piezas`: administración protegida del catálogo.
+- `/admin/categorias`: categorías y su orden.
+- `/admin/inicio`: tres piezas de la selección de inicio.
 
 ## Estructura
 
@@ -41,6 +49,9 @@ Vite usa `/lagarzaceramica/` como base durante el build. El archivo
 - `src/pages/`: páginas asociadas a las rutas.
 - `src/hooks/`: metadatos, scroll y animaciones de entrada.
 - `src/data/`: contenido estructurado del catálogo.
+- `src/admin/`: interfaz protegida de administración.
+- `src/context/` y `src/lib/`: sesión, consultas y operaciones de Supabase.
+- `supabase/`: migración SQL, RLS y guía de configuración.
 - `src/styles/`: CSS propio separado por responsabilidad.
 - `src/assets/media.js`: referencias a los recursos originales.
 - `optimized/`: derivados WebP de las fotografías seleccionadas.
@@ -63,12 +74,19 @@ Antes de publicar se debe confirmar con la clienta:
 Los textos pendientes conservan el atributo
 `data-content-status="provisional"` en sus componentes de página.
 
-## Categorías de piezas
+## Catálogo y administración
 
-Las piezas y categorías se administran únicamente en `src/data/products.js`.
-Al añadir o eliminar una entrada, la grilla, los filtros y su página individual
-se actualizan automáticamente. La URL se genera a partir del título mediante la
-propiedad `slug`; se puede definir un `slug` manual si una URL publicada debe
-permanecer estable aunque cambie el título. Cada línea acepta una o más fotos en
-su arreglo `images`; la primera se usa como portada del catálogo y las demás
-aparecen automáticamente como miniaturas en la ficha.
+En producción, Supabase almacena piezas, precios CLP opcionales, categorías,
+fotografías, sus encuadres y la selección de inicio. El panel permite crear
+borradores, publicar todas las piezas de una vez, archivar, restaurar, borrar y
+ordenar las tarjetas dentro de cada categoría arrastrándolas desde cualquier
+punto. Al cambiar un título también cambia su URL; las direcciones anteriores
+se conservan como redirecciones.
+
+La vitrina pública permite buscar, filtrar por categoría y precio, establecer
+un rango y ordenar por precio o nombre.
+
+El acceso combina un guard de rutas en React con Supabase Auth y políticas RLS.
+Los visitantes solo pueden leer piezas publicadas y únicamente las cuentas
+incluidas en `admin_users` pueden escribir. Consulta [supabase/README.md](supabase/README.md)
+para crear la estructura, la primera cuenta y migrar el catálogo existente.

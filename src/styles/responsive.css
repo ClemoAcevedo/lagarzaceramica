@@ -305,12 +305,14 @@
   }
   .catalog-controls {
     top: 4.8rem;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: .35rem;
   }
   .site-header.is-scrolled + #contenido .catalog-controls { top: 4.2rem; }
   .catalog-search { grid-row: 1; }
-  .catalog-filters { grid-row: 2; }
+  .catalog-refine-toggle { grid-row: 1; }
+  .catalog-filters { grid-row: 2; grid-column: 1 / -1; }
+  .catalog-refinements { grid-row: 3; grid-template-columns: 1fr 1fr; }
   .catalog {
     grid-template-columns: 1fr;
     gap: 5rem;

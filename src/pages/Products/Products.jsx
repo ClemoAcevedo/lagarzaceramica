@@ -2,7 +2,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ButtonLink } from '../../components/Links/Links.jsx';
 import { CatalogCard } from '../../components/ProductCard/ProductCard.jsx';
-import { productFilters, products } from '../../data/products.js';
+import CatalogStatus from '../../components/CatalogStatus/CatalogStatus.jsx';
+import { useCatalog } from '../../context/CatalogContext.jsx';
 import usePageMeta from '../../hooks/usePageMeta.js';
 import { whatsappUrl } from '../../utils/links.js';
 
@@ -17,11 +18,21 @@ function normalizeSearchText(value) {
 }
 
 export default function Products() {
+  const { categories, products, loading, error, refresh } = useCatalog();
+  const productFilters = useMemo(() => [
+    { value: 'all', label: 'Todas' },
+    ...categories.map(({ slug, name }) => ({ value: slug, label: name })),
+  ], [categories]);
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedFilter = searchParams.get('coleccion');
   const initialFilter = productFilters.some(({ value }) => value === requestedFilter) ? requestedFilter : 'all';
   const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [searchQuery, setSearchQuery] = useState('');
+  const [priceMode, setPriceMode] = useState('all');
+  const [minimumPrice, setMinimumPrice] = useState('');
+  const [maximumPrice, setMaximumPrice] = useState('');
+  const [sortOrder, setSortOrder] = useState('workshop');
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
   const filterTimeout = useRef();
   const entranceTimeout = useRef();
@@ -29,6 +40,10 @@ export default function Products() {
   const visibleProducts = useMemo(() => products.filter((product) => {
     const matchesCollection = activeFilter === 'all' || activeFilter === product.category;
     if (!matchesCollection) return false;
+    if (priceMode === 'priced' && !product.priceClp) return false;
+    if (priceMode === 'undefined' && product.priceClp) return false;
+    if (minimumPrice && (!product.priceClp || product.priceClp < Number(minimumPrice))) return false;
+    if (maximumPrice && (!product.priceClp || product.priceClp > Number(maximumPrice))) return false;
     if (!normalizedQuery) return true;
 
     return normalizeSearchText([
@@ -36,20 +51,48 @@ export default function Products() {
       product.description,
       product.collection,
     ].join(' ')).includes(normalizedQuery);
-  }), [activeFilter, normalizedQuery]);
+  }), [activeFilter, maximumPrice, minimumPrice, normalizedQuery, priceMode, products]);
   const visibleProductSlugs = new Set(visibleProducts.map(({ slug }) => slug));
+  const orderedProducts = useMemo(() => {
+    if (sortOrder === 'workshop') return products;
+    return [...products].sort((first, second) => {
+      if (sortOrder === 'name') return first.title.localeCompare(second.title, 'es');
+      if (!first.priceClp && !second.priceClp) return first.catalogOrder - second.catalogOrder;
+      if (!first.priceClp) return 1;
+      if (!second.priceClp) return -1;
+      return sortOrder === 'price-desc'
+        ? second.priceClp - first.priceClp
+        : first.priceClp - second.priceClp;
+    });
+  }, [products, sortOrder]);
+  const activeExtraFilters = [
+    priceMode !== 'all',
+    Boolean(minimumPrice),
+    Boolean(maximumPrice),
+    sortOrder !== 'workshop',
+  ].filter(Boolean).length;
 
   useEffect(() => () => {
     window.clearTimeout(filterTimeout.current);
     window.clearTimeout(entranceTimeout.current);
   }, []);
 
+  useEffect(() => {
+    if (!requestedFilter) return;
+    setActiveFilter(productFilters.some(({ value }) => value === requestedFilter) ? requestedFilter : 'all');
+  }, [productFilters, requestedFilter]);
+
   useLayoutEffect(() => {
     const savedScroll = sessionStorage.getItem('la-garza:catalog-scroll');
     if (savedScroll === null) return undefined;
     sessionStorage.removeItem('la-garza:catalog-scroll');
-    const frame = window.requestAnimationFrame(() => window.scrollTo(0, Number(savedScroll)));
-    return () => window.cancelAnimationFrame(frame);
+    const restore = () => window.scrollTo(0, Number(savedScroll));
+    const frame = window.requestAnimationFrame(restore);
+    const settledLayout = window.setTimeout(restore, 420);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(settledLayout);
+    };
   }, []);
 
   const changeFilter = (nextFilter) => {
@@ -69,10 +112,20 @@ export default function Products() {
     }, 180);
   };
 
+  const clearAllFilters = () => {
+    setActiveFilter('all');
+    setSearchParams({}, { replace: true });
+    setSearchQuery('');
+    setPriceMode('all');
+    setMinimumPrice('');
+    setMaximumPrice('');
+    setSortOrder('workshop');
+  };
+
   usePageMeta(
     'Piezas — La Garza',
     'Vitrina de piezas únicas de cerámica en gres hechas por La Garza en Valdivia.',
-    { image: products[0].image },
+    { image: products[0]?.image },
   );
 
   return (
@@ -116,6 +169,48 @@ export default function Products() {
             <button type="button" aria-label="Limpiar búsqueda" onClick={() => setSearchQuery('')}>×</button>
           )}
         </form>
+        <button
+          className={`catalog-refine-toggle${filtersOpen ? ' is-open' : ''}`}
+          type="button"
+          aria-expanded={filtersOpen}
+          aria-controls="filtros-avanzados"
+          onClick={() => setFiltersOpen((current) => !current)}
+        >
+          Filtrar y ordenar {activeExtraFilters > 0 && <span>{activeExtraFilters}</span>}
+        </button>
+        {filtersOpen && (
+          <div className="catalog-refinements" id="filtros-avanzados">
+            <label>
+              Mostrar por precio
+              <select value={priceMode} onChange={(event) => setPriceMode(event.target.value)}>
+                <option value="all">Todas las piezas</option>
+                <option value="priced">Solo con precio</option>
+                <option value="undefined">Precio por definir</option>
+              </select>
+            </label>
+            <label>
+              Precio mínimo
+              <span className="catalog-price-field"><span>$</span><input type="number" min="1" step="1000" inputMode="numeric" value={minimumPrice} placeholder="0" onChange={(event) => setMinimumPrice(event.target.value)} /></span>
+            </label>
+            <label>
+              Precio máximo
+              <span className="catalog-price-field"><span>$</span><input type="number" min="1" step="1000" inputMode="numeric" value={maximumPrice} placeholder="Sin límite" onChange={(event) => setMaximumPrice(event.target.value)} /></span>
+            </label>
+            <label>
+              Ordenar piezas
+              <select value={sortOrder} onChange={(event) => setSortOrder(event.target.value)}>
+                <option value="workshop">Orden del taller</option>
+                <option value="price-asc">Precio: menor a mayor</option>
+                <option value="price-desc">Precio: mayor a menor</option>
+                <option value="name">Nombre: A–Z</option>
+              </select>
+            </label>
+            <div className="catalog-refinements__summary" role="status">
+              <span>{visibleProducts.length} pieza{visibleProducts.length === 1 ? '' : 's'}</span>
+              <button type="button" onClick={clearAllFilters}>Limpiar todos los filtros</button>
+            </div>
+          </div>
+        )}
       </div>
 
       <section
@@ -123,12 +218,13 @@ export default function Products() {
         data-catalog
         aria-busy={isFiltering}
       >
-        {visibleProducts.length === 0 && (
+        <CatalogStatus loading={loading} error={error} onRetry={refresh} />
+        {!loading && !error && visibleProducts.length === 0 && (
           <p className="catalog-empty" role="status">
             No encontramos piezas que coincidan con tu búsqueda y clasificación.
           </p>
         )}
-        {products.map((product) => (
+        {!loading && !error && orderedProducts.map((product) => (
           <CatalogCard
             key={product.title}
             product={product}

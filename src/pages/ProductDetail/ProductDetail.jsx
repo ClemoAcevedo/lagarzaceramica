@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ButtonLink } from '../../components/Links/Links.jsx';
-import { getProductBySlug } from '../../data/products.js';
+import CatalogStatus from '../../components/CatalogStatus/CatalogStatus.jsx';
+import { useCatalog } from '../../context/CatalogContext.jsx';
+import { formatPriceCLP } from '../../lib/catalog.js';
+import { cropStyle } from '../../lib/crop.js';
+import LoadingImage from '../../components/LoadingImage/LoadingImage.jsx';
 import usePageMeta from '../../hooks/usePageMeta.js';
 
 export default function ProductDetail() {
   const { slug } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const product = getProductBySlug(slug);
+  const { products, loading, error, refresh } = useCatalog();
+  const product = products.find((item) => item.slug === slug || item.previousSlugs.includes(slug));
   const [activeImage, setActiveImage] = useState(0);
   const [shareStatus, setShareStatus] = useState('');
   const images = product?.images || [];
@@ -23,7 +28,13 @@ export default function ProductDetail() {
     { image: product?.image },
   );
 
+  if (loading || error) {
+    return <main id="contenido" className="product-detail section"><CatalogStatus loading={loading} error={error} onRetry={refresh} variant="detail" /></main>;
+  }
   if (!product) return <Navigate to="/piezas" replace />;
+  if (product.slug !== slug) {
+    return <Navigate to={`/piezas/${product.slug}`} state={location.state} replace />;
+  }
 
   const selectedImage = images[activeImage] || images[0];
   const shareUrl = new URL(`piezas/${product.slug}`, new URL(import.meta.env.BASE_URL, window.location.origin)).href;
@@ -62,11 +73,12 @@ export default function ProductDetail() {
         )}
         <div className={`product-detail__gallery${images.length > 1 ? ' has-thumbnails' : ''}`}>
           <figure className="product-detail__media image-reveal">
-            <img
+            <LoadingImage
               key={selectedImage.src}
               src={selectedImage.src}
               alt={selectedImage.alt}
               fetchPriority="high"
+              style={cropStyle(selectedImage.cropX, selectedImage.cropY, selectedImage.cropZoom)}
             />
           </figure>
           {images.length > 1 && (
@@ -80,7 +92,7 @@ export default function ProductDetail() {
                   aria-pressed={index === activeImage}
                   onClick={() => setActiveImage(index)}
                 >
-                  <img src={image.src} alt="" loading="lazy" />
+                  <LoadingImage src={image.src} alt="" loading="lazy" style={cropStyle(image.cropX, image.cropY, image.cropZoom)} />
                 </button>
               ))}
             </div>
@@ -90,6 +102,7 @@ export default function ProductDetail() {
           <p className="eyebrow">{product.collection}</p>
           <h1>{product.title}</h1>
           <p>{product.description}</p>
+          <p className="product-detail__price">{formatPriceCLP(product.priceClp)}</p>
           <ButtonLink href={product.contactUrl} arrow>Consultar esta línea</ButtonLink>
           <div className="product-detail__share" aria-label={`Compartir ${product.title}`}>
             <button type="button" onClick={shareProduct}>Compartir</button>

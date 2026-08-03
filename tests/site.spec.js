@@ -74,6 +74,27 @@ test('la búsqueda de piezas se combina con las clasificaciones', async ({ page 
   await expect(page.locator('.catalog-card:not([hidden])')).toHaveCount(17);
 });
 
+test('los clientes pueden filtrar y ordenar las piezas por precio', async ({ page }) => {
+  await page.goto('/piezas');
+  await page.getByRole('button', { name: 'Filtrar y ordenar' }).click();
+
+  await page.getByLabel('Mostrar por precio').selectOption('priced');
+  await expect(page.locator('.catalog-card:not([hidden])')).toHaveCount(0);
+  await expect(page.locator('.catalog-empty')).toBeVisible();
+
+  await page.getByLabel('Mostrar por precio').selectOption('undefined');
+  await expect(page.locator('.catalog-card:not([hidden])').first()).toBeVisible();
+
+  await page.getByLabel('Precio mínimo').fill('1000');
+  await expect(page.locator('.catalog-card:not([hidden])')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Limpiar todos los filtros' }).click();
+  await page.getByLabel('Ordenar piezas').selectOption('name');
+  const titles = await page.locator('.catalog-card:not([hidden]) h2').allTextContents();
+  const sortedTitles = [...titles].sort((first, second) => first.localeCompare(second, 'es'));
+  expect(titles).toEqual(sortedTitles);
+});
+
 test('la página 404 está centrada', async ({ page }) => {
   await page.goto('/esta-pagina-no-existe');
   await expect(page.locator('h1')).toHaveText('Esta página no está aquí.');
@@ -88,4 +109,38 @@ test('las fichas muestran un único control para compartir', async ({ page }) =>
   await expect(share.getByRole('button', { name: 'Compartir', exact: true })).toBeVisible();
   await expect(share.getByRole('button')).toHaveCount(1);
   await expect(share.getByRole('link')).toHaveCount(0);
+});
+
+test('el catálogo y las fichas reservan un espacio para el precio', async ({ page }) => {
+  await page.goto('/piezas');
+  const firstCard = page.locator('.catalog-card:not([hidden])').first();
+  await firstCard.scrollIntoViewIfNeeded();
+  await expect(firstCard.locator('.catalog-card__price')).toHaveText('Precio por definir');
+  await firstCard.locator('a').click();
+  await expect(page.locator('.product-detail__price')).toHaveText('Precio por definir');
+});
+
+test('las imágenes dejan de mostrar la carga al completarse o venir desde caché', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.featured img.is-loaded')).toHaveCount(3);
+  await expect(page.locator('.featured .image-loading-shimmer')).toHaveCount(0);
+
+  await page.goto('/piezas/gallina-contenedora');
+  const mainImage = page.locator('.product-detail__media img');
+  await expect(mainImage).toHaveClass(/is-loaded/);
+  await expect(page.locator('.product-detail__media .image-loading-shimmer')).toHaveCount(0);
+
+  const secondThumbnail = page.locator('.product-detail__thumbnail').nth(1);
+  if (await secondThumbnail.count()) {
+    await secondThumbnail.click();
+    await expect(mainImage).toHaveClass(/is-loaded/);
+    await expect(page.locator('.product-detail__media .image-loading-shimmer')).toHaveCount(0);
+  }
+});
+
+test('las rutas administrativas redirigen al acceso protegido', async ({ page }) => {
+  await page.goto('/admin/piezas');
+  await expect(page).toHaveURL(/\/admin\/login$/);
+  await expect(page.getByRole('heading', { name: 'Bienvenida al taller.' })).toBeVisible();
+  await expect(page.locator('.admin-form, .admin-message--warning')).toBeVisible();
 });
