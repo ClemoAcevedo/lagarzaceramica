@@ -244,8 +244,7 @@ export default function ProductForm() {
               <textarea value={values.description} onChange={setField('description')} rows="5" required />
             </label>
             <label>
-              Precio en pesos chilenos
-              <span className="admin-help">Opcional. Si lo dejas vacío se mostrará “Precio por definir”.</span>
+              <span className="admin-field-label">Precio en pesos chilenos <span className="admin-help">Opcional. Si lo dejas vacío se mostrará “Precio por definir”.</span></span>
               <div className="admin-price-input"><span>$</span><input type="number" min="1" step="1" value={values.price} onChange={setField('price')} inputMode="numeric" /></div>
             </label>
             <label>

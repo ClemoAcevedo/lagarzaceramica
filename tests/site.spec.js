@@ -193,6 +193,32 @@ test('el reencuadre puede alejar una fotografía vertical y deja ver el fondo be
   }).toBe(true);
 });
 
+test('el visor de reencuadre administrativo refleja el zoom mientras se edita', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('main img').first()).toBeVisible();
+  await page.evaluate(() => {
+    const source = document.querySelector('main img').currentSrc;
+    const viewport = document.createElement('div');
+    viewport.className = 'admin-crop-viewport admin-crop-viewport--cover';
+    viewport.innerHTML = `<img src="${source}" alt="" style="--crop-x: 50%; --crop-y: 50%; --crop-zoom: 1">`;
+    document.body.append(viewport);
+  });
+
+  const viewport = page.locator('.admin-crop-viewport');
+  const image = viewport.locator('img');
+  await expect(image).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
+
+  await image.evaluate((element) => element.style.setProperty('--crop-zoom', '0.5'));
+  await expect(image).toHaveCSS('transform', 'matrix(0.5, 0, 0, 0.5, 0, 0)');
+  const [zoomedOutViewport, zoomedOutImage] = await Promise.all([viewport.boundingBox(), image.boundingBox()]);
+  expect(zoomedOutImage.width).toBeLessThan(zoomedOutViewport.width);
+
+  await image.evaluate((element) => element.style.setProperty('--crop-zoom', '2'));
+  await expect(image).toHaveCSS('transform', 'matrix(2, 0, 0, 2, 0, 0)');
+  const [zoomedInViewport, zoomedInImage] = await Promise.all([viewport.boundingBox(), image.boundingBox()]);
+  expect(zoomedInImage.width).toBeGreaterThan(zoomedInViewport.width);
+});
+
 test('todas las fotografías de contenido usan el esqueleto compartido', async ({ page }) => {
   for (const route of ['/', '/sobre-la-garza', '/talleres']) {
     await page.goto(route);

@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromElements, Navigate, Route, RouterProvider } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 
 const About = lazy(() => import('./pages/About/About.jsx'));
@@ -16,10 +16,9 @@ const ProductForm = lazy(() => import('./admin/ProductForm.jsx'));
 const Categories = lazy(() => import('./admin/Categories.jsx'));
 const HomeSelection = lazy(() => import('./admin/HomeSelection.jsx'));
 
-export default function App() {
-  return (
-    <Suspense fallback={<main className="route-loading" aria-busy="true"><span>Cargando…</span></main>}>
-      <Routes>
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route>
       <Route path="admin/login" element={<Login />} />
       <Route element={<AdminGuard />}>
         <Route path="admin" element={<AdminLayout />}>
@@ -40,13 +39,21 @@ export default function App() {
         <Route path="piezas/fuente-orilla" element={<Navigate to="/piezas/frutero-orilla" replace />} />
         <Route path="piezas/vasos-bosque" element={<Navigate to="/piezas/vasos-sour" replace />} />
         <Route path="piezas/:slug" element={<ProductDetail />} />
-        <Route path="talleres" element={<Workshops />} />
-        <Route path="about" element={<Navigate to="/sobre-la-garza" replace />} />
+      <Route path="talleres" element={<Workshops />} />
+      <Route path="about" element={<Navigate to="/sobre-la-garza" replace />} />
         <Route path="products" element={<Navigate to="/piezas" replace />} />
         <Route path="workshops" element={<Navigate to="/talleres" replace />} />
         <Route path="*" element={<NotFound />} />
       </Route>
-      </Routes>
+    </Route>,
+  ),
+  { basename: import.meta.env.BASE_URL },
+);
+
+export default function App() {
+  return (
+    <Suspense fallback={<main className="route-loading" aria-busy="true"><span>Cargando…</span></main>}>
+      <RouterProvider router={router} />
     </Suspense>
   );
 }

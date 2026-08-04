@@ -1,43 +1,47 @@
 import { useEffect, useRef } from 'react';
+import { useBeforeUnload, useBlocker } from 'react-router-dom';
 
 const DEFAULT_MESSAGE = 'Tienes cambios sin guardar. ¿Quieres salir igualmente?';
 
 export default function useUnsavedChanges(enabled, message = DEFAULT_MESSAGE) {
-  const restoringHistory = useRef(false);
+  const allowNextNavigation = useRef(false);
+  const blocker = useBlocker(() => {
+    if (!enabled) return false;
+    if (allowNextNavigation.current) {
+      allowNextNavigation.current = false;
+      return false;
+    }
+    return true;
+  });
+
+  useBeforeUnload((event) => {
+    if (!enabled) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
+
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return;
+    if (window.confirm(message)) blocker.proceed();
+    else blocker.reset();
+  }, [blocker, message]);
 
   useEffect(() => {
     if (!enabled) return undefined;
-
-    const beforeUnload = (event) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    const interceptLink = (event) => {
-      const target = event.target.closest?.('a[href], [data-confirm-navigation]');
-      if (!target || target.target === '_blank' || (target.origin && target.origin !== window.location.origin)) return;
+    const interceptAction = (event) => {
+      const target = event.target.closest?.('[data-confirm-navigation]');
+      if (!target) return;
       if (!window.confirm(message)) {
         event.preventDefault();
         event.stopPropagation();
-      }
-    };
-    const interceptHistory = () => {
-      if (restoringHistory.current) {
-        restoringHistory.current = false;
         return;
       }
-      if (!window.confirm(message)) {
-        restoringHistory.current = true;
-        window.history.forward();
-      }
+      allowNextNavigation.current = true;
     };
 
-    window.addEventListener('beforeunload', beforeUnload);
-    document.addEventListener('click', interceptLink, true);
-    window.addEventListener('popstate', interceptHistory);
+    document.addEventListener('click', interceptAction, true);
     return () => {
-      window.removeEventListener('beforeunload', beforeUnload);
-      document.removeEventListener('click', interceptLink, true);
-      window.removeEventListener('popstate', interceptHistory);
+      document.removeEventListener('click', interceptAction, true);
     };
   }, [enabled, message]);
 }
