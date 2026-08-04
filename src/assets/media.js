@@ -1,3 +1,4 @@
+// E26 es el único archivo de marca pendiente de reemplazo. E28 es definitivo.
 import footerMark from '../../assets/SVG Files (Transparent Background)/Logo E28.svg';
 import headerLogo from '../../assets/SVG Files (Transparent Background)/Logo E26.svg';
 import image12 from '../../optimized/12.webp';

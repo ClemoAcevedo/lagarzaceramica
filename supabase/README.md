@@ -1,41 +1,84 @@
-# Configuración de Supabase
+# Supabase
 
-## 1. Opciones del proyecto
+La base remota está vinculada al repositorio mediante Supabase CLI. Su estructura
+se conserva como migraciones versionadas en `supabase/migrations/`; no se deben
+aplicar futuros cambios de esquema copiando SQL manualmente al Dashboard.
 
-- **Enable Data API:** activado.
-- **Automatically expose new tables:** desactivado.
-- **Enable automatic RLS:** activado.
+## Estado actual
 
-## 2. Crear la estructura
+Las migraciones `202608020001` a `202608040006` están registradas como aplicadas
+en el proyecto remoto. Para comprobar que ambos historiales coinciden:
 
-Abre **SQL Editor → New query**, pega el contenido de
-`supabase/migrations/202608020001_initial_catalog.sql` y ejecútalo una sola vez.
+```bash
+npm run db:status
+```
 
-## 3. Crear la cuenta administradora
+## Conectar otra instalación local
 
-1. Abre **Authentication → Users → Add user**.
-2. Crea la cuenta con correo y contraseña y marca el correo como confirmado.
-3. Copia el UUID del usuario.
-4. Ejecuta en SQL Editor, reemplazando el UUID:
+```bash
+npm install
+npx supabase login
+npx supabase link --project-ref pkzlspzntluxocnubwga
+```
+
+El login y los datos temporales de la vinculación se guardan fuera del control
+de versiones. Nunca se deben incluir access tokens, contraseñas o claves
+`secret`/`service_role` en Git ni en variables `VITE_*`.
+
+## Variables de la aplicación
+
+Copia `.env.example` a `.env.local` y completa:
+
+```text
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+```
+
+Las mismas variables deben existir en GitHub Actions para el build público.
+
+## Crear una migración
+
+```bash
+npx supabase migration new nombre_del_cambio
+```
+
+Edita únicamente el nuevo archivo SQL. Antes de aplicarlo, revisa el estado y
+haz una simulación:
+
+```bash
+npm run db:status
+npm run db:push:dry
+```
+
+Si la simulación es correcta:
+
+```bash
+npm run db:push
+npm run db:status
+```
+
+`db push` registra automáticamente la versión en
+`supabase_migrations.schema_migrations`. El SQL Editor puede utilizarse para
+consultas puntuales, pero no como mecanismo de despliegue del esquema.
+
+## Crear una cuenta administradora
+
+1. En Supabase abre **Authentication → Users → Add user**.
+2. Crea la cuenta, confirma el correo y copia su UUID.
+3. Ejecuta una vez en SQL Editor:
 
 ```sql
 insert into public.admin_users (user_id)
 values ('UUID-DE-LA-CUENTA');
 ```
 
-Mantén desactivado el registro público en **Authentication → Sign In / Providers**.
+Mantén desactivado el registro público. Esta inserción autoriza una cuenta; no
+modifica el esquema y por eso no requiere una migración compartida.
 
-## 4. Conectar el desarrollo local
+## Importación inicial del catálogo
 
-Crea `.env.local` a partir de `.env.example` usando la **Project URL** y la
-**Publishable key**. La clave `secret` o `service_role` nunca debe guardarse en
-un archivo `VITE_*`, en Git ni en el navegador.
-
-## 5. Migrar el catálogo existente
-
-La migración carga las fotografías WebP y crea las piezas como borradores sin
-precio. La clave secreta se usa solo durante este comando y no se incorpora al
-sitio:
+El importador solo se necesita al preparar una base vacía. Sube las fotografías
+WebP y crea las piezas como borradores; se detiene si ya existen productos.
 
 ```bash
 read -s "SUPABASE_SECRET_KEY?Pega la clave secreta y presiona Enter: "
@@ -44,45 +87,16 @@ npm run migrate:catalog
 unset SUPABASE_SECRET_KEY
 ```
 
-Luego entra a `/admin`, añade los precios, publica las piezas y configura las
-tres posiciones de inicio. El script se detiene si encuentra piezas existentes
-para evitar duplicaciones.
+La clave secreta vive únicamente en esa sesión de terminal.
 
-## 6. Activar reencuadre y publicación masiva
+## Recuperar una desincronización
 
-Si ya ejecutaste la migración inicial, abre **SQL Editor → New query**, pega el
-contenido completo de `supabase/migrations/202608030003_visual_cropping.sql` y
-ejecútalo una sola vez. Esta actualización:
+No ejecutes `migration repair` sin comprobar primero la base. Comienza con:
 
-- permite reencuadrar por separado la portada y cada fotografía;
-- hace que el precio sea opcional (en el sitio se verá como “Precio por definir”);
-- añade el botón **Publicar todos** al panel de piezas.
+```bash
+npm run db:status
+npx supabase db pull
+```
 
-Después entra a `/admin/piezas` y pulsa **Publicar todos**. Además de publicar
-los borradores, se recuperan automáticamente las tres piezas que aparecían en
-Inicio antes de la migración.
-
-## 7. Activar direcciones que siguen los cambios de nombre
-
-Abre **SQL Editor → New query**, pega el contenido de
-`supabase/migrations/202608030004_product_slug_history.sql` y ejecútalo una sola
-vez. Desde ese momento, al cambiar el nombre de una pieza también cambia su URL.
-Las direcciones anteriores se conservan como alias y redirigen a la nueva para
-no romper enlaces que ya hayan sido compartidos.
-
-## 8. GitHub Pages
-
-Crea estas variables en **Settings → Secrets and variables → Actions →
-Variables**:
-
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_PUBLISHABLE_KEY`
-
-El workflow ya las entrega a Vite durante el build.
-
-## 9. Portadas, encuadres de Inicio e imágenes responsivas
-
-Ejecuta `supabase/migrations/202608030005_admin_seo_images.sql` en el SQL
-Editor antes de desplegar la versión correspondiente. La migración permite
-elegir una fotografía de portada sin alterar el orden de la galería, guardar un
-encuadre independiente para Inicio y registrar variantes WebP para móvil.
+`migration repair` modifica solamente el historial, no aplica ni revierte SQL;
+debe reservarse para cambios que ya existen realmente en la base remota.

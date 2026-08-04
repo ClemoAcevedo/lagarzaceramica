@@ -1,112 +1,104 @@
 # La Garza
 
-Sitio vitrina del taller de cerámica La Garza, Valdivia, migrado a React 19.
+Sitio vitrina y panel de administración del taller de cerámica La Garza,
+Valdivia. Está construido con React 19, Vite, Supabase y GitHub Pages.
+
+## Requisitos
+
+- Node.js 24.
+- npm.
+- Variables públicas de Supabase para usar el catálogo remoto y el panel.
 
 ## Desarrollo local
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
-Sin variables de Supabase, el proyecto usa el catálogo local como respaldo. Para
-trabajar con el panel y los datos remotos, copia `.env.example` a `.env.local` y
-completa la URL y la clave publicable del proyecto.
+Completa `.env.local` con `VITE_SUPABASE_URL` y
+`VITE_SUPABASE_PUBLISHABLE_KEY`. El archivo es local y está excluido de Git.
+Sin esas variables, las páginas públicas usan el catálogo de respaldo; el panel
+de administración requiere Supabase.
 
-## Producción
+## Comandos
 
-```bash
-npm run build
-npm run preview
-```
-
-## GitHub Pages
-
-El repositorio está configurado para publicarse en
-`https://clemoacevedo.github.io/lagarzaceramica/`.
-
-Cada push a `main` ejecuta `.github/workflows/deploy.yml`, compila el proyecto
-y publica `dist/`. En GitHub se debe seleccionar una sola vez:
-**Settings → Pages → Build and deployment → Source: GitHub Actions**.
-
-El build genera HTML indexable para cada ruta pública, metadatos sociales y un
-sitemap basado en las piezas publicadas de Supabase. El workflow también se
-ejecuta una vez al día para incorporar al sitemap las piezas creadas desde el
-panel sin necesitar un nuevo commit.
-
-Vite usa `/lagarzaceramica/` como base durante el build. El archivo
-`dist/404.html` permite abrir y recargar directamente las rutas internas.
+| Comando | Uso |
+| --- | --- |
+| `npm run dev` | Servidor local de desarrollo. |
+| `npm run build` | Build de producción, snapshots SEO y sitemap. |
+| `npm run preview` | Vista previa del build. |
+| `npm test` | Pruebas funcionales en escritorio y móvil. |
+| `npm run test:preview` | Build local y pruebas de snapshots SEO. |
+| `npm run check` | Build y todas las pruebas antes de entregar. |
+| `npm run db:status` | Compara migraciones locales y remotas. |
+| `npm run db:push:dry` | Simula un despliegue de migraciones. |
+| `npm run db:push` | Aplica las migraciones pendientes. |
 
 ## Rutas
 
 - `/`: inicio.
 - `/sobre-la-garza`: historia, filosofía y proceso.
-- `/piezas`: vitrina filtrable, sin carrito ni pagos.
+- `/piezas`: vitrina con búsqueda, filtros y ordenamientos.
 - `/talleres`: metodología, información y preguntas frecuentes.
 - `/admin/login`: acceso al panel.
-- `/admin/piezas`: administración protegida del catálogo.
-- `/admin/categorias`: categorías y su orden.
-- `/admin/inicio`: tres piezas de la selección de inicio.
+- `/admin/piezas`: catálogo, estados y orden general o por categoría.
+- `/admin/categorias`: nombres y orden de categorías.
+- `/admin/inicio`: selección de tres piezas para Inicio.
 
 ## Estructura
 
-- `src/components/`: componentes compartidos de interfaz.
-- `src/pages/`: páginas asociadas a las rutas.
-- `src/hooks/`: metadatos, scroll y animaciones de entrada.
-- `src/data/`: contenido estructurado del catálogo.
-- `src/admin/`: interfaz protegida de administración.
-- `src/context/` y `src/lib/`: sesión, consultas y operaciones de Supabase.
-- `supabase/`: migración SQL, RLS y guía de configuración.
-- `src/styles/`: CSS propio separado por responsabilidad.
-- `src/assets/media.js`: referencias a los recursos originales.
-- `optimized/`: derivados WebP de las fotografías seleccionadas.
-- `fullphotos/`: originales fotográficos, conservados sin cambios.
-- `assets/`: identidad visual oficial, conservada sin cambios.
-- `legacy/`: implementación estática anterior, conservada como referencia.
-
-La navegación usa React Router. Vite genera el paquete de producción en `dist/`.
-El servidor de producción debe redirigir las rutas desconocidas a `index.html`
-para permitir la navegación directa a las rutas internas.
-
-## Publicación y SEO
-
-Después del primer despliegue:
-
-1. Registra `https://clemoacevedo.github.io/lagarzaceramica/` en Google Search
-   Console y envía `/lagarzaceramica/sitemap.xml`.
-2. Valida Inicio y una ficha con Rich Results Test y la inspección de URLs.
-3. Completa el Perfil de Empresa de Google con el mismo nombre, teléfono,
-   Instagram y localidad que aparecen en la web.
-4. Si se conecta un dominio propio, actualiza `rootUrl` en
-   `scripts/build-seo.mjs`, el canonical inicial de `index.html`, `robots.txt`
-   y la URL documentada aquí.
-
-Las rutas administrativas y la página 404 se marcan como `noindex`.
-
-## Contenido pendiente
-
-Antes de publicar se debe confirmar con la clienta:
-
-1. Historia y filosofía definitivas.
-2. Metodología, calendario, duración y valores de talleres.
-3. Nombres y descripciones definitivas de las piezas.
-
-Los textos pendientes conservan el atributo
-`data-content-status="provisional"` en sus componentes de página.
+- `src/pages/`: páginas públicas asociadas a las rutas.
+- `src/components/`: componentes compartidos.
+- `src/admin/`: panel protegido.
+- `src/context/`, `src/hooks/` y `src/lib/`: estado, sesión y acceso a datos.
+- `src/styles/`: estilos separados por responsabilidad.
+- `src/assets/media.js`: referencias centralizadas a imágenes y marca.
+- `supabase/migrations/`: historial versionado de la base de datos.
+- `scripts/`: generación SEO e importación inicial del catálogo.
+- `tests/` y `tests-preview/`: pruebas funcionales y del build estático.
+- `optimized/`: derivados WebP utilizados por el sitio.
+- `assets/`: identidad visual oficial original.
+- `fullphotos/`: archivo fotográfico original, excluido de Git.
+- `legacy/`: versión estática anterior conservada como referencia.
 
 ## Catálogo y administración
 
-En producción, Supabase almacena piezas, precios CLP opcionales, categorías,
-fotografías, sus encuadres y la selección de inicio. El panel permite crear
-borradores, publicar todas las piezas de una vez, archivar, restaurar, borrar y
-definir el orden general de la vitrina arrastrando las tarjetas desde cualquier
-punto. Al cambiar un título también cambia su URL; las direcciones anteriores
-se conservan como redirecciones.
+Supabase almacena piezas, precios CLP opcionales, categorías, fotografías,
+encuadres y la selección de Inicio. El panel permite crear borradores, publicar,
+archivar, restaurar y eliminar piezas. La vitrina completa y cada categoría
+tienen órdenes independientes administrables mediante arrastre.
 
-La vitrina pública permite buscar, filtrar por categoría y precio, establecer
-un rango y ordenar por precio o nombre.
+El acceso combina rutas protegidas con Supabase Auth y políticas RLS. Las
+personas visitantes solo pueden leer piezas publicadas y únicamente las cuentas
+incluidas en `admin_users` pueden escribir. La operación de la base está
+documentada en [supabase/README.md](supabase/README.md).
 
-El acceso combina un guard de rutas en React con Supabase Auth y políticas RLS.
-Los visitantes solo pueden leer piezas publicadas y únicamente las cuentas
-incluidas en `admin_users` pueden escribir. Consulta [supabase/README.md](supabase/README.md)
-para crear la estructura, la primera cuenta y migrar el catálogo existente.
+## Despliegue
+
+Cada push a `main` ejecuta `.github/workflows/deploy.yml`. El workflow instala
+dependencias, ejecuta las pruebas, compila y publica `dist/` en GitHub Pages. Se
+ejecuta además una vez al día para regenerar el sitemap con las piezas publicadas
+desde el panel.
+
+En GitHub deben existir estas variables de Actions:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+Mientras se use la URL temporal, Vite publica bajo `/lagarzaceramica/` y los
+canonical apuntan a `https://clemoacevedo.github.io/lagarzaceramica/`.
+
+## Próximo lanzamiento
+
+Quedan dos cambios deliberadamente postergados hasta recibir sus insumos:
+
+1. Conectar `lagarzaceramica.cl`, actualizar DNS, HTTPS, base de Vite, canonical,
+   sitemap, robots y Search Console.
+2. Sustituir únicamente el logo horizontal `Logo E26.svg`. La marca decorativa
+   `E28` y el favicon actuales son definitivos. Como el nuevo logo conservará
+   proporciones similares, solo debería requerir una comprobación visual.
+
+Consulta el procedimiento detallado en
+[docs/launch-checklist.md](docs/launch-checklist.md).

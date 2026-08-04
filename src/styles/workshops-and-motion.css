@@ -126,7 +126,6 @@
   color: var(--green-deep);
 }
 .workshop-intro__body p { margin-bottom: 0; }
-.workshop-intro__body[data-content-status="provisional"] small { opacity: .48; }
 
 .method.process .section-heading h2 {
   max-width: none;
