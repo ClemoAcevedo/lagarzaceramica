@@ -55,17 +55,25 @@ export default function Products() {
   }), [activeFilter, maximumPrice, minimumPrice, normalizedQuery, priceMode, products]);
   const visibleProductSlugs = new Set(visibleProducts.map(({ slug }) => slug));
   const orderedProducts = useMemo(() => {
-    if (sortOrder === 'workshop') return products;
+    const workshopOrder = activeFilter === 'all' ? 'catalogOrder' : 'categoryOrder';
+    if (sortOrder === 'workshop') {
+      return activeFilter === 'all'
+        ? products
+        : [...products].sort((first, second) => (
+          first.categoryOrder - second.categoryOrder
+          || first.catalogOrder - second.catalogOrder
+        ));
+    }
     return [...products].sort((first, second) => {
       if (sortOrder === 'name') return first.title.localeCompare(second.title, 'es');
-      if (!first.priceClp && !second.priceClp) return first.catalogOrder - second.catalogOrder;
+      if (!first.priceClp && !second.priceClp) return first[workshopOrder] - second[workshopOrder];
       if (!first.priceClp) return 1;
       if (!second.priceClp) return -1;
       return sortOrder === 'price-desc'
         ? second.priceClp - first.priceClp
         : first.priceClp - second.priceClp;
     });
-  }, [products, sortOrder]);
+  }, [activeFilter, products, sortOrder]);
   const activeExtraFilters = [
     priceMode !== 'all',
     Boolean(minimumPrice),

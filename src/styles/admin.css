@@ -157,7 +157,7 @@
   display: grid;
   margin-bottom: 1.5rem;
   padding: 1rem;
-  grid-template-columns: minmax(14rem, 1fr) minmax(12rem, .35fr);
+  grid-template-columns: minmax(14rem, 1fr) repeat(2, minmax(11rem, .35fr));
   gap: 1rem;
   border: 1px solid var(--line);
   background: var(--white);
@@ -383,8 +383,8 @@
 .admin-page-state button { padding: .75rem 1rem; border: 1px solid currentColor; background: transparent; cursor: pointer; }
 
 .admin-login { display: flex; padding: 2rem; align-items: center; justify-content: center; background: var(--green-deep); }
-.admin-login__card { width: min(100%, 32rem); padding: clamp(2rem, 5vw, 4rem); background: var(--paper); box-shadow: 0 2rem 5rem rgba(0, 0, 0, .2); }
-.admin-login__card > img { width: 11rem; margin: 0 auto 2.5rem; }
+.admin-login__card { width: min(100%, 29rem); padding: clamp(1.75rem, 4vw, 3.25rem); background: var(--paper); box-shadow: 0 2rem 5rem rgba(0, 0, 0, .2); }
+.admin-login__card > img { width: 10rem; margin: 0 auto 2rem; }
 .admin-login__card > p:not(.admin-kicker) { margin-bottom: 2rem; }
 .admin-modal { position: fixed; z-index: 1000; inset: 0; display: flex; padding: 1.5rem; align-items: center; justify-content: center; background: rgba(18, 35, 21, .72); }
 .admin-modal__card { width: min(100%, 34rem); padding: 2rem; background: var(--white); box-shadow: 0 2rem 6rem rgba(0, 0, 0, .25); }

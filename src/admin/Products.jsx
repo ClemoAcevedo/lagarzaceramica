@@ -23,6 +23,7 @@ import { cropStyle } from '../lib/crop.js';
 import {
   permanentlyDeleteProduct,
   publishAllDrafts,
+  reorderCategoryProducts,
   reorderProducts,
   setProductStatus,
 } from '../lib/admin.js';
@@ -85,7 +86,7 @@ function SortableProduct({ product, busy, canReorder, actionsDisabled, orderPosi
 }
 
 export default function AdminProducts() {
-  const { products, loading, error, refresh } = useAdminCatalog();
+  const { categories, products, loading, error, refresh } = useAdminCatalog();
   const navigate = useNavigate();
   const [ordered, setOrdered] = useState([]);
   const [message, setMessage] = useState({ text: '', isError: false });
@@ -95,6 +96,7 @@ export default function AdminProducts() {
   const [confirmPublishAll, setConfirmPublishAll] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [orderDirty, setOrderDirty] = useState(false);
   const suppressCardClick = useRef(false);
   const sensors = useSensors(
@@ -104,12 +106,22 @@ export default function AdminProducts() {
   );
   const draftCount = products.filter(({ status }) => status === 'draft').length;
   const canReorder = !search.trim() && statusFilter === 'all';
+  const selectedCategory = categories.find(({ id }) => id === categoryFilter);
+  const orderLabel = selectedCategory ? `orden de ${selectedCategory.name}` : 'orden general';
 
   useUnsavedChanges(orderDirty && !busy);
 
   useEffect(() => { setOrdered(products); setOrderDirty(false); }, [products]);
 
-  const visibleProducts = ordered.filter((product) => {
+  const categoryProducts = categoryFilter === 'all'
+    ? ordered
+    : ordered
+      .filter(({ categoryId }) => categoryId === categoryFilter)
+      .sort((first, second) => (
+        first.categoryOrder - second.categoryOrder
+        || first.catalogOrder - second.catalogOrder
+      ));
+  const visibleProducts = categoryProducts.filter((product) => {
     const matchesStatus = statusFilter === 'all' || product.status === statusFilter;
     const haystack = `${product.title} ${product.collection}`.toLocaleLowerCase('es');
     return matchesStatus && haystack.includes(search.trim().toLocaleLowerCase('es'));
@@ -170,10 +182,24 @@ export default function AdminProducts() {
       return;
     }
     setOrdered((items) => {
-      const from = items.findIndex(({ id }) => id === active.id);
-      const to = items.findIndex(({ id }) => id === over.id);
+      if (categoryFilter === 'all') {
+        const from = items.findIndex(({ id }) => id === active.id);
+        const to = items.findIndex(({ id }) => id === over.id);
+        if (from < 0 || to < 0) return items;
+        return arrayMove(items, from, to);
+      }
+
+      const categoryItems = items
+        .filter(({ categoryId }) => categoryId === categoryFilter)
+        .sort((first, second) => first.categoryOrder - second.categoryOrder);
+      const from = categoryItems.findIndex(({ id }) => id === active.id);
+      const to = categoryItems.findIndex(({ id }) => id === over.id);
       if (from < 0 || to < 0) return items;
-      return arrayMove(items, from, to);
+      const nextCategoryItems = arrayMove(categoryItems, from, to);
+      const positions = new Map(nextCategoryItems.map(({ id }, index) => [id, index]));
+      return items.map((item) => positions.has(item.id)
+        ? { ...item, categoryOrder: positions.get(item.id) }
+        : item);
     });
     setOrderDirty(true);
     releaseCardClick();
@@ -184,10 +210,18 @@ export default function AdminProducts() {
     navigate(`/admin/piezas/${product.id}`);
   };
 
-  const saveOrder = () => run(
-    () => reorderProducts(ordered.map(({ id }) => id)),
-    'Orden general guardado. La vitrina usará esta secuencia.',
-  );
+  const saveOrder = () => {
+    if (categoryFilter === 'all') {
+      return run(
+        () => reorderProducts(ordered.map(({ id }) => id)),
+        'Orden general guardado. La vista “Todas” usará esta secuencia.',
+      );
+    }
+    return run(
+      () => reorderCategoryProducts(categoryFilter, categoryProducts.map(({ id }) => id)),
+      `Orden de ${selectedCategory?.name || 'la categoría'} guardado.`,
+    );
+  };
 
   return (
     <main id="contenido" className="admin-main">
@@ -195,7 +229,7 @@ export default function AdminProducts() {
         <div>
           <p className="admin-kicker">Catálogo</p>
           <h1>Piezas</h1>
-          <p>Arrastra las tarjetas para definir el orden general de la vitrina, sin importar su categoría. Haz clic para editar una pieza.</p>
+          <p>Elige “Todas” para ordenar la vitrina completa o una categoría para definir su propio orden. Haz clic para editar una pieza.</p>
         </div>
         <div className="admin-page-heading__actions">
           {draftCount > 0 && <button className="admin-secondary" type="button" disabled={busy || orderDirty} onClick={() => setConfirmPublishAll(true)}>Publicar todos ({draftCount})</button>}
@@ -210,10 +244,11 @@ export default function AdminProducts() {
         <>
           <div className="admin-catalog-tools">
             <label>Buscar piezas<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nombre o categoría" /></label>
-            <label>Estado<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">Todos los estados</option><option value="published">Publicadas</option><option value="draft">Borradores</option><option value="archived">Archivadas</option></select></label>
+            <label>Categoría<select value={categoryFilter} disabled={orderDirty} onChange={(event) => setCategoryFilter(event.target.value)}><option value="all">Todas</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+            <label>Estado<select value={statusFilter} disabled={orderDirty} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">Todos los estados</option><option value="published">Publicadas</option><option value="draft">Borradores</option><option value="archived">Archivadas</option></select></label>
           </div>
           <div className="admin-list-heading">
-            <span>{visibleProducts.length} de {ordered.length} piezas · orden general{orderDirty ? ' · cambios sin guardar' : ''}</span>
+            <span>{visibleProducts.length} de {categoryProducts.length} piezas · {orderLabel}{orderDirty ? ' · cambios sin guardar' : ''}</span>
             <div className="admin-list-heading__actions">
               {orderDirty
                 ? <small>Guarda el orden antes de publicar, archivar o restaurar piezas.</small>
@@ -245,7 +280,9 @@ export default function AdminProducts() {
                       busy={busy}
                       canReorder={canReorder}
                       actionsDisabled={busy || orderDirty}
-                      orderPosition={ordered.findIndex(({ id }) => id === product.id) + 1}
+                      orderPosition={categoryFilter === 'all'
+                        ? ordered.findIndex(({ id }) => id === product.id) + 1
+                        : categoryProducts.findIndex(({ id }) => id === product.id) + 1}
                       onArchive={archive}
                       onDelete={setDeleting}
                       onOpen={openProduct}
@@ -259,7 +296,7 @@ export default function AdminProducts() {
             {orderDirty && (
               <div className="admin-order-save-bottom">
                 <span>Cambios de orden sin guardar</span>
-                <button className="admin-primary" type="button" disabled={busy} onClick={saveOrder}>{busy ? 'Guardando…' : 'Guardar orden general'}</button>
+                <button className="admin-primary" type="button" disabled={busy} onClick={saveOrder}>{busy ? 'Guardando…' : `Guardar ${orderLabel}`}</button>
               </div>
             )}
           </div>

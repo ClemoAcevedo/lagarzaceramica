@@ -133,6 +133,14 @@ export async function reorderProducts(ids) {
   notifyCatalogChanged();
 }
 
+export async function reorderCategoryProducts(categoryId, ids) {
+  await result(supabase.rpc('reorder_category_products', {
+    selected_category_id: categoryId,
+    product_ids: ids,
+  }));
+  notifyCatalogChanged();
+}
+
 export async function publishAllDrafts() {
   const count = await result(supabase.rpc('publish_all_drafts'));
   notifyCatalogChanged();

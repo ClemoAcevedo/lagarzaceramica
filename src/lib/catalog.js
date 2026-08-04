@@ -70,6 +70,7 @@ function normalizeProduct(row) {
     material: row.material || 'Gres esmaltado',
     status: row.status || 'published',
     catalogOrder: row.catalog_order ?? 0,
+    categoryOrder: row.category_order ?? row.catalog_order ?? 0,
     categoryId: row.category_id || category.id,
     category: category.slug || row.category,
     collection: category.name || row.collection,
@@ -107,6 +108,9 @@ async function localCatalog() {
     material: 'Gres esmaltado',
     status: 'published',
     catalog_order: index,
+    category_order: localProducts
+      .slice(0, index)
+      .filter(({ category }) => category === product.category).length,
     card_format: product.format,
     preview_fit: product.previewFit === 'contain' ? 'contain' : 'cover',
     preview_position: product.previewFit === 'bottom' ? 'bottom' : 'center',
@@ -142,6 +146,7 @@ const PRODUCT_SELECT = `
   material,
   status,
   catalog_order,
+  category_order,
   category_id,
   card_format,
   preview_fit,
