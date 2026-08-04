@@ -1,9 +1,7 @@
 import { useRef } from 'react';
 import LoadingImage from '../components/LoadingImage/LoadingImage.jsx';
-import { cropStyle } from '../lib/crop.js';
+import { cropPositionAfterDrag, cropStyle } from '../lib/crop.js';
 import AdminModal from './AdminModal.jsx';
-
-const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 export default function CropEditor({ image, value, aspect = 'cover', onChange, onCancel, onSave }) {
   const viewport = useRef(null);
@@ -23,11 +21,15 @@ export default function CropEditor({ image, value, aspect = 'cover', onChange, o
   const moveImage = (event) => {
     if (!drag.current || drag.current.pointerId !== event.pointerId || !viewport.current) return;
     const bounds = viewport.current.getBoundingClientRect();
-    const sensitivity = 100 / value.zoom;
+    const imageElement = viewport.current.querySelector('img');
+    if (!imageElement?.naturalWidth || !imageElement.naturalHeight) return;
+    const imageRatio = imageElement.naturalWidth / imageElement.naturalHeight;
+    const coverWidth = Math.max(bounds.width, bounds.height * imageRatio);
+    const coverHeight = coverWidth / imageRatio;
     onChange({
       ...value,
-      x: clamp(drag.current.cropX - ((event.clientX - drag.current.clientX) / bounds.width) * sensitivity, 0, 100),
-      y: clamp(drag.current.cropY - ((event.clientY - drag.current.clientY) / bounds.height) * sensitivity, 0, 100),
+      x: cropPositionAfterDrag(drag.current.cropX, event.clientX - drag.current.clientX, bounds.width, coverWidth, value.zoom),
+      y: cropPositionAfterDrag(drag.current.cropY, event.clientY - drag.current.clientY, bounds.height, coverHeight, value.zoom),
     });
   };
 
@@ -47,7 +49,7 @@ export default function CropEditor({ image, value, aspect = 'cover', onChange, o
           </div>
           <button type="button" aria-label="Cerrar reencuadre" onClick={onCancel}>×</button>
         </div>
-        <p className="admin-crop-modal__hint">Arrastra la fotografía para moverla. Al alejarla, el espacio libre usa el beige de la página.</p>
+        <p className="admin-crop-modal__hint">Arrastra la fotografía para moverla. Al alejarla, el espacio libre se verá blanco.</p>
         <div
           className={`admin-crop-viewport admin-crop-viewport--${aspect}`}
           ref={viewport}

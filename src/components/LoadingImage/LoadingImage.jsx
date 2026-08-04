@@ -24,14 +24,28 @@ export default function LoadingImage({ className = '', cropped = false, onLoad, 
       const coverHeight = coverWidth / imageRatio;
       const parsedCropX = Number.parseFloat(style?.['--crop-x']);
       const parsedCropY = Number.parseFloat(style?.['--crop-y']);
+      const parsedCropZoom = Number.parseFloat(style?.['--crop-zoom']);
       const cropX = Number.isFinite(parsedCropX) ? parsedCropX : 50;
       const cropY = Number.isFinite(parsedCropY) ? parsedCropY : 50;
+      const cropZoom = Number.isFinite(parsedCropZoom) && parsedCropZoom > 0 ? parsedCropZoom : 1;
+      const bleed = 1;
+      const bleedScale = Math.max(
+        (coverWidth + (bleed * 2) / cropZoom) / coverWidth,
+        (coverHeight + (bleed * 2) / cropZoom) / coverHeight,
+      );
+      const renderedWidth = coverWidth * bleedScale;
+      const renderedHeight = coverHeight * bleedScale;
+      const extraWidth = cropZoom * (renderedWidth - coverWidth);
+      const extraHeight = cropZoom * (renderedHeight - coverHeight);
+      const visualLeft = (width - cropZoom * coverWidth) * (cropX / 100) - extraWidth / 2;
+      const visualTop = (height - cropZoom * coverHeight) * (cropY / 100) - extraHeight / 2;
       setCropLayout({
         inset: 'auto',
-        width: `${coverWidth}px`,
-        height: `${coverHeight}px`,
-        left: `${(width - coverWidth) * (cropX / 100)}px`,
-        top: `${(height - coverHeight) * (cropY / 100)}px`,
+        width: `${renderedWidth}px`,
+        height: `${renderedHeight}px`,
+        maxWidth: 'none',
+        left: `${visualLeft - renderedWidth * (cropX / 100) * (1 - cropZoom)}px`,
+        top: `${visualTop - renderedHeight * (cropY / 100) * (1 - cropZoom)}px`,
         objectFit: 'fill',
       });
     };

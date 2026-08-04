@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useAdminCatalog } from '../context/AdminCatalogContext.jsx';
 import { saveProduct } from '../lib/admin.js';
@@ -48,6 +48,10 @@ export default function ProductForm() {
   const [cropDraft, setCropDraft] = useState(null);
   const [dirty, setDirty] = useState(false);
   const previewUrls = useRef(new Set());
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
 
   useUnsavedChanges(dirty && !saving);
 
@@ -135,6 +139,9 @@ export default function ProductForm() {
 
   const coverItem = images.find(({ clientId }) => clientId === coverClientId) || images[0];
   const coverImage = coverItem?.src || coverItem?.preview;
+  const nextSlug = slugify(values.title);
+  const publicPath = `/piezas/${nextSlug || 'nombre-de-la-pieza'}`;
+  const publicPathWillChange = !isNew && Boolean(nextSlug) && nextSlug !== product?.slug;
 
   const openCoverCropEditor = () => {
     if (!coverImage) return;
@@ -194,7 +201,7 @@ export default function ProductForm() {
 
     setSaving(true);
     try {
-      await saveProduct({
+      const savedProduct = await saveProduct({
         product,
         values: {
           ...values,
@@ -208,7 +215,10 @@ export default function ProductForm() {
       await refresh();
       navigate('/admin/piezas', {
         replace: true,
-        state: { notification: isNew ? 'La pieza se creó y guardó correctamente.' : 'Los cambios de la pieza se guardaron correctamente.' },
+        state: {
+          notification: isNew ? 'La pieza se creó y guardó correctamente.' : 'Los cambios de la pieza se guardaron correctamente.',
+          viewSlug: values.status === 'published' ? savedProduct.slug : null,
+        },
       });
     } catch (saveError) {
       setFormError(`No se pudieron guardar los cambios. ${saveError.message}`);
@@ -224,7 +234,13 @@ export default function ProductForm() {
           <Link className="admin-back" to="/admin/piezas">← Volver a piezas</Link>
           <p className="admin-kicker">{isNew ? 'Nueva pieza' : 'Editar pieza'}</p>
           <h1>{isNew ? 'Añadir una pieza' : product.title}</h1>
-          <p>Al guardar, la dirección pública se actualizará a <code>/piezas/{slugify(values.title) || 'nombre-de-la-pieza'}</code>. Las direcciones anteriores redirigirán automáticamente a esta nueva dirección.</p>
+          {isNew ? (
+            <p>Al guardar, la dirección pública será <code>{publicPath}</code>.</p>
+          ) : publicPathWillChange ? (
+            <p>Al guardar, la dirección pública se actualizará a <code>{publicPath}</code>. Las direcciones anteriores redirigirán automáticamente a esta nueva dirección.</p>
+          ) : (
+            <p>La dirección pública se mantendrá en <code>/piezas/{product.slug}</code>.</p>
+          )}
         </div>
       </header>
 
@@ -302,9 +318,12 @@ export default function ProductForm() {
             <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={addFiles} />
           </label>
           <div className="admin-cover-tool">
+            <span className="admin-cover-tool__preview">
+              {coverImage && <LoadingImage cropped src={coverImage} alt="" style={cropStyle(values.cropX, values.cropY, values.cropZoom)} />}
+            </span>
             <div>
-              <strong>Encuadre de la portada</strong>
-              <span>Este encuadre se usa en el catálogo. No modifica el encuadre de la misma fotografía dentro de la galería.</span>
+              <strong>Vista previa del encuadre de portada</strong>
+              <span>Se actualiza al usar un encuadre, aunque todavía no hayas guardado la pieza. No modifica el encuadre de galería de la fotografía.</span>
             </div>
             <button className="admin-secondary" type="button" disabled={!coverImage} onClick={openCoverCropEditor}>
               Reencuadrar portada del catálogo

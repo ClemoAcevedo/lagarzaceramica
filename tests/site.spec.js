@@ -1,4 +1,17 @@
 import { expect, test } from '@playwright/test';
+import { cropPositionAfterDrag } from '../src/lib/crop.js';
+
+test('arrastrar el encuadre sigue al puntero tanto acercado como alejado', () => {
+  const viewportSize = 200;
+  const coverSize = 200;
+  const pointerDelta = 20;
+
+  const zoomedOutPosition = cropPositionAfterDrag(50, pointerDelta, viewportSize, coverSize, 0.5);
+  const zoomedInPosition = cropPositionAfterDrag(50, pointerDelta, viewportSize, coverSize, 1.5);
+
+  expect(((zoomedOutPosition - 50) / 100) * (viewportSize - coverSize * 0.5)).toBeCloseTo(pointerDelta);
+  expect(((zoomedInPosition - 50) / 100) * (viewportSize - coverSize * 1.5)).toBeCloseTo(pointerDelta);
+});
 
 const routes = [
   ['/', 'Piezas con memoria'],
@@ -172,7 +185,7 @@ test('las imágenes dejan de mostrar la carga al completarse o venir desde cach�
   }
 });
 
-test('el reencuadre puede alejar una fotografía vertical y deja ver el fondo beige', async ({ page }) => {
+test('el reencuadre puede alejar una fotografía vertical y deja ver el fondo blanco', async ({ page }) => {
   await page.goto('/piezas/gallina-contenedora');
   await page.locator('.product-detail__thumbnail').nth(1).click();
 
@@ -186,11 +199,42 @@ test('el reencuadre puede alejar una fotografía vertical y deja ver el fondo be
     element.style.setProperty('--crop-zoom', '0.4');
   });
 
-  await expect(media).toHaveCSS('background-color', 'rgb(231, 223, 210)');
+  await expect(media).toHaveCSS('background-color', 'rgb(255, 255, 255)');
   await expect.poll(async () => {
     const [mediaBox, imageBox] = await Promise.all([media.boundingBox(), image.boundingBox()]);
     return imageBox.width < mediaBox.width && imageBox.height < mediaBox.height;
   }).toBe(true);
+});
+
+test('las miniaturas de una pieza usan la misma proporción que la imagen seleccionada', async ({ page }) => {
+  await page.goto('/piezas/gallina-contenedora');
+
+  const media = page.locator('.product-detail__media');
+  const thumbnail = page.locator('.product-detail__thumbnail').first();
+  await expect(thumbnail).toBeVisible();
+  await expect(thumbnail.locator('img')).toHaveCSS('position', 'absolute');
+
+  const [mediaBox, thumbnailBox] = await Promise.all([media.boundingBox(), thumbnail.boundingBox()]);
+  expect(mediaBox.width / mediaBox.height).toBeCloseTo(thumbnailBox.width / thumbnailBox.height, 2);
+  expect(mediaBox.width / mediaBox.height).toBeCloseTo(4 / 3, 2);
+});
+
+test('las portadas horizontales conservan su proporción y cubren el catálogo sin franjas', async ({ page }) => {
+  await page.goto('/piezas');
+
+  const media = page.locator('.catalog-card:not([hidden]) .catalog-card__media').first();
+  const image = media.locator('img');
+  await expect(image).toHaveClass(/is-loaded/);
+  await expect.poll(() => image.evaluate((element) => element.naturalWidth > element.naturalHeight)).toBe(true);
+
+  const [mediaBox, imageBox, naturalRatio] = await Promise.all([
+    media.boundingBox(),
+    image.boundingBox(),
+    image.evaluate((element) => element.naturalWidth / element.naturalHeight),
+  ]);
+  expect(imageBox.width / imageBox.height).toBeCloseTo(naturalRatio, 2);
+  expect(imageBox.x).toBeLessThan(mediaBox.x);
+  expect(imageBox.x + imageBox.width).toBeGreaterThan(mediaBox.x + mediaBox.width);
 });
 
 test('el visor de reencuadre administrativo refleja el zoom mientras se edita', async ({ page }) => {

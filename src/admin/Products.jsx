@@ -116,7 +116,7 @@ export default function AdminProducts() {
 
   useEffect(() => {
     if (!location.state?.notification) return;
-    setMessage({ text: location.state.notification, isError: false });
+    setMessage({ text: location.state.notification, isError: false, viewSlug: location.state.viewSlug || null });
     navigate(location.pathname, { replace: true, state: null });
   }, [location.pathname, location.state, navigate]);
 
@@ -247,7 +247,16 @@ export default function AdminProducts() {
       </header>
 
       <AdminPageState loading={loading} error={error} onRetry={refresh} />
-      {message.text && <p className={`admin-message${message.isError ? ' admin-message--error' : ''}`} role={message.isError ? 'alert' : 'status'}>{message.text}</p>}
+      {message.text && (
+        <div className={`admin-message${message.viewSlug ? ' admin-message--action' : ''}${message.isError ? ' admin-message--error' : ''}`} role={message.isError ? 'alert' : 'status'}>
+          <span>{message.text}</span>
+          {message.viewSlug && (
+            <a className="admin-secondary" href={`${import.meta.env.BASE_URL}piezas/${message.viewSlug}`} target="_blank" rel="noopener">
+              Ver pieza ↗
+            </a>
+          )}
+        </div>
+      )}
 
       {!loading && !error && (
         <>
