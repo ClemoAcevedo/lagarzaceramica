@@ -23,6 +23,16 @@ for (const [route, heading] of routes) {
   });
 }
 
+test('la selección del taller se revela al cargar Inicio directamente', async ({ page }) => {
+  await page.goto('/');
+
+  const featuredCards = page.locator('.featured .product-card');
+  await expect(featuredCards).toHaveCount(3);
+  await page.locator('.featured').scrollIntoViewIfNeeded();
+  await expect(featuredCards).toHaveClass([/is-visible/, /is-visible/, /is-visible/]);
+  await expect(featuredCards.first()).toBeVisible();
+});
+
 test('el menú móvil es legible, completo y bloquea el contenido posterior', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile');
   await page.goto('/');

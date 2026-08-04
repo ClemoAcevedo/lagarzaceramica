@@ -40,12 +40,26 @@ function useRouteFocus(pathname) {
 
 function useRevealAnimations(pathname) {
   useEffect(() => {
-    const items = document.querySelectorAll('.reveal, .image-reveal');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const revealSelector = '.reveal, .image-reveal';
+
+    const forEachReveal = (root, callback) => {
+      if (root.nodeType !== Node.ELEMENT_NODE) return;
+      if (root.matches(revealSelector)) callback(root);
+      root.querySelectorAll(revealSelector).forEach(callback);
+    };
 
     if (reduceMotion || !('IntersectionObserver' in window)) {
-      items.forEach((item) => item.classList.add('is-visible'));
-      return undefined;
+      const show = (item) => item.classList.add('is-visible');
+      document.querySelectorAll(revealSelector).forEach(show);
+
+      const mutationObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => forEachReveal(node, show));
+        });
+      });
+      mutationObserver.observe(document.body, { childList: true, subtree: true });
+      return () => mutationObserver.disconnect();
     }
 
     const observer = new IntersectionObserver((entries) => {
@@ -57,8 +71,20 @@ function useRevealAnimations(pathname) {
       });
     }, { threshold: 0.01, rootMargin: '240px 0px 240px' });
 
-    items.forEach((item) => observer.observe(item));
-    return () => observer.disconnect();
+    const observe = (item) => observer.observe(item);
+    document.querySelectorAll(revealSelector).forEach(observe);
+
+    const mutationObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => forEachReveal(node, observe));
+      });
+    });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      mutationObserver.disconnect();
+      observer.disconnect();
+    };
   }, [pathname]);
 }
 

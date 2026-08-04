@@ -13,16 +13,14 @@ a ella.
 3. Crear en el proveedor DNS los registros `A` del dominio raíz indicados por
    GitHub Pages y un `CNAME` de `www` hacia `clemoacevedo.github.io`. — Hecho
 4. Esperar la propagación, comprobar ambos hostnames y activar **Enforce HTTPS**.
-   — Pendiente: el dominio responde desde GitHub Pages, pero el certificado del
-   dominio raíz aún no coincide.
+   — Hecho; HTTP redirige a HTTPS y `www` redirige al dominio principal.
 5. Cambiar la base de producción de Vite desde `/lagarzaceramica/` a `/`. — Hecho
 6. Sustituir la URL temporal en `scripts/build-seo.mjs`, `index.html`,
    `public/robots.txt`, `public/sitemap.xml` y la documentación. — Hecho
 7. Compilar y verificar canonical, Open Graph, sitemap, rutas directas y 404.
-   — Verificación local hecha; repetir sobre el despliegue final.
+   — Hecho en local y sobre el despliegue público.
 8. Registrar la propiedad de dominio `lagarzaceramica.cl` en Google Search
-   Console y enviar `https://lagarzaceramica.cl/sitemap.xml`. — Pendiente de
-   acceso a la cuenta de Google y de que HTTPS funcione correctamente.
+   Console y enviar `https://lagarzaceramica.cl/sitemap.xml`. — Hecho
 9. Añadir el dominio a Supabase Auth si se habilitan recuperación de contraseña,
    enlaces por correo u OAuth. — Hecho; también se conservaron las redirecciones
    locales de desarrollo.

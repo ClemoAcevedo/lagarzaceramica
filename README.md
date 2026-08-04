@@ -92,15 +92,14 @@ la raíz (`/`) y GitHub Pages conserva el dominio configurado en **Settings →
 Pages → Custom domain**. Como el despliegue usa GitHub Actions, no se requiere
 un archivo `CNAME` en el repositorio ni dentro del build.
 
-## Próximo lanzamiento
+## Estado del lanzamiento
 
-El código ya está preparado para `lagarzaceramica.cl`. Antes de cerrar el
-lanzamiento falta que GitHub Pages termine de aprovisionar el certificado,
-activar **Enforce HTTPS**, desplegar estos cambios y enviar el sitemap desde
+`lagarzaceramica.cl` está configurado en GitHub Pages con HTTPS obligatorio. El
+dominio `www` redirige a la URL canónica, y el sitemap ya fue enviado desde
 Google Search Console.
 
-También queda sustituir únicamente el logo horizontal `Logo E26.svg`. La marca
-decorativa `E28` y el favicon actuales son definitivos. Como el nuevo logo
+El único cambio pendiente es sustituir el logo horizontal `Logo E26.svg`. La
+marca decorativa `E28` y el favicon actuales son definitivos. Como el nuevo logo
 conservará proporciones similares, solo debería requerir una comprobación visual.
 
 Consulta el procedimiento detallado en
