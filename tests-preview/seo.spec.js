@@ -7,7 +7,7 @@ async function firstProduct(request) {
   const url = xml.match(/<loc>(https?:\/\/[^<]+\/piezas\/[^<]+)<\/loc>/)?.[1];
   expect(url).toBeTruthy();
   return {
-    path: new URL(url).pathname.replace(/^\/(?:lagarzaceramica\/)?/, ''),
+    path: new URL(url).pathname.replace(/^\//, ''),
     url,
   };
 }

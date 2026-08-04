@@ -36,6 +36,14 @@ VITE_SUPABASE_PUBLISHABLE_KEY=
 
 Las mismas variables deben existir en GitHub Actions para el build público.
 
+## URL de autenticación
+
+El proyecto remoto usa `https://lagarzaceramica.cl/` como **Site URL** de Auth.
+La raíz, `/admin/login` y las URL locales de Vite están en la lista de
+redirecciones permitidas. Si vuelve a cambiar el dominio, actualiza estos campos
+en **Authentication → URL Configuration**; `supabase/config.toml` conserva URL
+locales porque configura la instancia de desarrollo, no el proyecto alojado.
+
 ## Crear una migración
 
 ```bash

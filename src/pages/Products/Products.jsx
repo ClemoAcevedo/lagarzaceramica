@@ -37,6 +37,7 @@ export default function Products() {
   const [isFiltering, setIsFiltering] = useState(false);
   const filterTimeout = useRef();
   const entranceTimeout = useRef();
+  const savedCatalogScroll = useRef(sessionStorage.getItem('la-garza:catalog-scroll'));
   const normalizedQuery = normalizeSearchText(searchQuery);
   const visibleProducts = useMemo(() => products.filter((product) => {
     const matchesCollection = activeFilter === 'all' || activeFilter === product.category;
@@ -92,17 +93,29 @@ export default function Products() {
   }, [productFilters, requestedFilter]);
 
   useLayoutEffect(() => {
-    const savedScroll = sessionStorage.getItem('la-garza:catalog-scroll');
-    if (savedScroll === null) return undefined;
+    const savedScroll = savedCatalogScroll.current;
+    if (savedScroll === null || loading || error) return undefined;
+
+    const scrollPosition = Number(savedScroll);
+    if (!Number.isFinite(scrollPosition)) {
+      sessionStorage.removeItem('la-garza:catalog-scroll');
+      savedCatalogScroll.current = null;
+      return undefined;
+    }
+
+    const restore = () => window.scrollTo(0, scrollPosition);
+    restore();
     sessionStorage.removeItem('la-garza:catalog-scroll');
-    const restore = () => window.scrollTo(0, Number(savedScroll));
     const frame = window.requestAnimationFrame(restore);
-    const settledLayout = window.setTimeout(restore, 420);
+    const settledLayout = window.setTimeout(() => {
+      restore();
+      savedCatalogScroll.current = null;
+    }, 420);
     return () => {
       window.cancelAnimationFrame(frame);
       window.clearTimeout(settledLayout);
     };
-  }, []);
+  }, [error, loading]);
 
   const changeFilter = (nextFilter) => {
     if (nextFilter === activeFilter || isFiltering) return;

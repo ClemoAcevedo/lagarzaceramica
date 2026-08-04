@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 
-const rootUrl = 'https://clemoacevedo.github.io/lagarzaceramica/';
+const rootUrl = 'https://lagarzaceramica.cl/';
 const distDir = new URL('../dist/', import.meta.url);
 
 function loadLocalEnv() {

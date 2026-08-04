@@ -87,18 +87,21 @@ En GitHub deben existir estas variables de Actions:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-Mientras se use la URL temporal, Vite publica bajo `/lagarzaceramica/` y los
-canonical apuntan a `https://clemoacevedo.github.io/lagarzaceramica/`.
+La URL pública y canónica es `https://lagarzaceramica.cl/`. Vite compila desde
+la raíz (`/`) y GitHub Pages conserva el dominio configurado en **Settings →
+Pages → Custom domain**. Como el despliegue usa GitHub Actions, no se requiere
+un archivo `CNAME` en el repositorio ni dentro del build.
 
 ## Próximo lanzamiento
 
-Quedan dos cambios deliberadamente postergados hasta recibir sus insumos:
+El código ya está preparado para `lagarzaceramica.cl`. Antes de cerrar el
+lanzamiento falta que GitHub Pages termine de aprovisionar el certificado,
+activar **Enforce HTTPS**, desplegar estos cambios y enviar el sitemap desde
+Google Search Console.
 
-1. Conectar `lagarzaceramica.cl`, actualizar DNS, HTTPS, base de Vite, canonical,
-   sitemap, robots y Search Console.
-2. Sustituir únicamente el logo horizontal `Logo E26.svg`. La marca decorativa
-   `E28` y el favicon actuales son definitivos. Como el nuevo logo conservará
-   proporciones similares, solo debería requerir una comprobación visual.
+También queda sustituir únicamente el logo horizontal `Logo E26.svg`. La marca
+decorativa `E28` y el favicon actuales son definitivos. Como el nuevo logo
+conservará proporciones similares, solo debería requerir una comprobación visual.
 
 Consulta el procedimiento detallado en
 [docs/launch-checklist.md](docs/launch-checklist.md).
