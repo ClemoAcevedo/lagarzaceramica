@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   closestCenter,
   DndContext,
@@ -20,6 +20,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useAdminCatalog } from '../context/AdminCatalogContext.jsx';
 import { formatPriceCLP } from '../lib/catalog.js';
 import { cropStyle } from '../lib/crop.js';
+import LoadingImage from '../components/LoadingImage/LoadingImage.jsx';
 import {
   permanentlyDeleteProduct,
   publishAllDrafts,
@@ -46,6 +47,7 @@ function SortableProduct({ product, busy, canReorder, actionsDisabled, orderPosi
 
   return (
     <article
+      data-confirm-navigation
       className={`admin-product-tile${isDragging ? ' is-dragging' : ''}${canReorder ? '' : ' is-reorder-disabled'}`}
       ref={setNodeRef}
       style={style}
@@ -55,7 +57,7 @@ function SortableProduct({ product, busy, canReorder, actionsDisabled, orderPosi
     >
       <div className="admin-product-tile__media">
         {product.image ? (
-          <img src={product.image} alt="" style={cropStyle(product.cropX, product.cropY, product.cropZoom)} />
+          <LoadingImage cropped src={product.image} alt="" style={cropStyle(product.cropX, product.cropY, product.cropZoom)} />
         ) : <span>Sin fotografía</span>}
         {canReorder && <span className="admin-drag-hint" aria-hidden="true"><span>⠿</span> Arrastra</span>}
         <span className="admin-order-rank">Orden {orderPosition}</span>
@@ -87,6 +89,7 @@ function SortableProduct({ product, busy, canReorder, actionsDisabled, orderPosi
 
 export default function AdminProducts() {
   const { categories, products, loading, error, refresh } = useAdminCatalog();
+  const location = useLocation();
   const navigate = useNavigate();
   const [ordered, setOrdered] = useState([]);
   const [message, setMessage] = useState({ text: '', isError: false });
@@ -110,6 +113,12 @@ export default function AdminProducts() {
   const orderLabel = selectedCategory ? `orden de ${selectedCategory.name}` : 'orden general';
 
   useUnsavedChanges(orderDirty && !busy);
+
+  useEffect(() => {
+    if (!location.state?.notification) return;
+    setMessage({ text: location.state.notification, isError: false });
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate]);
 
   useEffect(() => { setOrdered(products); setOrderDirty(false); }, [products]);
 

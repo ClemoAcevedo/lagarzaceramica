@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const DEFAULT_MESSAGE = 'Tienes cambios sin guardar. ¿Quieres salir igualmente?';
 
 export default function useUnsavedChanges(enabled, message = DEFAULT_MESSAGE) {
+  const restoringHistory = useRef(false);
+
   useEffect(() => {
     if (!enabled) return undefined;
 
@@ -11,12 +13,22 @@ export default function useUnsavedChanges(enabled, message = DEFAULT_MESSAGE) {
       event.returnValue = '';
     };
     const interceptLink = (event) => {
-      const link = event.target.closest?.('a[href]');
-      if (!link || link.target === '_blank' || link.origin !== window.location.origin) return;
-      if (!window.confirm(message)) event.preventDefault();
+      const target = event.target.closest?.('a[href], [data-confirm-navigation]');
+      if (!target || target.target === '_blank' || (target.origin && target.origin !== window.location.origin)) return;
+      if (!window.confirm(message)) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
     };
     const interceptHistory = () => {
-      if (!window.confirm(message)) window.history.forward();
+      if (restoringHistory.current) {
+        restoringHistory.current = false;
+        return;
+      }
+      if (!window.confirm(message)) {
+        restoringHistory.current = true;
+        window.history.forward();
+      }
     };
 
     window.addEventListener('beforeunload', beforeUnload);

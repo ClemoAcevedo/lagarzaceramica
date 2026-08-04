@@ -3,6 +3,7 @@ import { useAdminCatalog } from '../context/AdminCatalogContext.jsx';
 import { saveFeatured } from '../lib/admin.js';
 import { formatPriceCLP } from '../lib/catalog.js';
 import { cropStyle } from '../lib/crop.js';
+import LoadingImage from '../components/LoadingImage/LoadingImage.jsx';
 import AdminPageState from './AdminPageState.jsx';
 import CropEditor from './CropEditor.jsx';
 import useUnsavedChanges from '../hooks/useUnsavedChanges.js';
@@ -63,7 +64,7 @@ export default function HomeSelection() {
                     </select>
                   </label>
                   <div className="admin-featured-preview">
-                    {product ? <><div className="admin-featured-preview__media"><img src={product.image} alt="" style={cropStyle(selected.cropX, selected.cropY, selected.cropZoom)} /></div><h2>{product.title}</h2><p>{product.material} · {formatPriceCLP(product.priceClp)}</p><button className="admin-secondary" type="button" onClick={() => setCropDraft({ index, value: { x: selected.cropX, y: selected.cropY, zoom: selected.cropZoom } })}>Reencuadrar para Inicio</button></> : <p>Aquí verás una vista previa.</p>}
+                    {product ? <><div className="admin-featured-preview__media"><LoadingImage cropped src={product.image} alt="" style={cropStyle(selected.cropX, selected.cropY, selected.cropZoom)} /></div><h2>{product.title}</h2><p>{product.material} · {formatPriceCLP(product.priceClp)}</p><button className="admin-secondary" type="button" onClick={() => setCropDraft({ index, value: { x: selected.cropX, y: selected.cropY, zoom: selected.cropZoom } })}>Reencuadrar para Inicio</button></> : <p>Aquí verás una vista previa.</p>}
                   </div>
                 </div>
               );

@@ -191,7 +191,7 @@
   overflow: hidden;
   align-items: center;
   justify-content: center;
-  background: var(--mist);
+  background: var(--sand);
   font-size: .65rem;
 }
 .admin-product-tile__media img {
@@ -324,8 +324,8 @@
 .admin-image-list { display: grid; gap: .75rem; }
 .admin-image-item { display: grid; padding: .75rem; grid-template-columns: 7rem 1fr auto; align-items: center; gap: 1rem; border: 1px solid var(--line); background: #f8f6f0; }
 .admin-image-item.is-cover { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
-.admin-image-item__preview { display: block; width: 7rem; aspect-ratio: 4/3; overflow: hidden; background: var(--mist); }
-.admin-image-item img { width: 100%; height: 100%; object-fit: cover; }
+.admin-image-item__preview { display: block; position: relative; width: 7rem; aspect-ratio: 4/3; overflow: hidden; background: var(--sand); }
+.admin-image-item img { position: absolute; width: 100%; height: 100%; object-fit: cover; }
 .admin-image-item img {
   object-position: var(--crop-x, 50%) var(--crop-y, 50%);
   transform: scale(var(--crop-zoom, 1));
@@ -365,8 +365,9 @@
 .admin-featured-slot { display: grid; gap: 1rem; }
 .admin-featured-slot__number { font-size: .65rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
 .admin-featured-preview { min-height: 20rem; padding: .75rem; border: 1px solid var(--line); background: #f5f2eb; }
-.admin-featured-preview__media { aspect-ratio: 4/4.5; overflow: hidden; }
+.admin-featured-preview__media { position: relative; aspect-ratio: 4/4.5; overflow: hidden; background: var(--sand); }
 .admin-featured-preview img {
+  position: absolute;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -391,9 +392,9 @@
 .admin-modal__card h2 { margin-bottom: 1rem; font-size: 2.5rem; }
 .admin-modal__actions { display: flex; margin-top: 1.5rem; justify-content: flex-end; gap: .75rem; }
 .admin-crop-modal { padding: 1rem; }
-.admin-crop-modal__card { width: min(100%, 62rem); max-height: calc(100svh - 2rem); overflow-y: auto; }
+.admin-crop-modal__card { width: min(100%, 48rem); max-height: calc(100svh - 2rem); padding: 1.25rem; overflow: hidden; }
 .admin-crop-modal__heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
-.admin-crop-modal__heading h2 { margin: 0; }
+.admin-crop-modal__heading h2 { margin: 0; font-size: clamp(1.8rem, 4vh, 2.35rem); }
 .admin-crop-modal__heading > button {
   width: 2.75rem;
   height: 2.75rem;
@@ -403,20 +404,20 @@
   cursor: pointer;
   font-size: 1.5rem;
 }
-.admin-crop-modal__hint { margin: .8rem 0 1rem; font-size: .75rem; }
+.admin-crop-modal__hint { margin: .45rem 0 .7rem; font-size: .7rem; }
 .admin-crop-viewport {
   position: relative;
   width: min(100%, 31rem);
   margin: 0 auto;
   overflow: hidden;
-  background: #d8d5cc;
+  background: var(--sand);
   cursor: grab;
   touch-action: none;
   user-select: none;
 }
-.admin-crop-viewport--cover { aspect-ratio: 4/4.5; }
-.admin-crop-viewport--home { aspect-ratio: 4/3.75; }
-.admin-crop-viewport--gallery { width: min(100%, 42rem); aspect-ratio: 4/3; }
+.admin-crop-viewport--cover { width: min(100%, 40svh, 23rem); aspect-ratio: 4/4.5; }
+.admin-crop-viewport--home { width: min(100%, 43svh, 25rem); aspect-ratio: 4/3.75; }
+.admin-crop-viewport--gallery { width: min(100%, 54svh, 34rem); aspect-ratio: 4/3; }
 .admin-crop-viewport:active { cursor: grabbing; }
 .admin-crop-viewport img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; pointer-events: none; }
 .admin-crop-viewport > span {
@@ -426,7 +427,7 @@
   box-shadow: inset 0 0 0 999px rgba(24,48,28,.06);
   pointer-events: none;
 }
-.admin-crop-zoom { display: grid; width: min(100%, 42rem); margin: 1.25rem auto; gap: .5rem; }
+.admin-crop-zoom { display: grid; width: min(100%, 34rem); margin: .75rem auto; gap: .35rem; }
 .admin-crop-zoom > span { display: flex; justify-content: space-between; font-size: .7rem; }
 .admin-crop-zoom input { width: 100%; accent-color: var(--green-deep); }
 .admin-crop-modal__footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }

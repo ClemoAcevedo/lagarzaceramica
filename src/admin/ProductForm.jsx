@@ -4,6 +4,7 @@ import { useAdminCatalog } from '../context/AdminCatalogContext.jsx';
 import { saveProduct } from '../lib/admin.js';
 import { slugify } from '../lib/catalog.js';
 import { cropStyle } from '../lib/crop.js';
+import LoadingImage from '../components/LoadingImage/LoadingImage.jsx';
 import useUnsavedChanges from '../hooks/useUnsavedChanges.js';
 import { validateProductImage } from '../lib/images.js';
 import AdminPageState from './AdminPageState.jsx';
@@ -205,9 +206,12 @@ export default function ProductForm() {
       });
       setDirty(false);
       await refresh();
-      navigate('/admin/piezas', { replace: true });
+      navigate('/admin/piezas', {
+        replace: true,
+        state: { notification: isNew ? 'La pieza se creó y guardó correctamente.' : 'Los cambios de la pieza se guardaron correctamente.' },
+      });
     } catch (saveError) {
-      setFormError(saveError.message);
+      setFormError(`No se pudieron guardar los cambios. ${saveError.message}`);
     } finally {
       setSaving(false);
     }
@@ -220,7 +224,7 @@ export default function ProductForm() {
           <Link className="admin-back" to="/admin/piezas">← Volver a piezas</Link>
           <p className="admin-kicker">{isNew ? 'Nueva pieza' : 'Editar pieza'}</p>
           <h1>{isNew ? 'Añadir una pieza' : product.title}</h1>
-          <p>La dirección pública será <code>/piezas/{slugify(values.title) || 'nombre-de-la-pieza'}</code>. Si cambias el nombre, las direcciones anteriores seguirán redirigiendo aquí.</p>
+          <p>Al guardar, la dirección pública se actualizará a <code>/piezas/{slugify(values.title) || 'nombre-de-la-pieza'}</code>. Las direcciones anteriores redirigirán automáticamente a esta nueva dirección.</p>
         </div>
       </header>
 
@@ -275,9 +279,13 @@ export default function ProductForm() {
             {images.map((image, index) => (
               <article className={`admin-image-item${image.kind === 'new' ? ' admin-image-item--new' : ''}${image.clientId === coverClientId ? ' is-cover' : ''}`} key={image.clientId}>
                 <span className="admin-image-item__preview">
-                  <img src={image.src || image.preview} alt="" style={cropStyle(image.cropX, image.cropY, image.cropZoom)} />
+                  <LoadingImage cropped src={image.src || image.preview} alt="" style={cropStyle(image.cropX, image.cropY, image.cropZoom)} />
                 </span>
-                <label>Descripción para accesibilidad<input value={image.alt} onChange={(event) => { setDirty(true); setImages((current) => current.map((item) => item.clientId === image.clientId ? { ...item, alt: event.target.value } : item)); }} /></label>
+                <label>
+                  Descripción para accesibilidad
+                  <span className="admin-help">(Los lectores de pantalla leen este texto a personas ciegas. Describe brevemente lo que aparece en la foto.)</span>
+                  <input placeholder="Ej.: Jarrón alto de cerámica azul sobre una mesa" value={image.alt} onChange={(event) => { setDirty(true); setImages((current) => current.map((item) => item.clientId === image.clientId ? { ...item, alt: event.target.value } : item)); }} />
+                </label>
                 <div>
                   {image.kind === 'new' && <span>Nueva fotografía</span>}
                   {image.clientId === coverClientId ? <span>Portada actual</span> : <button type="button" onClick={() => { setCoverClientId(image.clientId); setValues((current) => ({ ...current, cropX: 50, cropY: 50, cropZoom: 1 })); setDirty(true); }}>Usar como portada</button>}

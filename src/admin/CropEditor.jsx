@@ -1,4 +1,6 @@
 import { useRef } from 'react';
+import LoadingImage from '../components/LoadingImage/LoadingImage.jsx';
+import { cropStyle } from '../lib/crop.js';
 import AdminModal from './AdminModal.jsx';
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -33,11 +35,7 @@ export default function CropEditor({ image, value, aspect = 'cover', onChange, o
     if (drag.current?.pointerId === event.pointerId) drag.current = null;
   };
 
-  const imageStyle = {
-    objectPosition: `${value.x}% ${value.y}%`,
-    transform: `scale(${value.zoom})`,
-    transformOrigin: `${value.x}% ${value.y}%`,
-  };
+  const imageStyle = cropStyle(value.x, value.y, value.zoom);
 
   return (
     <AdminModal className="admin-crop-modal" labelledBy="crop-title" onClose={onCancel}>
@@ -49,7 +47,7 @@ export default function CropEditor({ image, value, aspect = 'cover', onChange, o
           </div>
           <button type="button" aria-label="Cerrar reencuadre" onClick={onCancel}>×</button>
         </div>
-        <p className="admin-crop-modal__hint">Arrastra la fotografía para moverla dentro del marco.</p>
+        <p className="admin-crop-modal__hint">Arrastra la fotografía para moverla. Al alejarla, el espacio libre usa el beige de la página.</p>
         <div
           className={`admin-crop-viewport admin-crop-viewport--${aspect}`}
           ref={viewport}
@@ -58,14 +56,14 @@ export default function CropEditor({ image, value, aspect = 'cover', onChange, o
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
         >
-          <img src={image} alt="Vista previa del encuadre" draggable="false" style={imageStyle} />
+          <LoadingImage cropped src={image} alt="Vista previa del encuadre" draggable="false" style={imageStyle} />
           <span aria-hidden="true" />
         </div>
         <label className="admin-crop-zoom">
-          <span><strong>Acercar</strong><output>{Math.round(value.zoom * 100)}%</output></span>
+          <span><strong>Alejar / acercar</strong><output>{Math.round(value.zoom * 100)}%</output></span>
           <input
             type="range"
-            min="1"
+            min="0.25"
             max="3"
             step="0.01"
             value={value.zoom}

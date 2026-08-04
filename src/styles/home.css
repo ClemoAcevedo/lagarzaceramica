@@ -62,7 +62,7 @@
   position: relative;
   aspect-ratio: 4/4.8;
   overflow: hidden;
-  background: var(--mist);
+  background: var(--sand);
 }
 .product-card__image img {
   position: absolute;

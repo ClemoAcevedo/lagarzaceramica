@@ -31,7 +31,7 @@ export default function AdminLayout() {
           </nav>
           <div className="admin-account">
             <span>{session?.user.email}</span>
-            <button type="button" onClick={signOut}>Cerrar sesión</button>
+            <button type="button" data-confirm-navigation onClick={signOut}>Cerrar sesión</button>
           </div>
         </header>
         <Outlet />

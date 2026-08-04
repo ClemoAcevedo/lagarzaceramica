@@ -80,6 +80,7 @@ export default function ProductDetail() {
         <div className={`product-detail__gallery${images.length > 1 ? ' has-thumbnails' : ''}`}>
           <figure className="product-detail__media image-reveal">
             <LoadingImage
+              cropped
               key={selectedImage.src}
               src={selectedImage.src}
               srcSet={selectedImage.srcSet}
@@ -100,7 +101,7 @@ export default function ProductDetail() {
                   aria-pressed={index === activeImage}
                   onClick={() => setActiveImage(index)}
                 >
-                  <LoadingImage src={image.src} srcSet={image.srcSet} sizes="8rem" alt="" loading="lazy" style={cropStyle(image.cropX, image.cropY, image.cropZoom)} />
+                  <LoadingImage cropped src={image.src} srcSet={image.srcSet} sizes="8rem" alt="" loading="lazy" style={cropStyle(image.cropX, image.cropY, image.cropZoom)} />
                 </button>
               ))}
             </div>

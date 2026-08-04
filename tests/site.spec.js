@@ -172,6 +172,27 @@ test('las imágenes dejan de mostrar la carga al completarse o venir desde cach�
   }
 });
 
+test('el reencuadre puede alejar una fotografía vertical y deja ver el fondo beige', async ({ page }) => {
+  await page.goto('/piezas/gallina-contenedora');
+  await page.locator('.product-detail__thumbnail').nth(1).click();
+
+  const media = page.locator('.product-detail__media');
+  const image = media.locator('img');
+  await expect(image).toHaveClass(/is-loaded/);
+  await expect.poll(() => image.evaluate((element) => element.naturalHeight > element.naturalWidth)).toBe(true);
+
+  await image.evaluate((element) => {
+    element.style.transition = 'none';
+    element.style.setProperty('--crop-zoom', '0.4');
+  });
+
+  await expect(media).toHaveCSS('background-color', 'rgb(231, 223, 210)');
+  await expect.poll(async () => {
+    const [mediaBox, imageBox] = await Promise.all([media.boundingBox(), image.boundingBox()]);
+    return imageBox.width < mediaBox.width && imageBox.height < mediaBox.height;
+  }).toBe(true);
+});
+
 test('todas las fotografías de contenido usan el esqueleto compartido', async ({ page }) => {
   for (const route of ['/', '/sobre-la-garza', '/talleres']) {
     await page.goto(route);
