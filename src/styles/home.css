@@ -87,13 +87,17 @@
   border-top: 1px solid var(--line);
 }
 .product-card__meta h3 { margin: 0; font-size: clamp(1.35rem, 2vw, 1.75rem); }
-.product-card__meta span {
+.product-card__details {
   padding-top: .25rem;
   font-size: .55rem;
   font-weight: 500;
   letter-spacing: .12em;
+  text-align: right;
   text-transform: uppercase;
 }
+.product-card__details span { display: block; }
+.product-card__details span:first-child { color: var(--green); }
+.product-card__details span:last-child { color: var(--clay); }
 
 .workshop-preview {
   position: relative;

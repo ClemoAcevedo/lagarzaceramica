@@ -168,12 +168,12 @@ export default function About() {
               <li className={activeProcess === index ? 'is-active' : ''} key={title}>
                 {index === 0 && (
                   <img
-                    className="process-timeline__bird"
+                    className={`process-timeline__bird${activeProcess === null ? ' is-idle' : ''}`}
                     src={footerMark}
                     alt=""
                     aria-hidden="true"
                     style={{
-                      '--bird-offset': `${2.9 + (activeProcess ?? 0) * 5.8}rem`,
+                      '--bird-offset': activeProcess === null ? '0rem' : `${2.9 + activeProcess * 5.8}rem`,
                     }}
                   />
                 )}

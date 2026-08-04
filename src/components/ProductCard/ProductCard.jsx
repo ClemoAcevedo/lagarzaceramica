@@ -13,7 +13,10 @@ export default function ProductCard({ to, image, imageSrcSet, alt, title, materi
         </div>
         <div className="product-card__meta">
           <h3>{title}</h3>
-          <span>{material}<br />{formatPriceCLP(priceClp)}</span>
+          <div className="product-card__details">
+            <span>{material}</span>
+            <span>{formatPriceCLP(priceClp)}</span>
+          </div>
         </div>
       </Link>
     </article>
@@ -44,7 +47,7 @@ export function CatalogCard({ product, hidden, fromCatalog = false }) {
             <p className="eyebrow">{product.collection}</p>
             <h2>{product.title}</h2>
           </div>
-          <span className="catalog-card__action">Ver línea <span>↗</span></span>
+          <span className="catalog-card__action">Ver línea <span aria-hidden="true">↗︎</span></span>
           <p className="catalog-card__price">{formatPriceCLP(product.priceClp)}</p>
         </div>
       </Link>

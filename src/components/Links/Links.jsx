@@ -4,7 +4,7 @@ function LinkContent({ children, arrow }) {
   return (
     <>
       {children}
-      {arrow && <> <span>↗</span></>}
+      {arrow && <> <span aria-hidden="true">↗︎</span></>}
     </>
   );
 }

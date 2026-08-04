@@ -14,8 +14,8 @@ export default function Footer() {
           <Link to="/talleres">Talleres</Link>
         </nav>
         <div>
-          <a href={instagramUrl} target="_blank" rel="noopener">Instagram ↗</a>
-          <a href={contactUrl} target="_blank" rel="noopener">WhatsApp ↗</a>
+          <a href={instagramUrl} target="_blank" rel="noopener">Instagram ↗︎</a>
+          <a href={contactUrl} target="_blank" rel="noopener">WhatsApp ↗︎</a>
         </div>
       </div>
       <div className="footer-bottom">

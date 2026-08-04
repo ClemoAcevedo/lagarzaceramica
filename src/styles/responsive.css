@@ -173,8 +173,22 @@
   .product-card__image--tall,
   .featured .product-card__image,
   .featured .product-card__image--tall { aspect-ratio: 4/3.75; }
-  .product-card__meta span { max-width: 7rem; text-align: right; }
-  .product-card__meta span,
+  .product-card__meta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .7rem;
+  }
+  .product-card__details {
+    display: flex;
+    width: 100%;
+    padding-top: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    text-align: left;
+  }
+  .product-card__details span:last-child { text-align: right; }
+  .product-card__details,
   .catalog-card__action,
   .process-step__order { font-size: .68rem; }
   .workshop-preview { min-height: 84svh; }
@@ -250,16 +264,18 @@
   .editorial-gallery__wide { aspect-ratio: 4/3; }
   .editorial-gallery__portrait {
     width: 100%;
-    grid-column: 3 / 7;
+    grid-column: 2 / 6;
     grid-row: 3;
+    justify-self: center;
     outline-width: .7rem;
   }
   .editorial-gallery__portrait { aspect-ratio: 4/4.7; }
   .editorial-gallery__caption {
     margin: 2.25rem 0 1.25rem;
     padding-left: 0;
-    grid-column: 3 / 7;
+    grid-column: 2 / 6;
     grid-row: 2;
+    justify-self: center;
     transform: none;
   }
   .philosophy { min-height: 0; padding-top: 3.5rem; padding-bottom: 3.5rem; gap: 3rem; }

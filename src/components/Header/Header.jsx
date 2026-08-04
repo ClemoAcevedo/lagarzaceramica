@@ -87,8 +87,8 @@ export default function Header({ overlay = false }) {
           Contacto
         </a>
         <div className="nav-social" aria-label="Redes y contacto">
-          <a href={instagramUrl} target="_blank" rel="noopener">Instagram ↗</a>
-          <a href={contactUrl} target="_blank" rel="noopener">WhatsApp ↗</a>
+          <a href={instagramUrl} target="_blank" rel="noopener">Instagram ↗︎</a>
+          <a href={contactUrl} target="_blank" rel="noopener">WhatsApp ↗︎</a>
         </div>
       </nav>
     </header>

@@ -375,7 +375,11 @@
   object-fit: contain;
   pointer-events: none;
   transform: translate(-50%, -50%);
-  transition: top .55s cubic-bezier(.2, .7, .2, 1);
+  transition: top .55s cubic-bezier(.2, .7, .2, 1), opacity .3s;
+}
+
+.process-timeline__bird.is-idle {
+  opacity: 0;
 }
 
 .process-step > p {
