@@ -33,6 +33,17 @@ test('la selección del taller se revela al cargar Inicio directamente', async (
   await expect(featuredCards.first()).toBeVisible();
 });
 
+test('el hero móvil mantiene el título legible y sin palabras viudas', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile');
+  await page.goto('/');
+
+  await expect(page.locator('.hero__copy')).toHaveCSS('background-color', 'rgba(244, 241, 233, 0.76)');
+  const titleLines = page.locator('.hero__title-line');
+  await expect(titleLines).toHaveText(['Piezas con', 'memoria, hechas', 'para acompañar.']);
+  const lineTops = await titleLines.evaluateAll((lines) => lines.map((line) => line.getBoundingClientRect().top));
+  expect(new Set(lineTops.map(Math.round)).size).toBe(3);
+});
+
 test('el menú móvil es legible, completo y bloquea el contenido posterior', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile');
   await page.goto('/');

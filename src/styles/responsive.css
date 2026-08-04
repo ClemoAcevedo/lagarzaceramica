@@ -127,7 +127,16 @@
     width: auto;
     padding: 0;
   }
-  .hero h1 { max-width: 8.8ch; margin-bottom: 0; font-size: clamp(2.85rem, 12.2vw, 4.1rem); }
+  .hero__copy {
+    max-width: 100%;
+    padding: .8rem .9rem .95rem;
+    background: rgba(244, 241, 233, .76);
+    box-shadow: 0 .4rem 1.5rem rgba(24, 48, 28, .08);
+    backdrop-filter: blur(7px);
+  }
+  .hero h1 { max-width: none; margin-bottom: 0; font-size: clamp(2.45rem, 10.8vw, 3.65rem); }
+  .hero__title-line { display: block; white-space: nowrap; }
+  .hero__title-break { display: none; }
   .hero__subtitle { margin: .65rem 0 0; }
   .hero__caption { display: none; }
 

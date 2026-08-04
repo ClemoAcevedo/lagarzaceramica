@@ -30,7 +30,13 @@ export default function Home() {
         image={image27}
         imageAlt="Cuencos de Ribera en gres natural agrupados sobre fondo claro"
         subtitle="Cerámica en gres"
-        title={<>Piezas con memoria,<br />hechas para acompañar.</>}
+        title={
+          <>
+            <span className="hero__title-line">Piezas con</span>{' '}
+            <span className="hero__title-line">memoria,<br className="hero__title-break" /> hechas</span>{' '}
+            <span className="hero__title-line">para acompañar.</span>
+          </>
+        }
         action={{ to: '/piezas', label: 'Descubrir las piezas' }}
         caption="Cuencos de ribera · Gres natural"
       />
