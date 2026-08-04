@@ -1,4 +1,3 @@
-import { productFilters as localFilters, products as localProducts } from '../data/products.js';
 import { PRODUCT_IMAGES_BUCKET, isSupabaseConfigured, supabase } from './supabase.js';
 
 const forceLocalCatalog = import.meta.env.VITE_CATALOG_SOURCE === 'local';
@@ -32,13 +31,27 @@ function storageUrl(path) {
   return supabase.storage.from(PRODUCT_IMAGES_BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
+function imageSources(image) {
+  const small = storageUrl(image.storage_path_small);
+  const medium = storageUrl(image.storage_path_medium);
+  const large = image.src || storageUrl(image.storage_path);
+  return {
+    src: large,
+    srcSet: small || medium
+      ? [small && `${small} 500w`, medium && `${medium} 1000w`, large && `${large} 2000w`].filter(Boolean).join(', ')
+      : undefined,
+  };
+}
+
 function normalizeProduct(row) {
   const images = [...(row.images || [])]
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((image) => ({
       id: image.id,
-      src: image.src || storageUrl(image.storage_path),
+      ...imageSources(image),
       storagePath: image.storage_path,
+      storagePathSmall: image.storage_path_small,
+      storagePathMedium: image.storage_path_medium,
       alt: image.alt,
       sortOrder: image.sort_order,
       cropX: Number(image.crop_x ?? 50),
@@ -46,6 +59,7 @@ function normalizeProduct(row) {
       cropZoom: Number(image.crop_zoom ?? 1),
     }));
   const category = row.category || {};
+  const coverImage = images.find(({ id }) => id === row.cover_image_id) || images[0];
 
   return {
     id: row.id,
@@ -65,27 +79,28 @@ function normalizeProduct(row) {
     cropX: Number(row.crop_x ?? 50),
     cropY: Number(row.crop_y ?? (row.previewFit === 'bottom' ? 100 : 50)),
     cropZoom: Number(row.crop_zoom ?? 1),
+    coverImageId: coverImage?.id || null,
     previousSlugs: (row.slug_history || []).map(({ slug }) => slug),
     images,
-    image: images[0]?.src,
-    alt: images[0]?.alt || '',
+    image: coverImage?.src,
+    imageSrcSet: coverImage?.srcSet,
+    alt: coverImage?.alt || '',
   };
 }
 
-function sortProductsByCategory(products, categories) {
-  const categoryPosition = new Map(categories.map(({ id }, index) => [id, index]));
-  return [...products].sort((first, second) => {
-    const firstCategory = categoryPosition.get(first.categoryId) ?? Number.MAX_SAFE_INTEGER;
-    const secondCategory = categoryPosition.get(second.categoryId) ?? Number.MAX_SAFE_INTEGER;
-    return firstCategory - secondCategory || first.catalogOrder - second.catalogOrder;
-  });
+function sortProductsGlobally(products) {
+  return [...products].sort((first, second) => (
+    first.catalogOrder - second.catalogOrder
+    || first.title.localeCompare(second.title, 'es')
+  ));
 }
 
-function localCatalog() {
+async function localCatalog() {
+  const { productFilters: localFilters, products: localProducts } = await import('../data/products.js');
   const categories = localFilters
     .filter(({ value }) => value !== 'all')
     .map(({ value, label }, index) => ({ id: value, slug: value, name: label, sortOrder: index }));
-  const products = sortProductsByCategory(localProducts.map((product, index) => normalizeProduct({
+  const products = sortProductsGlobally(localProducts.map((product, index) => normalizeProduct({
     ...product,
     id: product.slug,
     price_clp: null,
@@ -107,7 +122,7 @@ function localCatalog() {
       crop_y: 50,
       crop_zoom: 1,
     })),
-  })), categories);
+  })));
   const productsBySlug = new Map(products.map((product) => [product.slug, product]));
 
   return {
@@ -134,9 +149,10 @@ const PRODUCT_SELECT = `
   crop_x,
   crop_y,
   crop_zoom,
+  cover_image_id,
   slug_history:product_slug_history(slug),
   category:categories(id, name, slug, sort_order),
-  images:product_images(id, storage_path, alt, sort_order, crop_x, crop_y, crop_zoom)
+  images:product_images!product_images_product_id_fkey(id, storage_path, storage_path_small, storage_path_medium, alt, sort_order, crop_x, crop_y, crop_zoom)
 `;
 
 async function throwIfError(promise) {
@@ -158,10 +174,10 @@ export async function fetchPublicCatalog() {
         .order('catalog_order')
         .order('sort_order', { referencedTable: 'product_images' }),
     ),
-    throwIfError(supabase.from('homepage_featured').select('slot, product_id').order('slot')),
+    throwIfError(supabase.from('homepage_featured').select('slot, product_id, crop_x, crop_y, crop_zoom').order('slot')),
   ]);
 
-  const products = sortProductsByCategory(productRows.map(normalizeProduct), categoryRows);
+  const products = sortProductsGlobally(productRows.map(normalizeProduct));
   const productsById = new Map(products.map((product) => [product.id, product]));
   const usedCategoryIds = new Set(products.map(({ categoryId }) => categoryId));
 
@@ -170,7 +186,15 @@ export async function fetchPublicCatalog() {
       .filter(({ id }) => usedCategoryIds.has(id))
       .map((category) => ({ ...category, sortOrder: category.sort_order })),
     products,
-    featuredProducts: featuredRows.map(({ product_id: id }) => productsById.get(id)).filter(Boolean),
+    featuredProducts: featuredRows.map((row) => {
+      const product = productsById.get(row.product_id);
+      return product ? {
+        ...product,
+        homeCropX: Number(row.crop_x ?? 50),
+        homeCropY: Number(row.crop_y ?? 50),
+        homeCropZoom: Number(row.crop_zoom ?? 1),
+      } : null;
+    }).filter(Boolean),
     source: 'supabase',
   };
 }
@@ -187,13 +211,18 @@ export async function fetchAdminCatalog() {
         .order('catalog_order')
         .order('sort_order', { referencedTable: 'product_images' }),
     ),
-    throwIfError(supabase.from('homepage_featured').select('slot, product_id').order('slot')),
+    throwIfError(supabase.from('homepage_featured').select('slot, product_id, crop_x, crop_y, crop_zoom').order('slot')),
   ]);
 
   return {
     categories: categoryRows.map((category) => ({ ...category, sortOrder: category.sort_order })),
-    products: sortProductsByCategory(productRows.map(normalizeProduct), categoryRows),
-    featuredIds: featuredRows.map(({ product_id: id }) => id),
+    products: sortProductsGlobally(productRows.map(normalizeProduct)),
+    featuredSelections: featuredRows.map((row) => ({
+      productId: row.product_id,
+      cropX: Number(row.crop_x ?? 50),
+      cropY: Number(row.crop_y ?? 50),
+      cropZoom: Number(row.crop_zoom ?? 1),
+    })),
   };
 }
 

@@ -4,7 +4,7 @@ import { fetchAdminCatalog } from '../lib/catalog.js';
 const AdminCatalogContext = createContext(null);
 
 export function AdminCatalogProvider({ children }) {
-  const [catalog, setCatalog] = useState({ categories: [], products: [], featuredIds: [] });
+  const [catalog, setCatalog] = useState({ categories: [], products: [], featuredSelections: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -33,4 +33,3 @@ export function useAdminCatalog() {
   if (!context) throw new Error('useAdminCatalog debe usarse dentro de AdminCatalogProvider.');
   return context;
 }
-

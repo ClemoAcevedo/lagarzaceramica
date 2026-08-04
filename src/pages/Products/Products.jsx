@@ -5,6 +5,7 @@ import { CatalogCard } from '../../components/ProductCard/ProductCard.jsx';
 import CatalogStatus from '../../components/CatalogStatus/CatalogStatus.jsx';
 import { useCatalog } from '../../context/CatalogContext.jsx';
 import usePageMeta from '../../hooks/usePageMeta.js';
+import { pageStructuredData } from '../../lib/seo.js';
 import { whatsappUrl } from '../../utils/links.js';
 
 const availabilityUrl = whatsappUrl('Hola La Garza, quisiera conocer las piezas disponibles.');
@@ -125,7 +126,7 @@ export default function Products() {
   usePageMeta(
     'Piezas — La Garza',
     'Vitrina de piezas únicas de cerámica en gres hechas por La Garza en Valdivia.',
-    { image: products[0]?.image },
+    { image: products[0]?.image, imageAlt: products[0]?.alt, structuredData: pageStructuredData({ type: 'CollectionPage', name: 'Piezas de La Garza', description: 'Vitrina de piezas únicas de cerámica en gres hechas por La Garza en Valdivia.', path: 'piezas', image: products[0]?.image }) },
   );
 
   return (

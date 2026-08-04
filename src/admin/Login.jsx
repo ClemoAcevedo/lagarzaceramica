@@ -14,7 +14,7 @@ export default function Login() {
   const navigate = useNavigate();
   const destination = location.state?.from?.pathname || '/admin/piezas';
 
-  usePageMeta('Administración — La Garza', 'Acceso al panel de administración de La Garza.');
+  usePageMeta('Administración — La Garza', 'Acceso al panel de administración de La Garza.', { robots: 'noindex,nofollow' });
 
   if (!loading && session && isAdmin) return <Navigate to={destination} replace />;
 
@@ -43,7 +43,7 @@ export default function Login() {
         {!configured ? (
           <div className="admin-message admin-message--warning" role="alert">
             <strong>Falta conectar Supabase.</strong>
-            <span>Agrega la URL y la clave publicable en el archivo <code>.env.local</code>.</span>
+            <span>{import.meta.env.DEV ? <>Agrega la URL y la clave publicable en <code>.env.local</code>.</> : <>Comprueba las variables <code>VITE_SUPABASE_URL</code> y <code>VITE_SUPABASE_PUBLISHABLE_KEY</code> del despliegue y vuelve a compilar.</>}</span>
           </div>
         ) : (
           <form className="admin-form" onSubmit={submit}>
@@ -65,4 +65,3 @@ export default function Login() {
     </main>
   );
 }
-

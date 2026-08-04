@@ -19,6 +19,7 @@ import {
   processCraft,
 } from '../../assets/media.js';
 import usePageMeta from '../../hooks/usePageMeta.js';
+import { pageStructuredData } from '../../lib/seo.js';
 
 const processSteps = [
   {
@@ -66,7 +67,7 @@ export default function About() {
   usePageMeta(
     'Sobre La Garza — Cerámica en Valdivia',
     'La historia, filosofía y proceso artesanal del taller de cerámica La Garza en Valdivia.',
-    { image: image165 },
+    { image: image165, imageAlt: 'Lola, fundadora de La Garza, en su taller', structuredData: pageStructuredData({ type: 'AboutPage', name: 'Sobre La Garza', description: 'La historia, filosofía y proceso artesanal del taller de cerámica La Garza en Valdivia.', path: 'sobre-la-garza', image: image165 }) },
   );
 
   return (

@@ -14,13 +14,14 @@ import {
 import { useCatalog } from '../../context/CatalogContext.jsx';
 import usePageMeta from '../../hooks/usePageMeta.js';
 import { homeContactUrl } from '../../utils/links.js';
+import { pageStructuredData } from '../../lib/seo.js';
 
 export default function Home() {
   const { featuredProducts, loading, error, refresh } = useCatalog();
   usePageMeta(
     'La Garza — Cerámica en gres, Valdivia',
     'La Garza, taller de cerámica en gres hecho a mano en Valdivia, Chile. Conoce nuestras piezas y talleres.',
-    { image: image27 },
+    { image: image27, imageAlt: 'Cuencos de Ribera en gres natural', structuredData: pageStructuredData({ name: 'La Garza — Cerámica en gres, Valdivia', description: 'Taller de cerámica en gres hecho a mano en Valdivia, Chile.', image: image27 }) },
   );
 
   return (
@@ -62,13 +63,14 @@ export default function Home() {
               key={product.id}
               to={`/piezas/${product.slug}`}
               image={product.image}
+              imageSrcSet={product.imageSrcSet}
               alt={product.alt}
               title={product.title}
               material={product.material}
               priceClp={product.priceClp}
-              cropX={product.cropX}
-              cropY={product.cropY}
-              cropZoom={product.cropZoom}
+              cropY={product.homeCropY ?? product.cropY}
+              cropZoom={product.homeCropZoom ?? product.cropZoom}
+              cropX={product.homeCropX ?? product.cropX}
               tall={index === 1}
             />
           ))}

@@ -29,6 +29,11 @@ Cada push a `main` ejecuta `.github/workflows/deploy.yml`, compila el proyecto
 y publica `dist/`. En GitHub se debe seleccionar una sola vez:
 **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
+El build genera HTML indexable para cada ruta pública, metadatos sociales y un
+sitemap basado en las piezas publicadas de Supabase. El workflow también se
+ejecuta una vez al día para incorporar al sitemap las piezas creadas desde el
+panel sin necesitar un nuevo commit.
+
 Vite usa `/lagarzaceramica/` como base durante el build. El archivo
 `dist/404.html` permite abrir y recargar directamente las rutas internas.
 
@@ -63,6 +68,21 @@ La navegación usa React Router. Vite genera el paquete de producción en `dist/
 El servidor de producción debe redirigir las rutas desconocidas a `index.html`
 para permitir la navegación directa a las rutas internas.
 
+## Publicación y SEO
+
+Después del primer despliegue:
+
+1. Registra `https://clemoacevedo.github.io/lagarzaceramica/` en Google Search
+   Console y envía `/lagarzaceramica/sitemap.xml`.
+2. Valida Inicio y una ficha con Rich Results Test y la inspección de URLs.
+3. Completa el Perfil de Empresa de Google con el mismo nombre, teléfono,
+   Instagram y localidad que aparecen en la web.
+4. Si se conecta un dominio propio, actualiza `rootUrl` en
+   `scripts/build-seo.mjs`, el canonical inicial de `index.html`, `robots.txt`
+   y la URL documentada aquí.
+
+Las rutas administrativas y la página 404 se marcan como `noindex`.
+
 ## Contenido pendiente
 
 Antes de publicar se debe confirmar con la clienta:
@@ -79,7 +99,7 @@ Los textos pendientes conservan el atributo
 En producción, Supabase almacena piezas, precios CLP opcionales, categorías,
 fotografías, sus encuadres y la selección de inicio. El panel permite crear
 borradores, publicar todas las piezas de una vez, archivar, restaurar, borrar y
-ordenar las tarjetas dentro de cada categoría arrastrándolas desde cualquier
+definir el orden general de la vitrina arrastrando las tarjetas desde cualquier
 punto. Al cambiar un título también cambia su URL; las direcciones anteriores
 se conservan como redirecciones.
 

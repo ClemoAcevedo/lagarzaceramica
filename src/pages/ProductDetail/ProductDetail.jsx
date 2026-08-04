@@ -7,6 +7,7 @@ import { formatPriceCLP } from '../../lib/catalog.js';
 import { cropStyle } from '../../lib/crop.js';
 import LoadingImage from '../../components/LoadingImage/LoadingImage.jsx';
 import usePageMeta from '../../hooks/usePageMeta.js';
+import { productStructuredData } from '../../lib/seo.js';
 
 export default function ProductDetail() {
   const { slug } = useParams();
@@ -25,7 +26,12 @@ export default function ProductDetail() {
   usePageMeta(
     product ? `${product.title} — La Garza` : 'Pieza no encontrada — La Garza',
     product?.description || 'Piezas de cerámica en gres hechas por La Garza en Valdivia.',
-    { image: product?.image },
+    {
+      image: product?.image,
+      imageAlt: product?.alt,
+      type: product ? 'product' : 'website',
+      structuredData: productStructuredData(product),
+    },
   );
 
   if (loading || error) {
@@ -76,6 +82,8 @@ export default function ProductDetail() {
             <LoadingImage
               key={selectedImage.src}
               src={selectedImage.src}
+              srcSet={selectedImage.srcSet}
+              sizes="(max-width: 760px) 100vw, 58vw"
               alt={selectedImage.alt}
               fetchPriority="high"
               style={cropStyle(selectedImage.cropX, selectedImage.cropY, selectedImage.cropZoom)}
@@ -92,7 +100,7 @@ export default function ProductDetail() {
                   aria-pressed={index === activeImage}
                   onClick={() => setActiveImage(index)}
                 >
-                  <LoadingImage src={image.src} alt="" loading="lazy" style={cropStyle(image.cropX, image.cropY, image.cropZoom)} />
+                  <LoadingImage src={image.src} srcSet={image.srcSet} sizes="8rem" alt="" loading="lazy" style={cropStyle(image.cropX, image.cropY, image.cropZoom)} />
                 </button>
               ))}
             </div>

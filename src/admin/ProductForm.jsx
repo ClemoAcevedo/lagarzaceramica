@@ -4,6 +4,8 @@ import { useAdminCatalog } from '../context/AdminCatalogContext.jsx';
 import { saveProduct } from '../lib/admin.js';
 import { slugify } from '../lib/catalog.js';
 import { cropStyle } from '../lib/crop.js';
+import useUnsavedChanges from '../hooks/useUnsavedChanges.js';
+import { validateProductImage } from '../lib/images.js';
 import AdminPageState from './AdminPageState.jsx';
 import CropEditor from './CropEditor.jsx';
 
@@ -39,11 +41,14 @@ export default function ProductForm() {
   const [values, setValues] = useState(emptyValues);
   const [images, setImages] = useState([]);
   const [removedImages, setRemovedImages] = useState([]);
-  const [newImages, setNewImages] = useState([]);
+  const [coverClientId, setCoverClientId] = useState(null);
   const [formError, setFormError] = useState('');
   const [saving, setSaving] = useState(false);
   const [cropDraft, setCropDraft] = useState(null);
+  const [dirty, setDirty] = useState(false);
   const previewUrls = useRef(new Set());
+
+  useUnsavedChanges(dirty && !saving);
 
   useEffect(() => {
     if (isNew) {
@@ -65,9 +70,10 @@ export default function ProductForm() {
       cropY: product.cropY,
       cropZoom: product.cropZoom,
     });
-    setImages(product.images.map((image, index) => ({ ...image, sortOrder: index })));
+    setImages(product.images.map((image, index) => ({ ...image, kind: 'existing', clientId: image.id, sortOrder: index })));
+    setCoverClientId(product.coverImageId || product.images[0]?.id || null);
     setRemovedImages([]);
-    setNewImages([]);
+    setDirty(false);
   }, [categories, isNew, product]);
 
   useEffect(() => () => {
@@ -79,41 +85,55 @@ export default function ProductForm() {
   if (!isNew && !product) return <Navigate to="/admin/piezas" replace />;
 
   const setField = (field) => (event) => {
+    setDirty(true);
     setValues((current) => ({ ...current, [field]: event.target.value }));
   };
 
   const addFiles = (event) => {
-    const additions = [...event.target.files].map((file) => {
+    const additions = [];
+    const failures = [];
+    [...event.target.files].forEach((file) => {
+      try {
+        validateProductImage(file);
+      } catch (validationError) {
+        failures.push(validationError.message);
+        return;
+      }
       const preview = URL.createObjectURL(file);
       previewUrls.current.add(preview);
-      return {
+      additions.push({
+        kind: 'new',
+        clientId: crypto.randomUUID(),
         file,
         alt: values.title ? `${values.title} — fotografía de la pieza` : file.name.replace(/\.[^.]+$/, ''),
         preview,
         cropX: 50,
         cropY: 50,
         cropZoom: 1,
-      };
+      });
     });
-    setNewImages((current) => [...current, ...additions]);
+    setFormError(failures.join(' '));
+    if (!coverClientId && additions[0]) setCoverClientId(additions[0].clientId);
+    setImages((current) => [...current, ...additions].map((image, index) => ({ ...image, sortOrder: index })));
+    if (additions.length) setDirty(true);
     event.target.value = '';
   };
 
-  const removeExisting = (index) => {
+  const removeImage = (index) => {
     const target = images[index];
-    setRemovedImages((current) => [...current, target]);
-    setImages((current) => current.filter((_, imageIndex) => imageIndex !== index).map((image, imageIndex) => ({ ...image, sortOrder: imageIndex })));
+    if (target.kind === 'existing') setRemovedImages((current) => [...current, target]);
+    else {
+      URL.revokeObjectURL(target.preview);
+      previewUrls.current.delete(target.preview);
+    }
+    const nextImages = images.filter((_, imageIndex) => imageIndex !== index).map((image, imageIndex) => ({ ...image, sortOrder: imageIndex }));
+    if (target.clientId === coverClientId) setCoverClientId(nextImages[0]?.clientId || null);
+    setImages(nextImages);
+    setDirty(true);
   };
 
-  const removeNew = (index) => {
-    setNewImages((current) => {
-      URL.revokeObjectURL(current[index].preview);
-      previewUrls.current.delete(current[index].preview);
-      return current.filter((_, imageIndex) => imageIndex !== index);
-    });
-  };
-
-  const coverImage = images[0]?.src || newImages[0]?.preview;
+  const coverItem = images.find(({ clientId }) => clientId === coverClientId) || images[0];
+  const coverImage = coverItem?.src || coverItem?.preview;
 
   const openCoverCropEditor = () => {
     if (!coverImage) return;
@@ -125,10 +145,10 @@ export default function ProductForm() {
     });
   };
 
-  const openImageCropEditor = (kind, index, image) => {
+  const openImageCropEditor = (image) => {
     setCropDraft({
-      kind,
-      index,
+      kind: 'gallery',
+      clientId: image.clientId,
       image: image.src || image.preview,
       aspect: 'gallery',
       value: { x: image.cropX, y: image.cropY, zoom: image.cropZoom },
@@ -148,11 +168,10 @@ export default function ProductForm() {
         previewFit: 'cover',
         previewPosition: 'center',
       }));
-    } else if (cropDraft.kind === 'existing') {
-      setImages((current) => current.map((image, index) => index === cropDraft.index ? { ...image, ...crop } : image));
     } else {
-      setNewImages((current) => current.map((image, index) => index === cropDraft.index ? { ...image, ...crop } : image));
+      setImages((current) => current.map((image) => image.clientId === cropDraft.clientId ? { ...image, ...crop } : image));
     }
+    setDirty(true);
     setCropDraft(null);
   };
 
@@ -167,7 +186,7 @@ export default function ProductForm() {
       setFormError('El nombre necesita al menos una letra o un número para crear su dirección.');
       return;
     }
-    if ([...images, ...newImages].some(({ alt }) => !alt.trim())) {
+    if (images.some(({ alt }) => !alt.trim())) {
       setFormError('Cada fotografía necesita una descripción alternativa.');
       return;
     }
@@ -182,8 +201,9 @@ export default function ProductForm() {
         },
         images,
         removedImages,
-        newImages,
+        coverClientId,
       });
+      setDirty(false);
       await refresh();
       navigate('/admin/piezas', { replace: true });
     } catch (saveError) {
@@ -249,30 +269,23 @@ export default function ProductForm() {
         <section className="admin-card">
           <div className="admin-card__heading">
             <span>2</span>
-            <div><h2>Fotografías</h2><p>La primera imagen será la portada. Puedes cambiar el orden con las flechas.</p></div>
+            <div><h2>Fotografías</h2><p>Ordena la galería y elige su portada por separado. Cada fotografía conserva su propio encuadre.</p></div>
           </div>
           <div className="admin-image-list">
             {images.map((image, index) => (
-              <article className="admin-image-item" key={image.id}>
+              <article className={`admin-image-item${image.kind === 'new' ? ' admin-image-item--new' : ''}${image.clientId === coverClientId ? ' is-cover' : ''}`} key={image.clientId}>
                 <span className="admin-image-item__preview">
-                  <img src={image.src} alt="" style={cropStyle(image.cropX, image.cropY, image.cropZoom)} />
+                  <img src={image.src || image.preview} alt="" style={cropStyle(image.cropX, image.cropY, image.cropZoom)} />
                 </span>
-                <label>Descripción para accesibilidad<input value={image.alt} onChange={(event) => setImages((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, alt: event.target.value } : item))} /></label>
+                <label>Descripción para accesibilidad<input value={image.alt} onChange={(event) => { setDirty(true); setImages((current) => current.map((item) => item.clientId === image.clientId ? { ...item, alt: event.target.value } : item)); }} /></label>
                 <div>
-                  <button type="button" disabled={index === 0} onClick={() => setImages(move(images, index, -1))}>↑ Subir</button>
-                  <button type="button" disabled={index === images.length - 1} onClick={() => setImages(move(images, index, 1))}>↓ Bajar</button>
-                  <button type="button" onClick={() => openImageCropEditor('existing', index, image)}>Reencuadrar foto</button>
-                  <button className="is-danger" type="button" onClick={() => removeExisting(index)}>Quitar</button>
+                  {image.kind === 'new' && <span>Nueva fotografía</span>}
+                  {image.clientId === coverClientId ? <span>Portada actual</span> : <button type="button" onClick={() => { setCoverClientId(image.clientId); setValues((current) => ({ ...current, cropX: 50, cropY: 50, cropZoom: 1 })); setDirty(true); }}>Usar como portada</button>}
+                  <button type="button" disabled={index === 0} onClick={() => { setImages(move(images, index, -1)); setDirty(true); }}>↑ Subir</button>
+                  <button type="button" disabled={index === images.length - 1} onClick={() => { setImages(move(images, index, 1)); setDirty(true); }}>↓ Bajar</button>
+                  <button type="button" onClick={() => openImageCropEditor(image)}>Reencuadrar galería</button>
+                  <button className="is-danger" type="button" onClick={() => removeImage(index)}>Quitar</button>
                 </div>
-              </article>
-            ))}
-            {newImages.map((image, index) => (
-              <article className="admin-image-item admin-image-item--new" key={image.preview}>
-                <span className="admin-image-item__preview">
-                  <img src={image.preview} alt="" style={cropStyle(image.cropX, image.cropY, image.cropZoom)} />
-                </span>
-                <label>Descripción para accesibilidad<input value={image.alt} onChange={(event) => setNewImages((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, alt: event.target.value } : item))} /></label>
-                <div><span>Nueva fotografía</span><button type="button" onClick={() => openImageCropEditor('new', index, image)}>Reencuadrar foto</button><button className="is-danger" type="button" onClick={() => removeNew(index)}>Quitar</button></div>
               </article>
             ))}
           </div>
@@ -284,18 +297,20 @@ export default function ProductForm() {
           <div className="admin-cover-tool">
             <div>
               <strong>Encuadre de la portada</strong>
-              <span>La primera fotografía es la portada. Muévela y acércala hasta que la pieza se vea como quieres.</span>
+              <span>Este encuadre se usa en el catálogo. No modifica el encuadre de la misma fotografía dentro de la galería.</span>
             </div>
             <button className="admin-secondary" type="button" disabled={!coverImage} onClick={openCoverCropEditor}>
-              Reencuadrar portada
+              Reencuadrar portada del catálogo
             </button>
           </div>
         </section>
 
         {formError && <p className="admin-message admin-message--error" role="alert">{formError}</p>}
         <div className="admin-sticky-actions">
+          {dirty && <span className="admin-unsaved" role="status">Cambios sin guardar</span>}
+          {!isNew && product.status === 'published' && <a className="admin-secondary" href={`${import.meta.env.BASE_URL}piezas/${product.slug}`} target="_blank" rel="noopener">Ver en el sitio ↗</a>}
           <Link className="admin-secondary" to="/admin/piezas">Cancelar</Link>
-          <button className="admin-primary" type="submit" disabled={saving}>{saving ? 'Guardando…' : 'Guardar pieza'}</button>
+          <button className="admin-primary" type="submit" disabled={saving || !dirty}>{saving ? 'Guardando…' : 'Guardar pieza'}</button>
         </div>
       </form>
       {cropDraft && (

@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { headerLogo } from '../assets/media.js';
 import { AdminCatalogProvider } from '../context/AdminCatalogContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import usePageMeta from '../hooks/usePageMeta.js';
 
 const links = [
   { to: '/admin/piezas', label: 'Piezas' },
@@ -11,6 +12,7 @@ const links = [
 
 export default function AdminLayout() {
   const { session, signOut } = useAuth();
+  usePageMeta('Panel de administración — La Garza', 'Gestión privada del catálogo de La Garza.', { robots: 'noindex,nofollow' });
 
   return (
     <AdminCatalogProvider>

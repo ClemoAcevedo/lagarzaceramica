@@ -60,6 +60,13 @@ body {
 body.menu-open { overflow: hidden; }
 img { display: block; max-width: 100%; }
 figure { margin: 0; }
+.seo-snapshot { min-height: 100svh; padding: 9rem var(--gutter) 5rem; background: var(--paper); }
+.seo-snapshot h1 { max-width: 14ch; font-size: clamp(3.5rem, 7vw, 7rem); }
+.seo-snapshot > p { max-width: 42rem; }
+.seo-snapshot ul { columns: 3 15rem; margin-top: 3rem; padding: 0; list-style: none; }
+.seo-snapshot li { margin-bottom: .5rem; }
+.seo-snapshot a { border-bottom: 1px solid currentColor; }
+.route-loading { display: grid; min-height: 100svh; place-items: center; background: var(--paper); font-family: var(--serif); font-size: 1.5rem; }
 .gallery-frame {
   position: relative;
   overflow: hidden;

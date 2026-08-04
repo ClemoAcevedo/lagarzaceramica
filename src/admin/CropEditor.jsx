@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import AdminModal from './AdminModal.jsx';
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -39,11 +40,11 @@ export default function CropEditor({ image, value, aspect = 'cover', onChange, o
   };
 
   return (
-    <div className="admin-modal admin-crop-modal" role="dialog" aria-modal="true" aria-labelledby="crop-title">
+    <AdminModal className="admin-crop-modal" labelledBy="crop-title" onClose={onCancel}>
       <div className="admin-modal__card admin-crop-modal__card">
         <div className="admin-crop-modal__heading">
           <div>
-            <p className="admin-kicker">{aspect === 'cover' ? 'Portada del catálogo' : 'Fotografía de la galería'}</p>
+            <p className="admin-kicker">{aspect === 'cover' ? 'Portada del catálogo' : aspect === 'home' ? 'Selección de Inicio' : 'Fotografía de la galería'}</p>
             <h2 id="crop-title">Reencuadrar fotografía</h2>
           </div>
           <button type="button" aria-label="Cerrar reencuadre" onClick={onCancel}>×</button>
@@ -79,6 +80,6 @@ export default function CropEditor({ image, value, aspect = 'cover', onChange, o
           </div>
         </div>
       </div>
-    </div>
+    </AdminModal>
   );
 }

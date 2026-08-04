@@ -310,6 +310,6 @@
 }
 .js .reveal { opacity: 0; transform: translateY(20px); transition: opacity .85s, transform .85s cubic-bezier(.2,.7,.2,1); }
 .js .reveal.is-visible { opacity: 1; transform: none; }
-.image-reveal { position: relative; overflow: hidden; }
+:where(.image-reveal) { position: relative; overflow: hidden; }
 .js .image-reveal img { opacity: 0; transform: scale(1.025); transition: opacity 1s, transform 1.25s cubic-bezier(.2,.7,.2,1); }
 .js .image-reveal.is-visible img { opacity: 1; transform: none; }

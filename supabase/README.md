@@ -79,3 +79,10 @@ Variables**:
 - `VITE_SUPABASE_PUBLISHABLE_KEY`
 
 El workflow ya las entrega a Vite durante el build.
+
+## 9. Portadas, encuadres de Inicio e imágenes responsivas
+
+Ejecuta `supabase/migrations/202608030005_admin_seo_images.sql` en el SQL
+Editor antes de desplegar la versión correspondiente. La migración permite
+elegir una fotografía de portada sin alterar el orden de la galería, guardar un
+encuadre independiente para Inicio y registrar variantes WebP para móvil.

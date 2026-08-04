@@ -27,13 +27,15 @@ import {
   setProductStatus,
 } from '../lib/admin.js';
 import AdminPageState from './AdminPageState.jsx';
+import AdminModal from './AdminModal.jsx';
+import useUnsavedChanges from '../hooks/useUnsavedChanges.js';
 
 const statusLabels = { draft: 'Borrador', published: 'Publicada', archived: 'Archivada' };
 
-function SortableProduct({ product, busy, onArchive, onDelete, onOpen, onRestore }) {
+function SortableProduct({ product, busy, canReorder, actionsDisabled, orderPosition, onArchive, onDelete, onOpen, onRestore }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: product.id,
-    disabled: busy,
+    disabled: busy || !canReorder,
   });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -43,7 +45,7 @@ function SortableProduct({ product, busy, onArchive, onDelete, onOpen, onRestore
 
   return (
     <article
-      className={`admin-product-tile${isDragging ? ' is-dragging' : ''}`}
+      className={`admin-product-tile${isDragging ? ' is-dragging' : ''}${canReorder ? '' : ' is-reorder-disabled'}`}
       ref={setNodeRef}
       style={style}
       onClick={() => onOpen(product)}
@@ -54,7 +56,8 @@ function SortableProduct({ product, busy, onArchive, onDelete, onOpen, onRestore
         {product.image ? (
           <img src={product.image} alt="" style={cropStyle(product.cropX, product.cropY, product.cropZoom)} />
         ) : <span>Sin fotografía</span>}
-        <span className="admin-drag-hint" aria-hidden="true"><span>⠿</span> Arrastra la tarjeta</span>
+        {canReorder && <span className="admin-drag-hint" aria-hidden="true"><span>⠿</span> Arrastra</span>}
+        <span className="admin-order-rank">Orden {orderPosition}</span>
         <span className={`admin-status admin-status--${product.status}`}>{statusLabels[product.status]}</span>
       </div>
       <div className="admin-product-tile__copy">
@@ -68,11 +71,12 @@ function SortableProduct({ product, busy, onArchive, onDelete, onOpen, onRestore
         onPointerDown={(event) => event.stopPropagation()}
       >
         <Link to={`/admin/piezas/${product.id}`}>Editar</Link>
-        {product.status === 'published' && <button type="button" disabled={busy} onClick={() => onArchive(product)}>Archivar</button>}
+        {product.status === 'published' && <a href={`${import.meta.env.BASE_URL}piezas/${product.slug}`} target="_blank" rel="noopener">Ver sitio ↗</a>}
+        {product.status === 'published' && <button type="button" disabled={actionsDisabled} onClick={() => onArchive(product)}>Archivar</button>}
         {product.status === 'archived' && (
           <>
-            <button type="button" disabled={busy} onClick={() => onRestore(product)}>Restaurar</button>
-            <button className="is-danger" type="button" disabled={busy} onClick={() => onDelete(product)}>Eliminar</button>
+            <button type="button" disabled={actionsDisabled} onClick={() => onRestore(product)}>Restaurar</button>
+            <button className="is-danger" type="button" disabled={actionsDisabled} onClick={() => onDelete(product)}>Eliminar</button>
           </>
         )}
       </div>
@@ -81,14 +85,17 @@ function SortableProduct({ product, busy, onArchive, onDelete, onOpen, onRestore
 }
 
 export default function AdminProducts() {
-  const { categories, products, loading, error, refresh } = useAdminCatalog();
+  const { products, loading, error, refresh } = useAdminCatalog();
   const navigate = useNavigate();
   const [ordered, setOrdered] = useState([]);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState({ text: '', isError: false });
   const [busy, setBusy] = useState(false);
   const [deleting, setDeleting] = useState(null);
   const [confirmation, setConfirmation] = useState('');
   const [confirmPublishAll, setConfirmPublishAll] = useState(false);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [orderDirty, setOrderDirty] = useState(false);
   const suppressCardClick = useRef(false);
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
@@ -96,31 +103,27 @@ export default function AdminProducts() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
   const draftCount = products.filter(({ status }) => status === 'draft').length;
+  const canReorder = !search.trim() && statusFilter === 'all';
 
-  useEffect(() => setOrdered(products), [products]);
+  useUnsavedChanges(orderDirty && !busy);
 
-  const groupedProducts = categories
-    .map((category) => ({
-      category,
-      products: ordered.filter((product) => product.categoryId === category.id),
-    }))
-    .filter(({ products: categoryProducts }) => categoryProducts.length > 0);
+  useEffect(() => { setOrdered(products); setOrderDirty(false); }, [products]);
 
-  const knownCategoryIds = new Set(categories.map(({ id: categoryId }) => categoryId));
-  const uncategorized = ordered.filter(({ categoryId }) => !knownCategoryIds.has(categoryId));
-  if (uncategorized.length) {
-    groupedProducts.push({ category: { id: 'uncategorized', name: 'Sin categoría' }, products: uncategorized });
-  }
+  const visibleProducts = ordered.filter((product) => {
+    const matchesStatus = statusFilter === 'all' || product.status === statusFilter;
+    const haystack = `${product.title} ${product.collection}`.toLocaleLowerCase('es');
+    return matchesStatus && haystack.includes(search.trim().toLocaleLowerCase('es'));
+  });
 
   const run = async (action, success) => {
     setBusy(true);
-    setMessage('');
+    setMessage({ text: '', isError: false });
     try {
       await action();
       await refresh();
-      setMessage(success);
+      setMessage({ text: success, isError: false });
     } catch (actionError) {
-      setMessage(actionError.message);
+      setMessage({ text: actionError.message, isError: true });
       await refresh();
     } finally {
       setBusy(false);
@@ -142,13 +145,13 @@ export default function AdminProducts() {
   const publishEverything = async () => {
     setConfirmPublishAll(false);
     setBusy(true);
-    setMessage('');
+    setMessage({ text: '', isError: false });
     try {
       const count = await publishAllDrafts();
       await refresh();
-      setMessage(`${count} pieza${count === 1 ? '' : 's'} publicada${count === 1 ? '' : 's'}. La vitrina ya está visible.`);
+      setMessage({ text: `${count} pieza${count === 1 ? '' : 's'} publicada${count === 1 ? '' : 's'}. La vitrina ya está visible.`, isError: false });
     } catch (publishError) {
-      setMessage(publishError.message);
+      setMessage({ text: publishError.message, isError: true });
       await refresh();
     } finally {
       setBusy(false);
@@ -161,7 +164,7 @@ export default function AdminProducts() {
     }, 0);
   };
 
-  const finishDrag = (categoryId, { active, over }) => {
+  const finishDrag = ({ active, over }) => {
     if (!over || active.id === over.id) {
       releaseCardClick();
       return;
@@ -169,9 +172,10 @@ export default function AdminProducts() {
     setOrdered((items) => {
       const from = items.findIndex(({ id }) => id === active.id);
       const to = items.findIndex(({ id }) => id === over.id);
-      if (items[from]?.categoryId !== categoryId || items[to]?.categoryId !== categoryId) return items;
+      if (from < 0 || to < 0) return items;
       return arrayMove(items, from, to);
     });
+    setOrderDirty(true);
     releaseCardClick();
   };
 
@@ -180,74 +184,90 @@ export default function AdminProducts() {
     navigate(`/admin/piezas/${product.id}`);
   };
 
+  const saveOrder = () => run(
+    () => reorderProducts(ordered.map(({ id }) => id)),
+    'Orden general guardado. La vitrina usará esta secuencia.',
+  );
+
   return (
     <main id="contenido" className="admin-main">
       <header className="admin-page-heading">
         <div>
           <p className="admin-kicker">Catálogo</p>
           <h1>Piezas</h1>
-          <p>Arrastra una tarjeta desde cualquier punto para ordenarla dentro de su categoría. Haz clic para editarla.</p>
+          <p>Arrastra las tarjetas para definir el orden general de la vitrina, sin importar su categoría. Haz clic para editar una pieza.</p>
         </div>
         <div className="admin-page-heading__actions">
-          {draftCount > 0 && <button className="admin-secondary" type="button" disabled={busy} onClick={() => setConfirmPublishAll(true)}>Publicar todos ({draftCount})</button>}
+          {draftCount > 0 && <button className="admin-secondary" type="button" disabled={busy || orderDirty} onClick={() => setConfirmPublishAll(true)}>Publicar todos ({draftCount})</button>}
           <Link className="admin-primary" to="/admin/piezas/nueva">Añadir nueva pieza</Link>
         </div>
       </header>
 
       <AdminPageState loading={loading} error={error} onRetry={refresh} />
-      {message && <p className="admin-message" role="status">{message}</p>}
+      {message.text && <p className={`admin-message${message.isError ? ' admin-message--error' : ''}`} role={message.isError ? 'alert' : 'status'}>{message.text}</p>}
 
       {!loading && !error && (
         <>
-          <div className="admin-list-heading">
-            <span>{ordered.length} piezas · ordenadas por categoría</span>
-            <button
-              className="admin-secondary"
-              type="button"
-              disabled={busy}
-              onClick={() => run(() => reorderProducts(ordered.map(({ id }) => id)), 'Nuevo orden guardado.')}
-            >
-              Guardar orden
-            </button>
+          <div className="admin-catalog-tools">
+            <label>Buscar piezas<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nombre o categoría" /></label>
+            <label>Estado<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">Todos los estados</option><option value="published">Publicadas</option><option value="draft">Borradores</option><option value="archived">Archivadas</option></select></label>
           </div>
-          <div className="admin-category-groups">
-            {groupedProducts.map(({ category, products: categoryProducts }) => (
-              <section className="admin-category-group" key={category.id}>
-                <header className="admin-category-group__heading">
-                  <div><p className="admin-kicker">Categoría</p><h2>{category.name}</h2></div>
-                  <span>{categoryProducts.length} pieza{categoryProducts.length === 1 ? '' : 's'}</span>
-                </header>
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragStart={() => { suppressCardClick.current = true; }}
-                  onDragCancel={releaseCardClick}
-                  onDragEnd={(event) => finishDrag(category.id, event)}
-                >
-                  <SortableContext items={categoryProducts.map(({ id }) => id)} strategy={rectSortingStrategy}>
-                    <div className="admin-product-grid">
-                      {categoryProducts.map((product) => (
-                        <SortableProduct
-                          key={product.id}
-                          product={product}
-                          busy={busy}
-                          onArchive={archive}
-                          onDelete={setDeleting}
-                          onOpen={openProduct}
-                          onRestore={(item) => run(() => setProductStatus(item.id, 'draft'), 'La pieza volvió a borradores.')}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              </section>
-            ))}
+          <div className="admin-list-heading">
+            <span>{visibleProducts.length} de {ordered.length} piezas · orden general{orderDirty ? ' · cambios sin guardar' : ''}</span>
+            <div className="admin-list-heading__actions">
+              {orderDirty
+                ? <small>Guarda el orden antes de publicar, archivar o restaurar piezas.</small>
+                : !canReorder && <small>Limpia la búsqueda y muestra todos los estados para reordenar.</small>}
+              <button
+                className="admin-secondary"
+                type="button"
+                disabled={busy || !orderDirty}
+                onClick={saveOrder}
+              >
+                {busy && orderDirty ? 'Guardando…' : 'Guardar orden'}
+              </button>
+            </div>
+          </div>
+          <div className="admin-global-order">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={() => { suppressCardClick.current = true; }}
+              onDragCancel={releaseCardClick}
+              onDragEnd={finishDrag}
+            >
+              <SortableContext items={visibleProducts.map(({ id }) => id)} strategy={rectSortingStrategy}>
+                <div className="admin-product-grid">
+                  {visibleProducts.map((product) => (
+                    <SortableProduct
+                      key={product.id}
+                      product={product}
+                      busy={busy}
+                      canReorder={canReorder}
+                      actionsDisabled={busy || orderDirty}
+                      orderPosition={ordered.findIndex(({ id }) => id === product.id) + 1}
+                      onArchive={archive}
+                      onDelete={setDeleting}
+                      onOpen={openProduct}
+                      onRestore={(item) => run(() => setProductStatus(item.id, 'draft'), 'La pieza volvió a borradores.')}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+            {visibleProducts.length === 0 && <p className="admin-empty">No hay piezas que coincidan con la búsqueda y el estado seleccionados.</p>}
+            {orderDirty && (
+              <div className="admin-order-save-bottom">
+                <span>Cambios de orden sin guardar</span>
+                <button className="admin-primary" type="button" disabled={busy} onClick={saveOrder}>{busy ? 'Guardando…' : 'Guardar orden general'}</button>
+              </div>
+            )}
           </div>
         </>
       )}
 
       {confirmPublishAll && (
-        <div className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="publish-all-title">
+        <AdminModal labelledBy="publish-all-title" onClose={() => setConfirmPublishAll(false)}>
           <div className="admin-modal__card">
             <p className="admin-kicker">Publicación inicial</p>
             <h2 id="publish-all-title">¿Publicar {draftCount} piezas?</h2>
@@ -257,11 +277,11 @@ export default function AdminProducts() {
               <button className="admin-primary" type="button" onClick={publishEverything}>Sí, publicar todas</button>
             </div>
           </div>
-        </div>
+        </AdminModal>
       )}
 
       {deleting && (
-        <div className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+        <AdminModal labelledBy="delete-title" onClose={() => setDeleting(null)}>
           <div className="admin-modal__card">
             <p className="admin-kicker">Acción permanente</p>
             <h2 id="delete-title">Eliminar “{deleting.title}”</h2>
@@ -275,7 +295,7 @@ export default function AdminProducts() {
               <button className="admin-danger" type="button" disabled={confirmation !== deleting.title || busy} onClick={removePermanently}>Eliminar definitivamente</button>
             </div>
           </div>
-        </div>
+        </AdminModal>
       )}
     </main>
   );

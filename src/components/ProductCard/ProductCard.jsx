@@ -4,12 +4,12 @@ import { formatPriceCLP } from '../../lib/catalog.js';
 import { cropStyle } from '../../lib/crop.js';
 import LoadingImage from '../LoadingImage/LoadingImage.jsx';
 
-export default function ProductCard({ to, image, alt, title, material, priceClp, cropX, cropY, cropZoom, tall = false }) {
+export default function ProductCard({ to, image, imageSrcSet, alt, title, material, priceClp, cropX, cropY, cropZoom, tall = false }) {
   return (
     <article className="product-card reveal">
       <Link to={to}>
         <div className={`product-card__image${tall ? ' product-card__image--tall' : ''}`}>
-          <LoadingImage src={image} alt={alt} loading="lazy" style={cropStyle(cropX, cropY, cropZoom)} />
+          <LoadingImage src={image} srcSet={imageSrcSet} sizes="(max-width: 760px) 92vw, 31vw" alt={alt} loading="lazy" style={cropStyle(cropX, cropY, cropZoom)} />
         </div>
         <div className="product-card__meta">
           <h3>{title}</h3>
@@ -37,7 +37,7 @@ export function CatalogCard({ product, hidden, fromCatalog = false }) {
         }}
       >
         <figure className="catalog-card__media image-reveal">
-          <LoadingImage src={product.image} alt={product.alt} loading="lazy" style={cropStyle(product.cropX, product.cropY, product.cropZoom)} />
+          <LoadingImage src={product.image} srcSet={product.imageSrcSet} sizes="(max-width: 760px) 92vw, 50vw" alt={product.alt} loading="lazy" style={cropStyle(product.cropX, product.cropY, product.cropZoom)} />
         </figure>
         <div className="catalog-card__copy">
           <div>

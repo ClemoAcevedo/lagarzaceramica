@@ -1,22 +1,25 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
-import About from './pages/About/About.jsx';
-import Home from './pages/Home/Home.jsx';
-import ProductDetail from './pages/ProductDetail/ProductDetail.jsx';
-import Products from './pages/Products/Products.jsx';
-import Workshops from './pages/Workshops/Workshops.jsx';
-import NotFound from './pages/NotFound/NotFound.jsx';
-import AdminGuard from './admin/AdminGuard.jsx';
-import AdminLayout from './admin/AdminLayout.jsx';
-import Login from './admin/Login.jsx';
-import AdminProducts from './admin/Products.jsx';
-import ProductForm from './admin/ProductForm.jsx';
-import Categories from './admin/Categories.jsx';
-import HomeSelection from './admin/HomeSelection.jsx';
+
+const About = lazy(() => import('./pages/About/About.jsx'));
+const Home = lazy(() => import('./pages/Home/Home.jsx'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail/ProductDetail.jsx'));
+const Products = lazy(() => import('./pages/Products/Products.jsx'));
+const Workshops = lazy(() => import('./pages/Workshops/Workshops.jsx'));
+const NotFound = lazy(() => import('./pages/NotFound/NotFound.jsx'));
+const AdminGuard = lazy(() => import('./admin/AdminGuard.jsx'));
+const AdminLayout = lazy(() => import('./admin/AdminLayout.jsx'));
+const Login = lazy(() => import('./admin/Login.jsx'));
+const AdminProducts = lazy(() => import('./admin/Products.jsx'));
+const ProductForm = lazy(() => import('./admin/ProductForm.jsx'));
+const Categories = lazy(() => import('./admin/Categories.jsx'));
+const HomeSelection = lazy(() => import('./admin/HomeSelection.jsx'));
 
 export default function App() {
   return (
-    <Routes>
+    <Suspense fallback={<main className="route-loading" aria-busy="true"><span>Cargando…</span></main>}>
+      <Routes>
       <Route path="admin/login" element={<Login />} />
       <Route element={<AdminGuard />}>
         <Route path="admin" element={<AdminLayout />}>
@@ -43,6 +46,7 @@ export default function App() {
         <Route path="workshops" element={<Navigate to="/talleres" replace />} />
         <Route path="*" element={<NotFound />} />
       </Route>
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }

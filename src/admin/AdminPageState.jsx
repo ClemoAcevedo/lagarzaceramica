@@ -4,8 +4,8 @@ export default function AdminPageState({ loading, error, onRetry }) {
   return (
     <div className="admin-page-state admin-page-state--error" role="alert">
       <p>No pudimos cargar la información del panel.</p>
+      {error?.message && <small>{error.message}</small>}
       <button type="button" onClick={onRetry}>Intentar nuevamente</button>
     </div>
   );
 }
-

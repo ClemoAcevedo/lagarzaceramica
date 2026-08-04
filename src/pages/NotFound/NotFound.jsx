@@ -5,6 +5,7 @@ export default function NotFound() {
   usePageMeta(
     'Página no encontrada — La Garza',
     'La página que buscas no existe o cambió de dirección.',
+    { robots: 'noindex,nofollow' },
   );
 
   return (

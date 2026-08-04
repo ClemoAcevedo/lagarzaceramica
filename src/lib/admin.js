@@ -1,5 +1,5 @@
 import { notifyCatalogChanged, slugify } from './catalog.js';
-import { optimizeProductImage } from './images.js';
+import { optimizeProductImages } from './images.js';
 import { PRODUCT_IMAGES_BUCKET, supabase } from './supabase.js';
 
 async function result(promise) {
@@ -8,9 +8,14 @@ async function result(promise) {
   return data;
 }
 
-export async function saveProduct({ values, product, images, removedImages, newImages }) {
+async function removeStoragePaths(paths) {
+  const validPaths = paths.filter(Boolean);
+  if (validPaths.length) await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove(validPaths);
+}
+
+export async function saveProduct({ values, product, images, removedImages, coverClientId }) {
   const desiredStatus = values.status;
-  const finalImageCount = images.length + newImages.length;
+  const finalImageCount = images.length;
   if (desiredStatus === 'published' && finalImageCount === 0) {
     throw new Error('Agrega al menos una imagen antes de publicar.');
   }
@@ -22,7 +27,7 @@ export async function saveProduct({ values, product, images, removedImages, newI
     description: values.description.trim(),
     price_clp: values.priceClp || null,
     material: values.material.trim(),
-    status: !product && desiredStatus === 'published' ? 'draft' : desiredStatus,
+    status: desiredStatus,
     card_format: values.format,
     preview_fit: values.previewFit,
     preview_position: values.previewPosition,
@@ -31,72 +36,83 @@ export async function saveProduct({ values, product, images, removedImages, newI
     crop_zoom: values.cropZoom,
   };
 
-  let savedProduct = product;
-  if (product) {
-    [savedProduct] = await result(
-      supabase.from('products').update(payload).eq('id', product.id).select('id, slug'),
-    );
-  } else {
-    const [lastProduct] = await result(
-      supabase.from('products').select('catalog_order').order('catalog_order', { ascending: false }).limit(1),
-    );
-    [savedProduct] = await result(
-      supabase.from('products').insert({
-        ...payload,
-        catalog_order: Number(lastProduct?.catalog_order ?? -1) + 1,
-      }).select('id, slug'),
-    );
-  }
+  const productId = product?.id || crypto.randomUUID();
+  payload.id = productId;
+  payload.is_new = !product;
+  const uploadedPaths = [];
+  const preparedImages = [];
 
-  for (const image of images) {
-    await result(
-      supabase.from('product_images').update({
+  try {
+    for (const image of images) {
+      if (image.kind !== 'new') continue;
+      let variants;
+      try {
+        variants = await optimizeProductImages(image.file);
+      } catch (imageError) {
+        throw new Error(imageError.message.startsWith(`${image.file.name}:`) ? imageError.message : `${image.file.name}: ${imageError.message}`);
+      }
+      const basePath = `${productId}/${crypto.randomUUID()}`;
+      const paths = {
+        large: `${basePath}.webp`,
+        medium: `${basePath}-1000.webp`,
+        small: `${basePath}-500.webp`,
+      };
+      for (const size of ['large', 'medium', 'small']) {
+        await result(supabase.storage.from(PRODUCT_IMAGES_BUCKET).upload(paths[size], variants[size], {
+          contentType: 'image/webp',
+          upsert: false,
+        }));
+        uploadedPaths.push(paths[size]);
+      }
+      preparedImages.push({ image, paths, id: crypto.randomUUID() });
+    }
+
+    const persistedIds = new Map();
+    const existingImages = images.filter(({ kind }) => kind !== 'new').map((image) => {
+      persistedIds.set(image.clientId, image.id);
+      return {
+        id: image.id,
         alt: image.alt.trim(),
         sort_order: image.sortOrder,
         crop_x: image.cropX,
         crop_y: image.cropY,
         crop_zoom: image.cropZoom,
-      }).eq('id', image.id),
-    );
-  }
+      };
+    });
+    const newImageRows = preparedImages.map(({ image, paths, id }) => {
+      persistedIds.set(image.clientId, id);
+      return {
+        id,
+        storage_path: paths.large,
+        storage_path_medium: paths.medium,
+        storage_path_small: paths.small,
+        alt: image.alt.trim(),
+        sort_order: image.sortOrder,
+        crop_x: image.cropX,
+        crop_y: image.cropY,
+        crop_zoom: image.cropZoom,
+      };
+    });
 
-  for (const image of removedImages) {
-    await result(supabase.from('product_images').delete().eq('id', image.id));
-    if (image.storagePath) {
-      await result(supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([image.storagePath]));
+    const coverImageId = persistedIds.get(coverClientId) || persistedIds.get(images[0]?.clientId) || null;
+    await result(supabase.rpc('save_product', {
+      product_data: payload,
+      existing_images: existingImages,
+      new_images: newImageRows,
+      removed_image_ids: removedImages.map(({ id }) => id),
+      selected_cover_id: coverImageId,
+    }));
+
+    if (removedImages.length) {
+      await removeStoragePaths(removedImages.flatMap((image) => [image.storagePath, image.storagePathMedium, image.storagePathSmall]));
     }
-  }
 
-  for (let index = 0; index < newImages.length; index += 1) {
-    const pendingImage = newImages[index];
-    const blob = await optimizeProductImage(pendingImage.file);
-    const storagePath = `${savedProduct.id}/${crypto.randomUUID()}.webp`;
-    try {
-      await result(supabase.storage.from(PRODUCT_IMAGES_BUCKET).upload(storagePath, blob, {
-        contentType: 'image/webp',
-        upsert: false,
-      }));
-      await result(supabase.from('product_images').insert({
-        product_id: savedProduct.id,
-        storage_path: storagePath,
-        alt: pendingImage.alt.trim(),
-        sort_order: images.length + index,
-        crop_x: pendingImage.cropX,
-        crop_y: pendingImage.cropY,
-        crop_zoom: pendingImage.cropZoom,
-      }));
-    } catch (error) {
-      await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([storagePath]);
-      throw error;
-    }
+    notifyCatalogChanged();
+    return { id: productId, slug: payload.slug };
+  } catch (error) {
+    await removeStoragePaths(uploadedPaths);
+    throw error;
   }
-
-  if (!product && desiredStatus === 'published') {
-    await result(supabase.from('products').update({ status: 'published' }).eq('id', savedProduct.id));
-  }
-
-  notifyCatalogChanged();
-  return savedProduct;
 }
 
 export async function setProductStatus(productId, status) {
@@ -106,7 +122,7 @@ export async function setProductStatus(productId, status) {
 
 export async function permanentlyDeleteProduct(product) {
   if (product.status !== 'archived') throw new Error('Solo puedes eliminar definitivamente una pieza archivada.');
-  const paths = product.images.map(({ storagePath }) => storagePath).filter(Boolean);
+  const paths = product.images.flatMap((image) => [image.storagePath, image.storagePathMedium, image.storagePathSmall]).filter(Boolean);
   await result(supabase.from('products').delete().eq('id', product.id));
   if (paths.length) await result(supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove(paths));
   notifyCatalogChanged();
@@ -123,8 +139,15 @@ export async function publishAllDrafts() {
   return count;
 }
 
-export async function saveFeatured(ids) {
-  await result(supabase.rpc('set_homepage_featured', { product_ids: ids }));
+export async function saveFeatured(selections) {
+  await result(supabase.rpc('set_homepage_featured', {
+    selections: selections.map((selection) => ({
+      product_id: selection.productId,
+      crop_x: selection.cropX,
+      crop_y: selection.cropY,
+      crop_zoom: selection.cropZoom,
+    })),
+  }));
   notifyCatalogChanged();
 }
 

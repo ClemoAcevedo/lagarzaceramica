@@ -15,6 +15,7 @@ import {
 } from '../../assets/media.js';
 import usePageMeta from '../../hooks/usePageMeta.js';
 import { whatsappUrl } from '../../utils/links.js';
+import { pageStructuredData } from '../../lib/seo.js';
 
 const workshopInfoUrl = whatsappUrl('Hola La Garza, quisiera recibir información sobre los talleres.');
 const workshopSignupUrl = whatsappUrl('Hola La Garza, quisiera inscribirme en un taller.');
@@ -49,11 +50,12 @@ const participationInfo = [
 
 export default function Workshops() {
   const [activeMethod, setActiveMethod] = useState(null);
+  const [activeParticipation, setActiveParticipation] = useState(0);
 
   usePageMeta(
     'Talleres de cerámica — La Garza',
     'Talleres de cerámica en gres de La Garza en Valdivia. Aprende, experimenta y crea con tus manos.',
-    { image: image189 },
+    { image: image189, imageAlt: 'Taller de cerámica La Garza en Valdivia', structuredData: pageStructuredData({ type: 'Service', name: 'Talleres de cerámica en Valdivia', description: 'Talleres presenciales de cerámica en gres de La Garza en Valdivia.', path: 'talleres', image: image189 }) },
   );
 
   return (
@@ -160,7 +162,18 @@ export default function Workshops() {
         <div className="workshop-guide__content">
           <div className="accordion workshop-guide__accordion">
             {participationInfo.map(([topic, detail], index) => (
-              <details key={topic} open={index === 0 || undefined}>
+              <details
+                key={topic}
+                name="workshop-participation"
+                open={activeParticipation === index}
+                onToggle={(event) => {
+                  const isOpen = event.currentTarget.open;
+                  setActiveParticipation((current) => {
+                    if (isOpen) return index;
+                    return current === index ? null : current;
+                  });
+                }}
+              >
                 <summary>{topic}<span>+</span></summary>
                 <p>{detail}</p>
               </details>
