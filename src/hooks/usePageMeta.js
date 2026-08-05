@@ -65,5 +65,6 @@ export default function usePageMeta(title, description, {
     }
     const pageData = (Array.isArray(structuredData) ? structuredData : [structuredData]).filter(Boolean);
     jsonLd.textContent = JSON.stringify([businessStructuredData(), ...pageData]);
+    document.head.querySelectorAll('script[data-la-garza-snapshot]').forEach((snapshot) => snapshot.remove());
   }, [description, image, imageAlt, robots, structuredData, title, type]);
 }

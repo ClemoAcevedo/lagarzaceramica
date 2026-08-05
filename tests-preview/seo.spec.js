@@ -38,6 +38,15 @@ test('la aplicación reemplaza el snapshot SEO sin errores', async ({ page, requ
   await page.goto(product.path);
   await expect(page.getByRole('heading', { level: 1 })).not.toBeEmpty();
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /index,follow/);
+  await expect(page.locator('script[data-la-garza-snapshot]')).toHaveCount(0);
+  await expect(page.locator('script[data-la-garza-json-ld]')).toHaveCount(1);
+  const pageSchemas = await page.locator('script[data-la-garza-json-ld]').evaluate((script) => (
+    JSON.parse(script.textContent).filter((entry) => ['Product', 'WebPage'].includes(entry['@type']))
+  ));
+  expect(pageSchemas).toHaveLength(1);
+  if (pageSchemas[0]['@type'] === 'Product') {
+    expect(pageSchemas[0].brand).toEqual({ '@type': 'Brand', name: 'La Garza' });
+  }
   expect(errors).toEqual([]);
 });
 
