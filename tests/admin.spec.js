@@ -242,6 +242,33 @@ test('una pieza publicada se puede enviar a borrado directo y un error conserva 
   });
 });
 
+test('una pieza se elimina desde su edición y vuelve al listado con una confirmación clara', async ({ page }) => {
+  const { state } = await mockAdmin(page, async ({ rpc, body, route }) => {
+    if (rpc !== 'permanently_delete_product') return undefined;
+    const index = state.products.findIndex(({ id }) => id === body.product_id);
+    state.products.splice(index, 1);
+    await route.fulfill({ status: 200, contentType: 'application/json', body: 'null' });
+    return true;
+  });
+  const product = state.products[0];
+
+  await page.goto(`/admin/piezas/${product.id}`);
+  await page.getByRole('button', { name: 'Eliminar pieza', exact: true }).click();
+
+  const confirmation = page.locator('.admin-delete-confirmation');
+  await expect(confirmation.locator('.admin-delete-confirmation__instruction')).toHaveText('Escribe exactamente este nombre para confirmar:');
+  await expect(confirmation.locator('.admin-delete-confirmation__name')).toHaveText(product.title);
+  const deleteButton = page.getByRole('button', { name: 'Eliminar definitivamente' });
+  await expect(deleteButton).toBeDisabled();
+
+  await page.getByLabel(/Escribe exactamente/).fill(product.title);
+  await deleteButton.click();
+
+  await expect(page).toHaveURL(/\/admin\/piezas$/);
+  await expect(page.locator('.admin-message')).toContainText('La pieza y sus fotografías fueron eliminadas.');
+  await expect(page.locator('.admin-product-tile')).toHaveCount(2);
+});
+
 test('las tarjetas reordenables no confunden el arrastre con una salida del panel', async ({ page }) => {
   const { state } = await mockAdmin(page);
   await page.goto('/admin/piezas');

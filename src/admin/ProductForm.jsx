@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useAdminCatalog } from '../context/AdminCatalogContext.jsx';
-import { saveProduct } from '../lib/admin.js';
+import { permanentlyDeleteProduct, saveProduct } from '../lib/admin.js';
 import { slugify } from '../lib/catalog.js';
 import { cropStyle } from '../lib/crop.js';
 import LoadingImage from '../components/LoadingImage/LoadingImage.jsx';
@@ -9,6 +9,7 @@ import useUnsavedChanges from '../hooks/useUnsavedChanges.js';
 import { validateProductImage } from '../lib/images.js';
 import AdminPageState from './AdminPageState.jsx';
 import CropEditor from './CropEditor.jsx';
+import DeleteProductModal from './DeleteProductModal.jsx';
 
 const emptyValues = {
   title: '',
@@ -45,6 +46,9 @@ export default function ProductForm() {
   const [coverClientId, setCoverClientId] = useState(null);
   const [formError, setFormError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const [cropDraft, setCropDraft] = useState(null);
   const [dirty, setDirty] = useState(false);
   const previewUrls = useRef(new Set());
@@ -54,7 +58,11 @@ export default function ProductForm() {
     window.scrollTo(0, 0);
   }, [id]);
 
-  const allowNavigation = useUnsavedChanges(dirty || saving, saving ? 'Espera a que termine el guardado antes de salir.' : undefined, saving);
+  const allowNavigation = useUnsavedChanges(
+    dirty || saving || deleting,
+    saving || deleting ? 'Espera a que termine la operación antes de salir.' : undefined,
+    saving || deleting,
+  );
 
   useEffect(() => {
     if (isNew) {
@@ -231,6 +239,27 @@ export default function ProductForm() {
     }
   };
 
+  const removePermanently = async () => {
+    if (!product || deleting) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      const outcome = await permanentlyDeleteProduct(product);
+      setDirty(false);
+      const reloaded = await refresh();
+      allowNavigation();
+      navigate('/admin/piezas', {
+        replace: true,
+        state: {
+          notification: `La pieza y sus fotografías fueron eliminadas.${outcome.cleanupWarning ? ` ${outcome.cleanupWarning}` : ''}${reloaded ? '' : ' No pudimos recargar el panel.'}`,
+        },
+      });
+    } catch (deleteFailure) {
+      setDeleteError(deleteFailure.message);
+      setDeleting(false);
+    }
+  };
+
   return (
     <main id="contenido" className="admin-main admin-editor">
       <header className="admin-page-heading admin-page-heading--compact">
@@ -335,6 +364,19 @@ export default function ProductForm() {
           </div>
         </section>
 
+        {!isNew && (
+          <section className="admin-card admin-danger-zone">
+            <div>
+              <p className="admin-kicker">Acción permanente</p>
+              <h2>Eliminar esta pieza</h2>
+              <p>Borra la pieza y todas sus fotografías. Antes de continuar tendrás que escribir su nombre para confirmar.</p>
+            </div>
+            <button className="admin-danger" type="button" disabled={saving || deleting} onClick={() => { setDeleteError(''); setDeleteModalOpen(true); }}>
+              Eliminar pieza
+            </button>
+          </section>
+        )}
+
         {formError && <p className="admin-message admin-message--error" role="alert">{formError}</p>}
         <div className={`admin-sticky-actions${dirty ? '' : ' admin-sticky-actions--static'}`}>
           {dirty && <span className="admin-unsaved" role="status">Cambios sin guardar</span>}
@@ -351,6 +393,16 @@ export default function ProductForm() {
           onChange={(value) => setCropDraft((current) => ({ ...current, value }))}
           onCancel={() => setCropDraft(null)}
           onSave={saveCrop}
+        />
+      )}
+      {deleteModalOpen && product && (
+        <DeleteProductModal
+          product={product}
+          busy={deleting}
+          error={deleteError}
+          hasUnsavedChanges={dirty}
+          onClose={() => { if (!deleting) setDeleteModalOpen(false); }}
+          onConfirm={removePermanently}
         />
       )}
     </main>

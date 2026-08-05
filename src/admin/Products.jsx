@@ -29,6 +29,7 @@ import {
 } from '../lib/admin.js';
 import AdminPageState from './AdminPageState.jsx';
 import AdminModal from './AdminModal.jsx';
+import DeleteProductModal from './DeleteProductModal.jsx';
 import useUnsavedChanges from '../hooks/useUnsavedChanges.js';
 
 const statusLabels = { draft: 'Borrador', published: 'Publicada' };
@@ -87,7 +88,7 @@ export default function AdminProducts() {
   const [message, setMessage] = useState({ text: '', isError: false });
   const [busy, setBusy] = useState(false);
   const [deleting, setDeleting] = useState(null);
-  const [confirmation, setConfirmation] = useState('');
+  const [deleteError, setDeleteError] = useState('');
   const [confirmPublishAll, setConfirmPublishAll] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -149,12 +150,30 @@ export default function AdminProducts() {
   };
 
   const removePermanently = async () => {
-    if (!deleting || confirmation !== deleting.title) return;
-    const removed = await run(() => permanentlyDeleteProduct(deleting), 'La pieza y sus fotografías fueron eliminadas.');
-    if (removed) {
+    if (!deleting) return;
+    setBusy(true);
+    setDeleteError('');
+    setMessage({ text: '', isError: false });
+    try {
+      const outcome = await permanentlyDeleteProduct(deleting);
+      const reloaded = await refresh();
+      setMessage({
+        text: `La pieza y sus fotografías fueron eliminadas.${outcome.cleanupWarning ? ` ${outcome.cleanupWarning}` : ''}${reloaded ? '' : ' El cambio se aplicó, pero no pudimos recargar el panel.'}`,
+        isError: false,
+      });
       setDeleting(null);
-      setConfirmation('');
+    } catch (deleteFailure) {
+      setDeleteError(deleteFailure.message);
+      await refresh();
+    } finally {
+      setBusy(false);
     }
+  };
+
+  const openDeletion = (product) => {
+    setMessage({ text: '', isError: false });
+    setDeleteError('');
+    setDeleting(product);
   };
 
   const publishEverything = async () => {
@@ -302,7 +321,7 @@ export default function AdminProducts() {
                       orderPosition={categoryFilter === 'all'
                         ? ordered.findIndex(({ id }) => id === product.id) + 1
                         : categoryProducts.findIndex(({ id }) => id === product.id) + 1}
-                      onDelete={setDeleting}
+                      onDelete={openDeletion}
                       onOpen={openProduct}
                     />
                   ))}
@@ -335,21 +354,13 @@ export default function AdminProducts() {
       )}
 
       {deleting && (
-        <AdminModal labelledBy="delete-title" onClose={() => setDeleting(null)}>
-          <div className="admin-modal__card">
-            <p className="admin-kicker">Acción permanente</p>
-            <h2 id="delete-title">Eliminar “{deleting.title}”</h2>
-            <p>Se borrarán la pieza y todas sus fotografías. Si está publicada, dejará de aparecer inmediatamente en el sitio. Esta acción no se puede deshacer.</p>
-            <label>
-              Escribe <strong>{deleting.title}</strong> para confirmar
-              <input value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoFocus />
-            </label>
-            <div className="admin-modal__actions">
-              <button className="admin-secondary" type="button" onClick={() => setDeleting(null)}>Cancelar</button>
-              <button className="admin-danger" type="button" disabled={confirmation !== deleting.title || busy} onClick={removePermanently}>Eliminar definitivamente</button>
-            </div>
-          </div>
-        </AdminModal>
+        <DeleteProductModal
+          product={deleting}
+          busy={busy}
+          error={deleteError}
+          onClose={() => { setDeleting(null); setDeleteError(''); }}
+          onConfirm={removePermanently}
+        />
       )}
     </main>
   );
