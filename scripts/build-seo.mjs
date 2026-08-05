@@ -63,6 +63,7 @@ function setMeta(html, selector, content) {
 
 function snapshotHtml(baseHtml, page, products) {
   const canonical = new URL(page.path.replace(/^\//, ''), rootUrl).href;
+  const isPricedProduct = Number(page.product?.price_clp) > 0;
   let html = baseHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(page.title)}</title>`);
   html = setMeta(html, ['name', 'description'], page.description);
   html = setMeta(html, ['name', 'robots'], page.robots || 'index,follow,max-image-preview:large');
@@ -85,16 +86,16 @@ function snapshotHtml(baseHtml, page, products) {
 
   const structured = {
     '@context': 'https://schema.org',
-    '@type': page.schemaType || 'WebPage',
+    '@type': isPricedProduct ? 'Product' : (page.schemaType || 'WebPage'),
+    ...(isPricedProduct ? { '@id': `${canonical}#product` } : {}),
     name: page.heading,
     description: page.description,
     url: canonical,
-    ...(page.product ? {
-      '@type': 'Product',
+    ...(isPricedProduct ? {
       image: page.product.images.map(({ url }) => url),
       material: page.product.material,
       brand: { '@type': 'Brand', name: 'La Garza' },
-      ...(page.product.price_clp ? { offers: { '@type': 'Offer', url: canonical, priceCurrency: 'CLP', price: page.product.price_clp } } : {}),
+      offers: { '@type': 'Offer', url: canonical, priceCurrency: 'CLP', price: page.product.price_clp },
     } : {}),
   };
   html = html.replace('</head>', `    <script type="application/ld+json" data-la-garza-snapshot>${JSON.stringify(structured).replace(/</g, '\\u003c')}</script>\n  </head>`);
@@ -128,7 +129,7 @@ async function build() {
     { path: '/sobre-la-garza', title: 'Sobre La Garza — Cerámica en Valdivia', heading: 'Sobre La Garza', description: 'Conoce la historia, filosofía y proceso artesanal del taller de cerámica La Garza en Valdivia.', schemaType: 'AboutPage' },
     { path: '/piezas', title: 'Piezas de cerámica en gres — La Garza', heading: 'Piezas de cerámica en gres', description: 'Vitrina de piezas únicas de cerámica en gres hechas por La Garza en Valdivia.', schemaType: 'CollectionPage', includeProducts: true },
     { path: '/talleres', title: 'Talleres de cerámica en Valdivia — La Garza', heading: 'Talleres de cerámica en Valdivia', description: 'Talleres presenciales de cerámica en gres para aprender, experimentar y crear con las manos en Valdivia.', schemaType: 'Service' },
-    ...products.map((product) => ({ path: `/piezas/${product.slug}`, title: `${product.title} — La Garza`, heading: product.title, description: product.description, type: 'product', schemaType: 'Product', image: product.images[0]?.url, product })),
+    ...products.map((product) => ({ path: `/piezas/${product.slug}`, title: `${product.title} — La Garza`, heading: product.title, description: product.description, type: 'product', image: product.images[0]?.url, product })),
   ];
 
   for (const page of pages) await writeRoute(page.path, snapshotHtml(baseHtml, page, products));

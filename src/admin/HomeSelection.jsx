@@ -17,7 +17,7 @@ export default function HomeSelection() {
   const [dirty, setDirty] = useState(false);
   const [cropDraft, setCropDraft] = useState(null);
 
-  useUnsavedChanges(dirty && !saving);
+  useUnsavedChanges(dirty || saving, saving ? 'Espera a que termine el guardado antes de salir.' : undefined, saving);
 
   useEffect(() => {
     setSelection(Array.from({ length: 3 }, (_, index) => featuredSelections[index] || { productId: '', cropX: 50, cropY: 50, cropZoom: 1 }));
@@ -32,10 +32,10 @@ export default function HomeSelection() {
     setSaving(true);
     setMessage({ text: '', isError: false });
     try {
-      await saveFeatured(selection);
-      await refresh();
+      await saveFeatured(selection, featuredSelections);
+      const reloaded = await refresh();
       setDirty(false);
-      setMessage({ text: 'La selección de inicio quedó actualizada.', isError: false });
+      setMessage({ text: `La selección de inicio quedó actualizada.${reloaded ? '' : ' No pudimos recargar el panel.'}`, isError: false });
     } catch (saveError) {
       setMessage({ text: saveError.message, isError: true });
     } finally {
@@ -48,8 +48,9 @@ export default function HomeSelection() {
       <header className="admin-page-heading"><div><p className="admin-kicker">Página de inicio</p><h1>Piezas singulares</h1><p>Elige las tres piezas, y su orden, para la sección “Selección del taller”.</p></div></header>
       <AdminPageState loading={loading} error={error} onRetry={refresh} />
       {message.text && <p className={`admin-message${message.isError ? ' admin-message--error' : ''}`} role={message.isError ? 'alert' : 'status'}>{message.text}</p>}
+      {saving && <p className="admin-busy" role="status">Guardando la selección…</p>}
       {!loading && !error && (
-        <section className="admin-card">
+        <section className="admin-card" aria-busy={saving} inert={saving ? true : undefined}>
           <div className="admin-featured-grid">
             {selection.map((selected, index) => {
               const product = published.find((item) => item.id === selected.productId);

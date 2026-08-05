@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, createRoutesFromElements, Navigate, Route, RouterProvider } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
+import { CatalogProvider } from './context/CatalogContext.jsx';
 
 const About = lazy(() => import('./pages/About/About.jsx'));
 const Home = lazy(() => import('./pages/Home/Home.jsx'));
@@ -16,6 +17,10 @@ const ProductForm = lazy(() => import('./admin/ProductForm.jsx'));
 const Categories = lazy(() => import('./admin/Categories.jsx'));
 const HomeSelection = lazy(() => import('./admin/HomeSelection.jsx'));
 
+function PublicLayout() {
+  return <CatalogProvider><Layout /></CatalogProvider>;
+}
+
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route>
@@ -30,7 +35,7 @@ const router = createBrowserRouter(
           <Route path="inicio" element={<HomeSelection />} />
         </Route>
       </Route>
-      <Route element={<Layout />}>
+      <Route element={<PublicLayout />}>
         <Route index element={<Home />} />
         <Route path="sobre-la-garza" element={<About />} />
         <Route path="piezas" element={<Products />} />

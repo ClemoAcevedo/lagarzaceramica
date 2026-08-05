@@ -13,14 +13,14 @@ export function AuthProvider({ children }) {
     if (!nextSession || !supabase) {
       setIsAdmin(false);
       setLoading(false);
-      return false;
+      return { authorized: false, error: null };
     }
 
     const { data, error } = await supabase.rpc('is_admin');
     const authorized = !error && data === true;
     setIsAdmin(authorized);
     setLoading(false);
-    return authorized;
+    return { authorized, error };
   }, []);
 
   useEffect(() => {
@@ -55,8 +55,11 @@ export function AuthProvider({ children }) {
       throw new Error('No pudimos iniciar sesión con esas credenciales.');
     }
 
-    const authorized = await verifySession(data.session);
-    if (!authorized) {
+    const verification = await verifySession(data.session);
+    if (verification.error) {
+      throw new Error('Iniciaste sesión, pero no pudimos verificar los permisos. Revisa tu conexión e intenta nuevamente.');
+    }
+    if (!verification.authorized) {
       await supabase.auth.signOut();
       throw new Error('Esta cuenta no tiene acceso al panel.');
     }
@@ -85,4 +88,3 @@ export function useAuth() {
   if (!context) throw new Error('useAuth debe usarse dentro de AuthProvider.');
   return context;
 }
-

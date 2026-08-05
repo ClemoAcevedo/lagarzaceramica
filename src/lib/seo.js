@@ -38,28 +38,38 @@ export function businessStructuredData() {
 export function productStructuredData(product) {
   if (!product) return null;
   const url = new URL(`piezas/${product.slug}`, siteRootUrl()).href;
-  return [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'Product',
-      '@id': `${url}#product`,
-      name: product.title,
-      description: product.description,
-      image: product.images.map(({ src }) => src),
-      material: product.material,
-      category: product.collection,
-      brand: { '@type': 'Brand', name: 'La Garza' },
+  const pageOrProduct = Number(product.priceClp) > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    '@id': `${url}#product`,
+    name: product.title,
+    description: product.description,
+    image: product.images.map(({ src }) => src),
+    material: product.material,
+    category: product.collection,
+    brand: { '@type': 'Brand', name: 'La Garza' },
+    url,
+    offers: {
+      '@type': 'Offer',
       url,
-      ...(product.priceClp ? {
-        offers: {
-          '@type': 'Offer',
-          url,
-          priceCurrency: 'CLP',
-          price: product.priceClp,
-          seller: { '@id': `${siteRootUrl()}#taller` },
-        },
-      } : {}),
+      priceCurrency: 'CLP',
+      price: product.priceClp,
+      seller: { '@id': `${siteRootUrl()}#taller` },
     },
+  } : {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': url,
+    name: product.title,
+    description: product.description,
+    url,
+    ...(product.image ? { primaryImageOfPage: new URL(product.image, window.location.origin).href } : {}),
+    isPartOf: { '@id': `${siteRootUrl()}#website` },
+    about: { '@id': `${siteRootUrl()}#taller` },
+    inLanguage: 'es-CL',
+  };
+  return [
+    pageOrProduct,
     {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',

@@ -1,6 +1,7 @@
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const MAX_SOURCE_BYTES = 20 * 1024 * 1024;
 const MAX_IMAGE_SIDE = 2000;
+const MAX_IMAGE_PIXELS = 40_000_000;
 
 const WEBP_VARIANTS = {
   large: { maxSide: MAX_IMAGE_SIDE, quality: 0.84 },
@@ -37,14 +38,20 @@ export async function optimizeProductImages(file) {
   validateProductImage(file);
 
   const bitmap = await createImageBitmap(file);
-  const variants = {};
-  for (const [name, settings] of Object.entries(WEBP_VARIANTS)) {
-    variants[name] = await resizeToWebp(bitmap, settings);
-  }
-  bitmap.close();
+  try {
+    if (bitmap.width * bitmap.height > MAX_IMAGE_PIXELS) {
+      throw new Error('La imagen tiene demasiada resolución; usa una fotografía de hasta 40 megapíxeles.');
+    }
+    const variants = {};
+    for (const [name, settings] of Object.entries(WEBP_VARIANTS)) {
+      variants[name] = await resizeToWebp(bitmap, settings);
+    }
 
-  if (variants.large.size > 10 * 1024 * 1024) {
-    throw new Error('La imagen optimizada supera el límite de 10 MB.');
+    if (variants.large.size > 10 * 1024 * 1024) {
+      throw new Error('La imagen optimizada supera el límite de 10 MB.');
+    }
+    return variants;
+  } finally {
+    bitmap.close();
   }
-  return variants;
 }

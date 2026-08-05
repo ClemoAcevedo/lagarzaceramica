@@ -9,8 +9,21 @@ async function result(promise) {
 }
 
 async function removeStoragePaths(paths) {
-  const validPaths = paths.filter(Boolean);
-  if (validPaths.length) await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove(validPaths);
+  const validPaths = [...new Set(paths.filter(Boolean))];
+  if (validPaths.length) await result(supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove(validPaths));
+}
+
+async function completeStorageCleanup(paths) {
+  if (paths.length) await result(supabase.rpc('complete_storage_cleanup', { paths }));
+}
+
+export async function cleanupOrphanedStorage() {
+  const candidates = await result(supabase.rpc('storage_cleanup_candidates'));
+  const paths = (candidates || []).map((candidate) => candidate.path).filter(Boolean);
+  if (!paths.length) return 0;
+  await removeStoragePaths(paths);
+  await completeStorageCleanup(paths);
+  return paths.length;
 }
 
 export async function saveProduct({ values, product, images, removedImages, coverClientId }) {
@@ -34,6 +47,7 @@ export async function saveProduct({ values, product, images, removedImages, cove
     crop_x: values.cropX,
     crop_y: values.cropY,
     crop_zoom: values.cropZoom,
+    expected_updated_at: product?.updatedAt || null,
   };
 
   const productId = product?.id || crypto.randomUUID();
@@ -41,6 +55,7 @@ export async function saveProduct({ values, product, images, removedImages, cove
   payload.is_new = !product;
   const uploadedPaths = [];
   const preparedImages = [];
+  let savedToDatabase = false;
 
   try {
     for (const image of images) {
@@ -57,12 +72,14 @@ export async function saveProduct({ values, product, images, removedImages, cove
         medium: `${basePath}-1000.webp`,
         small: `${basePath}-500.webp`,
       };
+      const variantPaths = Object.values(paths);
+      await result(supabase.rpc('queue_storage_cleanup', { paths: variantPaths, delay_seconds: 3600 }));
+      uploadedPaths.push(...variantPaths);
       for (const size of ['large', 'medium', 'small']) {
         await result(supabase.storage.from(PRODUCT_IMAGES_BUCKET).upload(paths[size], variants[size], {
           contentType: 'image/webp',
           upsert: false,
         }));
-        uploadedPaths.push(paths[size]);
       }
       preparedImages.push({ image, paths, id: crypto.randomUUID() });
     }
@@ -102,41 +119,72 @@ export async function saveProduct({ values, product, images, removedImages, cove
       removed_image_ids: removedImages.map(({ id }) => id),
       selected_cover_id: coverImageId,
     }));
+    savedToDatabase = true;
 
-    if (removedImages.length) {
-      await removeStoragePaths(removedImages.flatMap((image) => [image.storagePath, image.storagePathMedium, image.storagePathSmall]));
+    let cleanupWarning = null;
+    try {
+      await completeStorageCleanup(uploadedPaths);
+      await cleanupOrphanedStorage();
+    } catch {
+      cleanupWarning = 'La pieza se guardó; la limpieza de archivos quedó pendiente y se reintentará automáticamente.';
     }
 
     notifyCatalogChanged();
-    return { id: productId, slug: payload.slug };
+    return { id: productId, slug: payload.slug, cleanupWarning };
   } catch (error) {
-    await removeStoragePaths(uploadedPaths);
+    if (savedToDatabase) {
+      notifyCatalogChanged();
+      return {
+        id: productId,
+        slug: payload.slug,
+        cleanupWarning: 'La pieza se guardó; la limpieza de archivos quedó pendiente y se reintentará automáticamente.',
+      };
+    }
+    try {
+      await removeStoragePaths(uploadedPaths);
+      await completeStorageCleanup(uploadedPaths);
+    } catch {
+      // The durable cleanup queue will retry paths that could not be removed now.
+    }
     throw error;
   }
 }
 
-export async function setProductStatus(productId, status) {
-  await result(supabase.from('products').update({ status }).eq('id', productId));
+export async function setProductStatus(product, status) {
+  await result(supabase.rpc('set_product_status', {
+    product_id: product.id,
+    next_status: status,
+    expected_updated_at: product.updatedAt,
+  }));
   notifyCatalogChanged();
 }
 
 export async function permanentlyDeleteProduct(product) {
   if (product.status !== 'archived') throw new Error('Solo puedes eliminar definitivamente una pieza archivada.');
-  const paths = product.images.flatMap((image) => [image.storagePath, image.storagePathMedium, image.storagePathSmall]).filter(Boolean);
-  await result(supabase.from('products').delete().eq('id', product.id));
-  if (paths.length) await result(supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove(paths));
+  await result(supabase.rpc('permanently_delete_product', {
+    product_id: product.id,
+    expected_updated_at: product.updatedAt,
+  }));
+  let cleanupWarning = null;
+  try {
+    await cleanupOrphanedStorage();
+  } catch {
+    cleanupWarning = 'La pieza se eliminó; sus archivos quedaron pendientes de limpieza automática.';
+  }
+  notifyCatalogChanged();
+  return { cleanupWarning };
+}
+
+export async function reorderProducts(ids, expectedIds) {
+  await result(supabase.rpc('reorder_products', { product_ids: ids, expected_product_ids: expectedIds }));
   notifyCatalogChanged();
 }
 
-export async function reorderProducts(ids) {
-  await result(supabase.rpc('reorder_products', { product_ids: ids }));
-  notifyCatalogChanged();
-}
-
-export async function reorderCategoryProducts(categoryId, ids) {
+export async function reorderCategoryProducts(categoryId, ids, expectedIds) {
   await result(supabase.rpc('reorder_category_products', {
     selected_category_id: categoryId,
     product_ids: ids,
+    expected_product_ids: expectedIds,
   }));
   notifyCatalogChanged();
 }
@@ -147,9 +195,15 @@ export async function publishAllDrafts() {
   return count;
 }
 
-export async function saveFeatured(selections) {
+export async function saveFeatured(selections, expectedSelections) {
   await result(supabase.rpc('set_homepage_featured', {
     selections: selections.map((selection) => ({
+      product_id: selection.productId,
+      crop_x: selection.cropX,
+      crop_y: selection.cropY,
+      crop_zoom: selection.cropZoom,
+    })),
+    expected_selections: expectedSelections.map((selection) => ({
       product_id: selection.productId,
       crop_x: selection.cropX,
       crop_y: selection.cropY,
@@ -159,24 +213,27 @@ export async function saveFeatured(selections) {
   notifyCatalogChanged();
 }
 
-export async function createCategory(name, sortOrder) {
-  await result(supabase.from('categories').insert({ name: name.trim(), slug: slugify(name), sort_order: sortOrder }));
+export async function createCategory(name) {
+  await result(supabase.rpc('create_category', { category_name: name.trim() }));
   notifyCatalogChanged();
 }
 
-export async function updateCategory(id, name) {
-  await result(supabase.from('categories').update({ name: name.trim() }).eq('id', id));
+export async function saveCategories(updates, ids) {
+  await result(supabase.rpc('save_categories', {
+    category_updates: updates.map((category) => ({
+      id: category.id,
+      name: category.name.trim(),
+      expected_updated_at: category.updatedAt,
+    })),
+    category_ids: ids,
+  }));
   notifyCatalogChanged();
 }
 
-export async function deleteCategory(id) {
-  const products = await result(supabase.from('products').select('id').eq('category_id', id).limit(1));
-  if (products.length) throw new Error('Reasigna o elimina las piezas de esta categoría antes de eliminarla.');
-  await result(supabase.from('categories').delete().eq('id', id));
-  notifyCatalogChanged();
-}
-
-export async function reorderCategories(ids) {
-  await result(supabase.rpc('reorder_categories', { category_ids: ids }));
+export async function deleteCategory(category) {
+  await result(supabase.rpc('delete_category', {
+    category_id: category.id,
+    expected_updated_at: category.updatedAt,
+  }));
   notifyCatalogChanged();
 }

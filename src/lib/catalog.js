@@ -69,6 +69,7 @@ function normalizeProduct(row) {
     priceClp: row.price_clp ?? null,
     material: row.material || 'Gres esmaltado',
     status: row.status || 'published',
+    updatedAt: row.updated_at || null,
     catalogOrder: row.catalog_order ?? 0,
     categoryOrder: row.category_order ?? row.catalog_order ?? 0,
     categoryId: row.category_id || category.id,
@@ -145,6 +146,7 @@ const PRODUCT_SELECT = `
   price_clp,
   material,
   status,
+  updated_at,
   catalog_order,
   category_order,
   category_id,
@@ -170,7 +172,7 @@ export async function fetchPublicCatalog() {
   if (!isSupabaseConfigured || forceLocalCatalog) return localCatalog();
 
   const [categoryRows, productRows, featuredRows] = await Promise.all([
-    throwIfError(supabase.from('categories').select('id, name, slug, sort_order').order('sort_order')),
+    throwIfError(supabase.from('categories').select('id, name, slug, sort_order, updated_at').order('sort_order')),
     throwIfError(
       supabase
         .from('products')
@@ -189,7 +191,7 @@ export async function fetchPublicCatalog() {
   return {
     categories: categoryRows
       .filter(({ id }) => usedCategoryIds.has(id))
-      .map((category) => ({ ...category, sortOrder: category.sort_order })),
+      .map((category) => ({ ...category, sortOrder: category.sort_order, updatedAt: category.updated_at })),
     products,
     featuredProducts: featuredRows.map((row) => {
       const product = productsById.get(row.product_id);
@@ -208,7 +210,7 @@ export async function fetchAdminCatalog() {
   if (!supabase) throw new Error('Supabase no está configurado.');
 
   const [categoryRows, productRows, featuredRows] = await Promise.all([
-    throwIfError(supabase.from('categories').select('id, name, slug, sort_order').order('sort_order')),
+    throwIfError(supabase.from('categories').select('id, name, slug, sort_order, updated_at').order('sort_order')),
     throwIfError(
       supabase
         .from('products')
@@ -220,7 +222,7 @@ export async function fetchAdminCatalog() {
   ]);
 
   return {
-    categories: categoryRows.map((category) => ({ ...category, sortOrder: category.sort_order })),
+    categories: categoryRows.map((category) => ({ ...category, sortOrder: category.sort_order, updatedAt: category.updated_at })),
     products: sortProductsGlobally(productRows.map(normalizeProduct)),
     featuredSelections: featuredRows.map((row) => ({
       productId: row.product_id,

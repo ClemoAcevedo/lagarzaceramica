@@ -79,7 +79,7 @@ documentada en [supabase/README.md](supabase/README.md).
 
 Cada push a `main` ejecuta `.github/workflows/deploy.yml`. El workflow instala
 dependencias, ejecuta las pruebas, compila y publica `dist/` en GitHub Pages. Se
-ejecuta además una vez al día para regenerar el sitemap con las piezas publicadas
+ejecuta además una vez por semana para regenerar el sitemap con las piezas publicadas
 desde el panel.
 
 En GitHub deben existir estas variables de Actions:

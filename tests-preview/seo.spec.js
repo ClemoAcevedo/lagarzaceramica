@@ -21,6 +21,14 @@ test('las fichas publicadas incluyen contenido y metadatos antes de ejecutar Rea
   expect(html).toContain('property="og:title"');
   expect(html).toContain('type="application/ld+json"');
   expect(html).toContain(`rel="canonical" href="${product.url}"`);
+  const snapshot = JSON.parse(html.match(/<script type="application\/ld\+json" data-la-garza-snapshot>(.*?)<\/script>/)?.[1]);
+  expect(['Product', 'WebPage']).toContain(snapshot['@type']);
+  if (snapshot['@type'] === 'Product') {
+    expect(snapshot.offers).toMatchObject({ '@type': 'Offer', priceCurrency: 'CLP' });
+    expect(Number(snapshot.offers.price)).toBeGreaterThan(0);
+  } else {
+    expect(snapshot.offers).toBeUndefined();
+  }
 });
 
 test('la aplicación reemplaza el snapshot SEO sin errores', async ({ page, request }) => {

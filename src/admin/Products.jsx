@@ -112,7 +112,7 @@ export default function AdminProducts() {
   const selectedCategory = categories.find(({ id }) => id === categoryFilter);
   const orderLabel = selectedCategory ? `orden de ${selectedCategory.name}` : 'orden general';
 
-  useUnsavedChanges(orderDirty && !busy);
+  useUnsavedChanges(orderDirty || busy, busy ? 'Espera a que termine la operación antes de salir.' : undefined, busy);
 
   useEffect(() => {
     if (!location.state?.notification) return;
@@ -140,12 +140,17 @@ export default function AdminProducts() {
     setBusy(true);
     setMessage({ text: '', isError: false });
     try {
-      await action();
-      await refresh();
-      setMessage({ text: success, isError: false });
+      const outcome = await action();
+      const reloaded = await refresh();
+      setMessage({
+        text: `${success}${outcome?.cleanupWarning ? ` ${outcome.cleanupWarning}` : ''}${reloaded ? '' : ' El cambio se aplicó, pero no pudimos recargar el panel.'}`,
+        isError: false,
+      });
+      return true;
     } catch (actionError) {
       setMessage({ text: actionError.message, isError: true });
       await refresh();
+      return false;
     } finally {
       setBusy(false);
     }
@@ -153,14 +158,16 @@ export default function AdminProducts() {
 
   const archive = (product) => {
     if (!window.confirm(`¿Archivar “${product.title}”? Dejará de aparecer en el sitio.`)) return;
-    run(() => setProductStatus(product.id, 'archived'), 'La pieza quedó archivada.');
+    run(() => setProductStatus(product, 'archived'), 'La pieza quedó archivada.');
   };
 
   const removePermanently = async () => {
     if (!deleting || confirmation !== deleting.title) return;
-    await run(() => permanentlyDeleteProduct(deleting), 'La pieza y sus fotografías fueron eliminadas.');
-    setDeleting(null);
-    setConfirmation('');
+    const removed = await run(() => permanentlyDeleteProduct(deleting), 'La pieza y sus fotografías fueron eliminadas.');
+    if (removed) {
+      setDeleting(null);
+      setConfirmation('');
+    }
   };
 
   const publishEverything = async () => {
@@ -169,8 +176,8 @@ export default function AdminProducts() {
     setMessage({ text: '', isError: false });
     try {
       const count = await publishAllDrafts();
-      await refresh();
-      setMessage({ text: `${count} pieza${count === 1 ? '' : 's'} publicada${count === 1 ? '' : 's'}. La vitrina ya está visible.`, isError: false });
+      const reloaded = await refresh();
+      setMessage({ text: `${count} pieza${count === 1 ? '' : 's'} publicada${count === 1 ? '' : 's'}.${reloaded ? '' : ' El cambio se aplicó, pero no pudimos recargar el panel.'}`, isError: false });
     } catch (publishError) {
       setMessage({ text: publishError.message, isError: true });
       await refresh();
@@ -222,12 +229,19 @@ export default function AdminProducts() {
   const saveOrder = () => {
     if (categoryFilter === 'all') {
       return run(
-        () => reorderProducts(ordered.map(({ id }) => id)),
+        () => reorderProducts(ordered.map(({ id }) => id), products.map(({ id }) => id)),
         'Orden general guardado. La vista “Todas” usará esta secuencia.',
       );
     }
     return run(
-      () => reorderCategoryProducts(categoryFilter, categoryProducts.map(({ id }) => id)),
+      () => reorderCategoryProducts(
+        categoryFilter,
+        categoryProducts.map(({ id }) => id),
+        products
+          .filter(({ categoryId }) => categoryId === categoryFilter)
+          .sort((first, second) => first.categoryOrder - second.categoryOrder)
+          .map(({ id }) => id),
+      ),
       `Orden de ${selectedCategory?.name || 'la categoría'} guardado.`,
     );
   };
@@ -304,7 +318,7 @@ export default function AdminProducts() {
                       onArchive={archive}
                       onDelete={setDeleting}
                       onOpen={openProduct}
-                      onRestore={(item) => run(() => setProductStatus(item.id, 'draft'), 'La pieza volvió a borradores.')}
+                      onRestore={(item) => run(() => setProductStatus(item, 'draft'), 'La pieza volvió a borradores.')}
                     />
                   ))}
                 </div>
@@ -326,7 +340,7 @@ export default function AdminProducts() {
           <div className="admin-modal__card">
             <p className="admin-kicker">Publicación inicial</p>
             <h2 id="publish-all-title">¿Publicar {draftCount} piezas?</h2>
-            <p>Todas quedarán visibles inmediatamente. Los precios vacíos aparecerán como “Precio por definir” y recuperaremos la selección original de tres piezas en Inicio.</p>
+            <p>Todas quedarán visibles inmediatamente. Los precios vacíos aparecerán como “Precio por definir”. La selección de Inicio no se modificará.</p>
             <div className="admin-modal__actions">
               <button className="admin-secondary" type="button" onClick={() => setConfirmPublishAll(false)}>Cancelar</button>
               <button className="admin-primary" type="button" onClick={publishEverything}>Sí, publicar todas</button>

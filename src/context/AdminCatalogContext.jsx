@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { fetchAdminCatalog } from '../lib/catalog.js';
+import { cleanupOrphanedStorage } from '../lib/admin.js';
 
 const AdminCatalogContext = createContext(null);
 
@@ -13,8 +14,10 @@ export function AdminCatalogProvider({ children }) {
     setError(null);
     try {
       setCatalog(await fetchAdminCatalog());
+      return true;
     } catch (catalogError) {
       setError(catalogError);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -22,6 +25,7 @@ export function AdminCatalogProvider({ children }) {
 
   useEffect(() => {
     refresh();
+    cleanupOrphanedStorage().catch(() => {});
   }, [refresh]);
 
   const value = useMemo(() => ({ ...catalog, loading, error, refresh }), [catalog, error, loading, refresh]);

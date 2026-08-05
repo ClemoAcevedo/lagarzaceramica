@@ -48,19 +48,22 @@ export default function ProductForm() {
   const [cropDraft, setCropDraft] = useState(null);
   const [dirty, setDirty] = useState(false);
   const previewUrls = useRef(new Set());
+  const initializedProductId = useRef(null);
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  useUnsavedChanges(dirty && !saving);
+  const allowNavigation = useUnsavedChanges(dirty || saving, saving ? 'Espera a que termine el guardado antes de salir.' : undefined, saving);
 
   useEffect(() => {
     if (isNew) {
+      initializedProductId.current = null;
       setValues((current) => ({ ...current, categoryId: current.categoryId || categories[0]?.id || '' }));
       return;
     }
-    if (!product) return;
+    if (!product || initializedProductId.current === product.id) return;
+    initializedProductId.current = product.id;
     setValues({
       title: product.title,
       description: product.description,
@@ -212,11 +215,12 @@ export default function ProductForm() {
         coverClientId,
       });
       setDirty(false);
-      await refresh();
+      const reloaded = await refresh();
+      allowNavigation();
       navigate('/admin/piezas', {
         replace: true,
         state: {
-          notification: isNew ? 'La pieza se creó y guardó correctamente.' : 'Los cambios de la pieza se guardaron correctamente.',
+          notification: `${isNew ? 'La pieza se creó y guardó correctamente.' : 'Los cambios de la pieza se guardaron correctamente.'}${savedProduct.cleanupWarning ? ` ${savedProduct.cleanupWarning}` : ''}${reloaded ? '' : ' No pudimos recargar el panel.'}`,
           viewSlug: values.status === 'published' ? savedProduct.slug : null,
         },
       });
@@ -243,8 +247,9 @@ export default function ProductForm() {
           )}
         </div>
       </header>
+      {saving && <p className="admin-busy" role="status">Guardando la pieza y sus fotografías…</p>}
 
-      <form className="admin-editor__form" onSubmit={submit}>
+      <form className="admin-editor__form" onSubmit={submit} aria-busy={saving} inert={saving ? true : undefined}>
         <section className="admin-card">
           <div className="admin-card__heading">
             <span>1</span>
@@ -261,7 +266,7 @@ export default function ProductForm() {
             </label>
             <label>
               <span className="admin-field-label">Precio en pesos chilenos <span className="admin-help">Opcional. Si lo dejas vacío se mostrará “Precio por definir”.</span></span>
-              <div className="admin-price-input"><span>$</span><input type="number" min="1" step="1" value={values.price} onChange={setField('price')} inputMode="numeric" /></div>
+              <div className="admin-price-input"><span>$</span><input type="number" min="1" max="9007199254740991" step="1" value={values.price} onChange={setField('price')} inputMode="numeric" /></div>
             </label>
             <label>
               Material
@@ -299,7 +304,7 @@ export default function ProductForm() {
                 <label>
                   Descripción para accesibilidad
                   <span className="admin-help">(Los lectores de pantalla leen este texto a personas ciegas. Describe brevemente lo que aparece en la foto.)</span>
-                  <input placeholder="Ej.: Jarrón alto de cerámica azul sobre una mesa" value={image.alt} onChange={(event) => { setDirty(true); setImages((current) => current.map((item) => item.clientId === image.clientId ? { ...item, alt: event.target.value } : item)); }} />
+                  <input maxLength="240" placeholder="Ej.: Jarrón alto de cerámica azul sobre una mesa" value={image.alt} onChange={(event) => { setDirty(true); setImages((current) => current.map((item) => item.clientId === image.clientId ? { ...item, alt: event.target.value } : item)); }} />
                 </label>
                 <div>
                   {image.kind === 'new' && <span>Nueva fotografía</span>}
@@ -332,7 +337,7 @@ export default function ProductForm() {
         </section>
 
         {formError && <p className="admin-message admin-message--error" role="alert">{formError}</p>}
-        <div className="admin-sticky-actions">
+        <div className={`admin-sticky-actions${dirty ? '' : ' admin-sticky-actions--static'}`}>
           {dirty && <span className="admin-unsaved" role="status">Cambios sin guardar</span>}
           {!isNew && product.status === 'published' && <a className="admin-secondary" href={`${import.meta.env.BASE_URL}piezas/${product.slug}`} target="_blank" rel="noopener">Ver en el sitio ↗</a>}
           <Link className="admin-secondary" to="/admin/piezas">Cancelar</Link>

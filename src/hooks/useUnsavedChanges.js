@@ -3,7 +3,7 @@ import { useBeforeUnload, useBlocker } from 'react-router-dom';
 
 const DEFAULT_MESSAGE = 'Tienes cambios sin guardar. ¿Quieres salir igualmente?';
 
-export default function useUnsavedChanges(enabled, message = DEFAULT_MESSAGE) {
+export default function useUnsavedChanges(enabled, message = DEFAULT_MESSAGE, preventNavigation = false) {
   const allowNextNavigation = useRef(false);
   const blocker = useBlocker(() => {
     if (!enabled) return false;
@@ -22,15 +22,26 @@ export default function useUnsavedChanges(enabled, message = DEFAULT_MESSAGE) {
 
   useEffect(() => {
     if (blocker.state !== 'blocked') return;
+    if (preventNavigation) {
+      window.alert(message);
+      blocker.reset();
+      return;
+    }
     if (window.confirm(message)) blocker.proceed();
     else blocker.reset();
-  }, [blocker, message]);
+  }, [blocker, message, preventNavigation]);
 
   useEffect(() => {
     if (!enabled) return undefined;
     const interceptAction = (event) => {
       const target = event.target.closest?.('[data-confirm-navigation]');
       if (!target) return;
+      if (preventNavigation) {
+        window.alert(message);
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       if (!window.confirm(message)) {
         event.preventDefault();
         event.stopPropagation();
@@ -43,5 +54,9 @@ export default function useUnsavedChanges(enabled, message = DEFAULT_MESSAGE) {
     return () => {
       document.removeEventListener('click', interceptAction, true);
     };
-  }, [enabled, message]);
+  }, [enabled, message, preventNavigation]);
+
+  return () => {
+    allowNextNavigation.current = true;
+  };
 }

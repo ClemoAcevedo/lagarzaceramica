@@ -167,6 +167,16 @@ test('el catálogo y las fichas reservan un espacio para el precio', async ({ pa
   await expect(page.locator('.product-detail__price')).toHaveText('Precio por definir');
 });
 
+test('las fichas sin precio no anuncian un fragmento de producto incompleto', async ({ page }) => {
+  await page.goto('/piezas/gallina-contenedora');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Gallina contenedora');
+  const structuredData = await page.locator('script[type="application/ld+json"]').evaluateAll((scripts) => (
+    scripts.flatMap((script) => JSON.parse(script.textContent))
+  ));
+  expect(structuredData.some((entry) => entry['@type'] === 'Product')).toBe(false);
+  expect(structuredData.some((entry) => entry['@type'] === 'WebPage')).toBe(true);
+});
+
 test('las imágenes dejan de mostrar la carga al completarse o venir desde caché', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.featured img.is-loaded')).toHaveCount(3);
