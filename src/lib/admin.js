@@ -150,17 +150,7 @@ export async function saveProduct({ values, product, images, removedImages, cove
   }
 }
 
-export async function setProductStatus(product, status) {
-  await result(supabase.rpc('set_product_status', {
-    product_id: product.id,
-    next_status: status,
-    expected_updated_at: product.updatedAt,
-  }));
-  notifyCatalogChanged();
-}
-
 export async function permanentlyDeleteProduct(product) {
-  if (product.status !== 'archived') throw new Error('Solo puedes eliminar definitivamente una pieza archivada.');
   await result(supabase.rpc('permanently_delete_product', {
     product_id: product.id,
     expected_updated_at: product.updatedAt,

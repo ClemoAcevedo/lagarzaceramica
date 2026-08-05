@@ -67,8 +67,8 @@ de administración requiere Supabase.
 
 Supabase almacena piezas, precios CLP opcionales, categorías, fotografías,
 encuadres y la selección de Inicio. El panel permite crear borradores, publicar,
-archivar, restaurar y eliminar piezas. La vitrina completa y cada categoría
-tienen órdenes independientes administrables mediante arrastre.
+devolver piezas a borrador y eliminarlas directamente. La vitrina completa y
+cada categoría tienen órdenes independientes administrables mediante arrastre.
 
 El acceso combina rutas protegidas con Supabase Auth y políticas RLS. Las
 personas visitantes solo pueden leer piezas publicadas y únicamente las cuentas

@@ -149,7 +149,6 @@
 .admin-product-row__copy p { margin: 0; font-size: .7rem; }
 .admin-status { display: inline-flex; padding: .18rem .5rem; border-radius: 2rem; background: #e7e3d8; font-size: .55rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
 .admin-status--published { background: #d8ead7; color: #25542c; }
-.admin-status--archived { background: #e2e2e2; color: #555; }
 .admin-product-row__actions { display: flex; min-width: 15rem; align-items: center; justify-content: flex-end; gap: 1rem; }
 .admin-shell .is-danger { color: #8d2b24; }
 .admin-product-grid {

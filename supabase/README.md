@@ -6,7 +6,7 @@ aplicar futuros cambios de esquema copiando SQL manualmente al Dashboard.
 
 ## Estado actual
 
-Las migraciones `202608020001` a `202608040006` están registradas como aplicadas
+Las migraciones `202608020001` a `202608050009` están registradas como aplicadas
 en el proyecto remoto. Para comprobar que ambos historiales coinciden:
 
 ```bash

@@ -26,15 +26,14 @@ import {
   publishAllDrafts,
   reorderCategoryProducts,
   reorderProducts,
-  setProductStatus,
 } from '../lib/admin.js';
 import AdminPageState from './AdminPageState.jsx';
 import AdminModal from './AdminModal.jsx';
 import useUnsavedChanges from '../hooks/useUnsavedChanges.js';
 
-const statusLabels = { draft: 'Borrador', published: 'Publicada', archived: 'Archivada' };
+const statusLabels = { draft: 'Borrador', published: 'Publicada' };
 
-function SortableProduct({ product, busy, canReorder, actionsDisabled, orderPosition, onArchive, onDelete, onOpen, onRestore }) {
+function SortableProduct({ product, busy, canReorder, actionsDisabled, orderPosition, onDelete, onOpen }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: product.id,
     disabled: busy || !canReorder,
@@ -47,7 +46,6 @@ function SortableProduct({ product, busy, canReorder, actionsDisabled, orderPosi
 
   return (
     <article
-      data-confirm-navigation
       className={`admin-product-tile${isDragging ? ' is-dragging' : ''}${canReorder ? '' : ' is-reorder-disabled'}`}
       ref={setNodeRef}
       style={style}
@@ -75,13 +73,7 @@ function SortableProduct({ product, busy, canReorder, actionsDisabled, orderPosi
       >
         <Link to={`/admin/piezas/${product.id}`}>Editar</Link>
         {product.status === 'published' && <a href={`${import.meta.env.BASE_URL}piezas/${product.slug}`} target="_blank" rel="noopener">Ver sitio ↗</a>}
-        {product.status === 'published' && <button type="button" disabled={actionsDisabled} onClick={() => onArchive(product)}>Archivar</button>}
-        {product.status === 'archived' && (
-          <>
-            <button type="button" disabled={actionsDisabled} onClick={() => onRestore(product)}>Restaurar</button>
-            <button className="is-danger" type="button" disabled={actionsDisabled} onClick={() => onDelete(product)}>Eliminar</button>
-          </>
-        )}
+        <button className="is-danger" type="button" disabled={actionsDisabled} onClick={() => onDelete(product)}>Eliminar</button>
       </div>
     </article>
   );
@@ -154,11 +146,6 @@ export default function AdminProducts() {
     } finally {
       setBusy(false);
     }
-  };
-
-  const archive = (product) => {
-    if (!window.confirm(`¿Archivar “${product.title}”? Dejará de aparecer en el sitio.`)) return;
-    run(() => setProductStatus(product, 'archived'), 'La pieza quedó archivada.');
   };
 
   const removePermanently = async () => {
@@ -277,13 +264,13 @@ export default function AdminProducts() {
           <div className="admin-catalog-tools">
             <label>Buscar piezas<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nombre o categoría" /></label>
             <label>Categoría<select value={categoryFilter} disabled={orderDirty} onChange={(event) => setCategoryFilter(event.target.value)}><option value="all">Todas</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
-            <label>Estado<select value={statusFilter} disabled={orderDirty} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">Todos los estados</option><option value="published">Publicadas</option><option value="draft">Borradores</option><option value="archived">Archivadas</option></select></label>
+            <label>Estado<select value={statusFilter} disabled={orderDirty} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">Todos los estados</option><option value="published">Publicadas</option><option value="draft">Borradores</option></select></label>
           </div>
           <div className="admin-list-heading">
             <span>{visibleProducts.length} de {categoryProducts.length} piezas · {orderLabel}{orderDirty ? ' · cambios sin guardar' : ''}</span>
             <div className="admin-list-heading__actions">
               {orderDirty
-                ? <small>Guarda el orden antes de publicar, archivar o restaurar piezas.</small>
+                ? <small>Guarda el orden antes de editar o eliminar piezas.</small>
                 : !canReorder && <small>Limpia la búsqueda y muestra todos los estados para reordenar.</small>}
               <button
                 className="admin-secondary"
@@ -315,10 +302,8 @@ export default function AdminProducts() {
                       orderPosition={categoryFilter === 'all'
                         ? ordered.findIndex(({ id }) => id === product.id) + 1
                         : categoryProducts.findIndex(({ id }) => id === product.id) + 1}
-                      onArchive={archive}
                       onDelete={setDeleting}
                       onOpen={openProduct}
-                      onRestore={(item) => run(() => setProductStatus(item, 'draft'), 'La pieza volvió a borradores.')}
                     />
                   ))}
                 </div>
@@ -354,7 +339,7 @@ export default function AdminProducts() {
           <div className="admin-modal__card">
             <p className="admin-kicker">Acción permanente</p>
             <h2 id="delete-title">Eliminar “{deleting.title}”</h2>
-            <p>Se borrarán la pieza y todas sus fotografías. Esta acción no se puede deshacer.</p>
+            <p>Se borrarán la pieza y todas sus fotografías. Si está publicada, dejará de aparecer inmediatamente en el sitio. Esta acción no se puede deshacer.</p>
             <label>
               Escribe <strong>{deleting.title}</strong> para confirmar
               <input value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoFocus />

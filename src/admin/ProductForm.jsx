@@ -284,7 +284,6 @@ export default function ProductForm() {
               <select value={values.status} onChange={setField('status')}>
                 <option value="draft">Borrador — solo visible aquí</option>
                 <option value="published">Publicada — visible en el sitio</option>
-                {product?.status === 'archived' && <option value="archived">Archivada</option>}
               </select>
             </label>
           </div>

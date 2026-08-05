@@ -123,6 +123,8 @@ test('el panel carga una sola copia del catálogo y conserva controles legibles'
   await page.goto('/admin/piezas');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Piezas');
   await expect(page.locator('.admin-product-tile')).toHaveCount(3);
+  await expect(page.getByRole('button', { name: 'Eliminar', exact: true })).toHaveCount(3);
+  await expect(page.getByRole('button', { name: 'Archivar', exact: true })).toHaveCount(0);
   expect(productRequests).toBeLessThanOrEqual(2); // StrictMode repite efectos solo en desarrollo.
   expect(calls.filter(({ rpc }) => rpc === 'storage_cleanup_candidates').length).toBeLessThanOrEqual(2);
   const editHeight = await page.getByRole('link', { name: 'Editar' }).first().evaluate((element) => element.getBoundingClientRect().height);
@@ -208,26 +210,25 @@ test('retirar una pieza y quitar su última imagen se envía como una sola opera
   expect(savedPayload.removed_image_ids).toEqual(['cccccccc-cccc-4ccc-8ccc-ccccccccccc1']);
 });
 
-test('un conflicto concurrente se muestra sin anunciar un archivado inexistente', async ({ page }) => {
-  await mockAdmin(page, async ({ rpc, route }) => {
-    if (rpc !== 'set_product_status') return undefined;
-    await route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ code: 'P0001', message: 'La pieza cambió o ya no existe. Recarga el panel.' }) });
-    return true;
-  });
+test('el panel solo ofrece los estados borrador y publicada', async ({ page }) => {
+  const { state } = await mockAdmin(page);
+  state.products[0].status = 'draft';
   await page.goto('/admin/piezas');
-  page.once('dialog', (dialog) => dialog.accept());
-  await page.locator('.admin-product-tile').first().getByRole('button', { name: 'Archivar' }).click();
-  await expect(page.getByRole('alert')).toContainText('cambió o ya no existe');
-  await expect(page.locator('.admin-product-tile').first().locator('.admin-status')).toHaveText('Publicada');
+  await expect(page.getByLabel('Estado').locator('option')).toHaveText(['Todos los estados', 'Publicadas', 'Borradores']);
+
+  await page.goto(`/admin/piezas/${state.products[0].id}`);
+  await expect(page.getByLabel('Estado').locator('option')).toHaveText([
+    'Borrador — solo visible aquí',
+    'Publicada — visible en el sitio',
+  ]);
 });
 
-test('un error al eliminar definitivamente conserva abierta la confirmación', async ({ page }) => {
-  const { state } = await mockAdmin(page, async ({ rpc, route }) => {
+test('una pieza publicada se puede enviar a borrado directo y un error conserva la confirmación', async ({ page }) => {
+  const { calls, state } = await mockAdmin(page, async ({ rpc, route }) => {
     if (rpc !== 'permanently_delete_product') return undefined;
     await route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ code: 'P0001', message: 'La pieza cambió o ya no existe. Recarga el panel.' }) });
     return true;
   });
-  state.products[0].status = 'archived';
   await page.goto('/admin/piezas');
   await page.locator('.admin-product-tile').first().getByRole('button', { name: 'Eliminar' }).click();
   await page.getByLabel(/Escribe/).fill(state.products[0].title);
@@ -235,6 +236,24 @@ test('un error al eliminar definitivamente conserva abierta la confirmación', a
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByRole('alert')).toContainText('cambió o ya no existe');
   await expect(page.getByLabel(/Escribe/)).toHaveValue(state.products[0].title);
+  expect(calls.find(({ rpc }) => rpc === 'permanently_delete_product').body).toMatchObject({
+    product_id: state.products[0].id,
+    expected_updated_at: updatedAt,
+  });
+});
+
+test('las tarjetas reordenables no confunden el arrastre con una salida del panel', async ({ page }) => {
+  await mockAdmin(page);
+  await page.goto('/admin/piezas');
+
+  const firstTile = page.locator('.admin-product-tile').first();
+  await expect(firstTile).not.toHaveAttribute('data-confirm-navigation', '');
+  await firstTile.focus();
+  await page.keyboard.press('Space');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Space');
+  await expect(page.getByText('Cambios de orden sin guardar', { exact: true })).toBeVisible();
+  await expect(page.locator('.admin-product-tile').first()).not.toHaveAttribute('data-confirm-navigation', '');
 });
 
 test('la selección de Inicio envía la versión original y conserva el error concurrente', async ({ page }) => {
