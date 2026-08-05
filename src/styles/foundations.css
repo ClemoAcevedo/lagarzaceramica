@@ -47,6 +47,23 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+
+@media (hover: hover) and (pointer: fine) {
+  html {
+    scrollbar-color: var(--clay) var(--paper);
+    scrollbar-width: thin;
+  }
+
+  html::-webkit-scrollbar { width: 12px; }
+  html::-webkit-scrollbar-track { background: var(--paper); }
+  html::-webkit-scrollbar-thumb {
+    border: 3px solid var(--paper);
+    border-radius: 999px;
+    background: var(--clay);
+  }
+  html::-webkit-scrollbar-thumb:hover { background: var(--green); }
+}
+
 body {
   margin: 0;
   overflow-x: clip;
