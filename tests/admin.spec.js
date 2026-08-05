@@ -243,14 +243,17 @@ test('una pieza publicada se puede enviar a borrado directo y un error conserva 
 });
 
 test('las tarjetas reordenables no confunden el arrastre con una salida del panel', async ({ page }) => {
-  await mockAdmin(page);
+  const { state } = await mockAdmin(page);
   await page.goto('/admin/piezas');
 
   const firstTile = page.locator('.admin-product-tile').first();
   await expect(firstTile).not.toHaveAttribute('data-confirm-navigation', '');
+  await firstTile.scrollIntoViewIfNeeded();
   await firstTile.focus();
   await page.keyboard.press('Space');
+  await expect(firstTile).toHaveAttribute('aria-pressed', 'true');
   await page.keyboard.press('ArrowRight');
+  await expect(page.locator('[aria-live="assertive"]')).toContainText(state.products[1].id);
   await page.keyboard.press('Space');
   await expect(page.getByText('Cambios de orden sin guardar', { exact: true })).toBeVisible();
   await expect(page.locator('.admin-product-tile').first()).not.toHaveAttribute('data-confirm-navigation', '');
