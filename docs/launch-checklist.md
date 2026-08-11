@@ -1,7 +1,6 @@
 # Checklist de lanzamiento
 
-Este documento registra el lanzamiento de `lagarzaceramica.cl` y el cambio
-pendiente del logo horizontal final.
+Este documento registra el lanzamiento de `lagarzaceramica.cl`.
 
 ## Dominio
 
@@ -35,17 +34,10 @@ Los archivos de marca cumplen tres funciones:
 
 | Uso | Archivo actual |
 | --- | --- |
-| Header, login y panel | `assets/SVG Files (Transparent Background)/Logo E26.svg` — pendiente |
+| Header, login y panel | `assets/SVG Files (Transparent Background)/lagarzahorizontal.svg` — definitivo |
 | Marca decorativa y footer | `assets/SVG Files (Transparent Background)/Logo E28.svg` — definitivo |
 | Icono del navegador | `assets/Favicon Square A1-01.png` — definitivo |
 
-Cuando llegue el nuevo `E26`:
-
-1. Exportar el SVG con fondo transparente y un `viewBox` ajustado al dibujo.
-2. Sustituir `Logo E26.svg`; si cambia su nombre, actualizar una sola referencia
-   en `src/assets/media.js`.
-3. Revisar header normal y superpuesto, menú móvil, login y panel.
-4. Ejecutar `npm run check` y comprobar que no haya saltos de layout.
-
-Como el nuevo logo mantendrá proporciones similares, no se anticipan cambios de
-composición; los tamaños CSS solo se tocarán si la comprobación visual lo exige.
+El logotipo horizontal final se centraliza en `src/assets/media.js`; esto lo usa
+el header público, el acceso y el panel. Tras cualquier cambio de marca, revisar
+esas tres vistas y ejecutar `npm run check` para detectar saltos de layout.

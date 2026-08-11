@@ -11,7 +11,7 @@
   z-index: 100;
   top: 0;
   display: grid;
-  min-height: 5.5rem;
+  min-height: 6.5rem;
   padding: .65rem clamp(1.25rem, 3vw, 3.5rem);
   grid-template-columns: auto 1fr auto;
   align-items: center;
@@ -21,7 +21,7 @@
   backdrop-filter: blur(16px);
 }
 .admin-brand { display: flex; align-items: center; gap: 1rem; }
-.admin-brand img { width: 7.5rem; height: 3.8rem; object-fit: contain; }
+.admin-brand img { width: 14rem; height: 5rem; object-fit: contain; }
 .admin-brand span,
 .admin-kicker {
   font-size: .62rem;
@@ -410,7 +410,8 @@
 
 .admin-login { display: flex; padding: 2rem; align-items: center; justify-content: center; background: var(--green-deep); }
 .admin-login__card { width: min(100%, 29rem); padding: clamp(1.75rem, 4vw, 3.25rem); background: var(--paper); box-shadow: 0 2rem 5rem rgba(0, 0, 0, .2); }
-.admin-login__card > img { width: 10rem; margin: 0 auto 2rem; }
+.admin-login__card > img { width: 15rem; margin: 0 auto 2rem; }
+.admin-login h1 { font-size: clamp(1.75rem, 4vw, 3.25rem); white-space: nowrap; }
 .admin-login__card > p:not(.admin-kicker) { margin-bottom: 2rem; }
 .admin-modal { position: fixed; z-index: 1000; inset: 0; display: flex; padding: 1.5rem; align-items: center; justify-content: center; background: rgba(18, 35, 21, .72); }
 .admin-modal__card { width: min(100%, 34rem); padding: 2rem; background: var(--white); box-shadow: 0 2rem 6rem rgba(0, 0, 0, .25); }

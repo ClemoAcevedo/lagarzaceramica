@@ -38,6 +38,8 @@
   height: 5.1rem;
   object-fit: contain;
   object-position: left center;
+  transform: translateY(.2rem) scale(1.2);
+  transform-origin: left center;
   transition:
     height .4s cubic-bezier(.2, .7, .2, 1),
     filter .35s ease;

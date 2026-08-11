@@ -98,9 +98,8 @@ un archivo `CNAME` en el repositorio ni dentro del build.
 dominio `www` redirige a la URL canónica, y el sitemap ya fue enviado desde
 Google Search Console.
 
-El único cambio pendiente es sustituir el logo horizontal `Logo E26.svg`. La
-marca decorativa `E28` y el favicon actuales son definitivos. Como el nuevo logo
-conservará proporciones similares, solo debería requerir una comprobación visual.
+El logo horizontal final (`lagarzahorizontal.svg`), la marca decorativa `E28` y
+el favicon actuales son definitivos.
 
 Consulta el procedimiento detallado en
 [docs/launch-checklist.md](docs/launch-checklist.md).

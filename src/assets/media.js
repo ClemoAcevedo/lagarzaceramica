@@ -1,6 +1,6 @@
-// E26 es el único archivo de marca pendiente de reemplazo. E28 es definitivo.
+// Logotipo horizontal final para header, acceso y panel. E28 es la marca decorativa.
 import footerMark from '../../assets/SVG Files (Transparent Background)/Logo E28.svg';
-import headerLogo from '../../assets/SVG Files (Transparent Background)/Logo E26.svg';
+import headerLogo from '../../assets/SVG Files (Transparent Background)/lagarzahorizontal.svg';
 import image12 from '../../optimized/12.webp';
 import image5 from '../../optimized/5.webp';
 import image9 from '../../optimized/9.webp';
